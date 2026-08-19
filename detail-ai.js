@@ -1,3 +1,4 @@
+(() => {
 const paperCatalog = {
   t2: {
     title: "2026 深圳南山区初一上期末数学真题",
@@ -160,9 +161,12 @@ const paperQuestions = {
 const params = new URLSearchParams(location.search);
 const contextName = params.get("context") || "paper";
 const isWorkbook = contextName === "series";
+const isCanvasShell = Boolean(document.querySelector("#aiSelectedPanel")) && !document.querySelector("#questionCardBoard");
+const isHomeShell = isCanvasShell;
 const initialTopicId = params.get("topic") || (isWorkbook ? "t9" : "t2");
 // 试卷 / 专项 / 同步等共用同一工作台，避免从首页点不同类型资源时 tab 互相隔离
 const STORAGE_KEY = "feixiang-ai-workspace-v5";
+const CANVAS_COLLAPSE_KEY = "feixiang-ai-canvas-manual-collapsed-v1";
 const LEGACY_STORAGE_KEYS = [
   "feixiang-ai-workspace-v4-paper",
   "feixiang-ai-workspace-v4-special",
@@ -230,6 +234,8 @@ const workbookDirectory = {
 };
 
 let workspace = loadWorkspace();
+let applyingRemoteWorkspace = false;
+let canvasSyncChannel = null;
 let tabCounter = workspace.tabs.reduce((max, tab) => {
   const n = Number.parseInt(String(tab.id).replace("tab-", ""), 10);
   return Number.isFinite(n) ? Math.max(max, n) : max;
@@ -279,59 +285,161 @@ function getTabBaseTitle(tab) {
     .trim();
 }
 
+function defaultWorkspace() {
+  return {
+    tabs: [],
+    activeTabId: null,
+    homeActive: false,
+    browseTabs: [],
+    activeBrowseFilter: null,
+    basketCount: 0,
+    showAnswers: false,
+    paperFavorited: false,
+    globalSelectedQuestions: [],
+    favoriteQuestions: [],
+    canvasTitle: "",
+    canvasManuallyCollapsed: false
+  };
+}
+
+function parseWorkspaceRaw(saved) {
+  if (!saved) return null;
+  try {
+    const parsed = JSON.parse(saved);
+    if (!parsed || typeof parsed !== "object") return null;
+    delete parsed.aiPanelHidden;
+    if (Array.isArray(parsed.tabs)) {
+      parsed.tabs = parsed.tabs.map(tab => ({
+        ...tab,
+        context: tab.context || contextName,
+        topicId: tab.fromQuestionId ? tab.topicId : getBaseTopicId(tab.topicId)
+      }));
+    }
+    return {
+      ...defaultWorkspace(),
+      ...parsed,
+      browseTabs: Array.isArray(parsed.browseTabs) ? parsed.browseTabs : [],
+      activeBrowseFilter: parsed.activeBrowseFilter || null,
+      globalSelectedQuestions: Array.isArray(parsed.globalSelectedQuestions) ? parsed.globalSelectedQuestions : [],
+      favoriteQuestions: Array.isArray(parsed.favoriteQuestions) ? parsed.favoriteQuestions : []
+    };
+  } catch {
+    return null;
+  }
+}
+
+function canvasQuestionCount(ws) {
+  return Array.isArray(ws?.globalSelectedQuestions) ? ws.globalSelectedQuestions.length : 0;
+}
+
+function mergeWorkspaces(localWs, sessionWs) {
+  if (!localWs) return sessionWs;
+  if (!sessionWs) return localWs;
+  const canvasSource = canvasQuestionCount(sessionWs) > canvasQuestionCount(localWs) ? sessionWs : localWs;
+  const favoriteSource = (sessionWs.favoriteQuestions?.length || 0) > (localWs.favoriteQuestions?.length || 0) ? sessionWs : localWs;
+  return {
+    ...sessionWs,
+    ...localWs,
+    tabs: (localWs.tabs?.length || 0) >= (sessionWs.tabs?.length || 0) ? localWs.tabs : sessionWs.tabs,
+    globalSelectedQuestions: canvasSource.globalSelectedQuestions,
+    canvasTitle: canvasSource.canvasTitle || localWs.canvasTitle || sessionWs.canvasTitle || "",
+    favoriteQuestions: favoriteSource.favoriteQuestions,
+    canvasManuallyCollapsed: Boolean(localWs.canvasManuallyCollapsed || sessionWs.canvasManuallyCollapsed)
+  };
+}
+
 function loadWorkspace() {
   try {
-    let saved = sessionStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      try {
-        saved = localStorage.getItem(STORAGE_KEY);
-      } catch {}
-    }
-    if (!saved) {
-      for (const legacyKey of LEGACY_STORAGE_KEYS) {
-        saved = sessionStorage.getItem(legacyKey);
-        if (saved) {
-          sessionStorage.removeItem(legacyKey);
-          break;
-        }
+    let localWs = null;
+    let sessionWs = null;
+    try {
+      sessionWs = parseWorkspaceRaw(sessionStorage.getItem(STORAGE_KEY));
+    } catch {}
+    try {
+      localWs = parseWorkspaceRaw(localStorage.getItem(STORAGE_KEY));
+    } catch {}
+    const merged = mergeWorkspaces(localWs, sessionWs);
+    if (merged) return merged;
+    for (const legacyKey of LEGACY_STORAGE_KEYS) {
+      const legacy = parseWorkspaceRaw(sessionStorage.getItem(legacyKey) || localStorage.getItem(legacyKey));
+      if (legacy) {
+        try { sessionStorage.removeItem(legacyKey); } catch {}
+        return legacy;
       }
-    }
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      delete parsed.aiPanelHidden;
-      if (Array.isArray(parsed.tabs)) {
-        parsed.tabs = parsed.tabs.map(tab => ({
-          ...tab,
-          context: tab.context || contextName,
-          topicId: tab.fromQuestionId ? tab.topicId : getBaseTopicId(tab.topicId)
-        }));
-      }
-      return {
-        tabs: [],
-        activeTabId: null,
-        homeActive: false,
-        browseTabs: [],
-        activeBrowseFilter: null,
-        basketCount: 0,
-        showAnswers: false,
-        paperFavorited: false,
-        globalSelectedQuestions: [],
-        favoriteQuestions: [],
-        canvasTitle: "",
-        ...parsed,
-        browseTabs: Array.isArray(parsed.browseTabs) ? parsed.browseTabs : [],
-        activeBrowseFilter: parsed.activeBrowseFilter || null
-      };
     }
   } catch {}
-  return { tabs: [], activeTabId: null, homeActive: false, browseTabs: [], activeBrowseFilter: null, basketCount: 0, showAnswers: false, paperFavorited: false, globalSelectedQuestions: [], favoriteQuestions: [], canvasTitle: "" };
+  return defaultWorkspace();
 }
 
 function saveWorkspace() {
+  if (applyingRemoteWorkspace) return;
   const json = JSON.stringify(workspace);
   sessionStorage.setItem(STORAGE_KEY, json);
   try {
     localStorage.setItem(STORAGE_KEY, json);
+  } catch {}
+  broadcastCanvasSync();
+}
+
+function getCanvasSyncSnapshot() {
+  return {
+    globalSelectedQuestions: Array.isArray(workspace.globalSelectedQuestions) ? workspace.globalSelectedQuestions : [],
+    canvasTitle: workspace.canvasTitle || "",
+    canvasManuallyCollapsed: Boolean(workspace.canvasManuallyCollapsed),
+    favoriteQuestions: Array.isArray(workspace.favoriteQuestions) ? workspace.favoriteQuestions : []
+  };
+}
+
+function applyRemoteCanvasState(parsed) {
+  if (!parsed || typeof parsed !== "object") return;
+  const incoming = Array.isArray(parsed.globalSelectedQuestions) ? parsed.globalSelectedQuestions : [];
+  const current = Array.isArray(workspace.globalSelectedQuestions) ? workspace.globalSelectedQuestions : [];
+  if (!incoming.length && current.length) {
+    try {
+      const stored = parseWorkspaceRaw(localStorage.getItem(STORAGE_KEY));
+      if (canvasQuestionCount(stored) > 0) return;
+    } catch {}
+  }
+  applyingRemoteWorkspace = true;
+  workspace.globalSelectedQuestions = incoming;
+  workspace.canvasTitle = parsed.canvasTitle || "";
+  workspace.canvasManuallyCollapsed = Boolean(parsed.canvasManuallyCollapsed);
+  if (Array.isArray(parsed.favoriteQuestions)) workspace.favoriteQuestions = parsed.favoriteQuestions;
+  rightPanelSectionState.selectedCollapsed = !workspace.globalSelectedQuestions.length || workspace.canvasManuallyCollapsed;
+  applySelectedPanelState();
+  renderQuestionCards();
+  window.dispatchEvent(new CustomEvent("aiq-canvas-change"));
+  applyingRemoteWorkspace = false;
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
+  } catch {}
+}
+
+function broadcastCanvasSync() {
+  try {
+    canvasSyncChannel?.postMessage({ type: "canvas-sync", payload: getCanvasSyncSnapshot() });
+  } catch {}
+}
+
+function bindCanvasSync() {
+  window.addEventListener("storage", event => {
+    if (event.key === STORAGE_KEY && event.newValue) {
+      try {
+        applyRemoteCanvasState(JSON.parse(event.newValue));
+      } catch {}
+      return;
+    }
+    if (event.key === CANVAS_COLLAPSE_KEY) {
+      workspace.canvasManuallyCollapsed = event.newValue === "1";
+      rightPanelSectionState.selectedCollapsed = shouldCanvasStartCollapsed();
+      applySelectedPanelState();
+    }
+  });
+  try {
+    canvasSyncChannel = new BroadcastChannel("feixiang-ai-canvas-sync");
+    canvasSyncChannel.addEventListener("message", event => {
+      if (event.data?.type === "canvas-sync") applyRemoteCanvasState(event.data.payload);
+    });
   } catch {}
 }
 
@@ -509,6 +617,7 @@ function removeGlobalSelectedByKey(selectionKey) {
   syncTabSelectedQuestionIds(getActiveTab());
   saveWorkspace();
   renderQuestionCards();
+  collapseCanvasIfEmpty();
 }
 
 function getActiveTab() {
@@ -619,17 +728,29 @@ function hasSingleChoiceSection(tab) {
 
 function formatQuestionListTitle() {
   const now = new Date();
-  return `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}题单`;
+  const pad = value => String(value).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}组题`;
 }
 
 function formatQuestionListShortTitle() {
-  const now = new Date();
-  return `题单 ${now.getMonth() + 1}.${now.getDate()}`;
+  return formatQuestionListTitle();
+}
+
+function isAutoCanvasTitle(title) {
+  return /^\d{4}[./-]\d{1,2}[./-]\d{1,2}(题单|组题)$/.test(String(title || "").trim());
+}
+
+function isUserCanvasTitle(title) {
+  const text = String(title || "").trim();
+  if (!text || isAutoCanvasTitle(text)) return false;
+  if (/试卷|学年/.test(text)) return false;
+  return /组题/.test(text);
 }
 
 function getCanvasListTitle() {
   const title = String(workspace.canvasTitle || "").trim();
-  return title || formatQuestionListTitle();
+  if (isUserCanvasTitle(title)) return title;
+  return formatQuestionListTitle();
 }
 
 function setCanvasListTitle(next) {
@@ -637,6 +758,40 @@ function setCanvasListTitle(next) {
   workspace.canvasTitle = title;
   saveWorkspace();
   return title;
+}
+
+function applyCanvasTitleToUi() {
+  const title = getCanvasListTitle();
+  if (workspace.canvasTitle !== title) {
+    workspace.canvasTitle = title;
+    saveWorkspace();
+  }
+  const head = document.querySelector("#canvasHeadTitle");
+  const paper = document.querySelector("#canvasPaperTitle");
+  const rail = document.querySelector("#canvasRailTitle");
+  const expandBtn = document.querySelector("#aiSelectedExpand");
+  const panel = document.querySelector("#aiSelectedPanel");
+  if (head && document.activeElement !== head) head.textContent = title;
+  if (paper && document.activeElement !== paper) paper.textContent = title;
+  if (rail) rail.textContent = title;
+  if (expandBtn) expandBtn.setAttribute("aria-label", `展开${title}`);
+  if (panel) panel.setAttribute("aria-label", title);
+}
+
+function bindCanvasTitleEditor(node) {
+  if (!node || node.dataset.bound) return;
+  node.dataset.bound = "1";
+  node.addEventListener("blur", () => {
+    const next = setCanvasListTitle(node.textContent);
+    node.textContent = next;
+    applyCanvasTitleToUi();
+  });
+  node.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      node.blur();
+    }
+  });
 }
 
 function ensureInitialTab() {
@@ -676,14 +831,12 @@ function ensureInitialTab() {
     }
   }
 
-  if (params.get("topic")) {
-    workspace.activeTabId = mainTab.id;
-    workspace.homeActive = false;
-    workspace.activeBrowseFilter = null;
-  } else if (params.get("tabId")) {
+  workspace.homeActive = false;
+  workspace.activeBrowseFilter = null;
+  if (params.get("tabId")) {
     const urlTab = workspace.tabs.find(tab => tab.id === params.get("tabId"));
-    if (urlTab) workspace.activeTabId = urlTab.id;
-  } else if (!workspace.activeTabId || !workspace.tabs.some(tab => tab.id === workspace.activeTabId)) {
+    workspace.activeTabId = urlTab?.id || mainTab.id;
+  } else if (params.get("topic") || !workspace.activeTabId || !workspace.tabs.some(tab => tab.id === workspace.activeTabId)) {
     workspace.activeTabId = mainTab.id;
   }
 
@@ -830,7 +983,7 @@ function renderMeta(tab) {
   const context = document.querySelector("#breadcrumbContext");
   const leaf = document.querySelector("#breadcrumbLeaf");
   if (context) context.textContent = tabContextLabel(tab);
-  if (leaf) leaf.textContent = selectedPanelEnlarged ? "组题画布" : displayTitle;
+  if (leaf) leaf.textContent = selectedPanelEnlarged ? getCanvasListTitle() : displayTitle;
 }
 
 function renderWorkbookDirectory() {
@@ -914,8 +1067,8 @@ function applyPageMode() {
   directoryPanel?.setAttribute("hidden", "");
   mobileDirectory?.setAttribute("hidden", "");
   document.querySelector("#directoryMask")?.setAttribute("hidden", "");
-  document.querySelector("#breadcrumbContext").textContent = isWorkbook ? "练习册" : "试卷";
-  document.querySelector("#breadcrumbLeaf").textContent = isWorkbook ? "章节练习" : "试卷详情";
+  document.querySelector("#breadcrumbContext") && (document.querySelector("#breadcrumbContext").textContent = isWorkbook ? "练习册" : "试卷");
+  document.querySelector("#breadcrumbLeaf") && (document.querySelector("#breadcrumbLeaf").textContent = isWorkbook ? "章节练习" : "试卷详情");
   if (favoriteLabel) favoriteLabel.textContent = "收藏";
   if (docTabs) docTabs.setAttribute("aria-label", "已打开的题单");
 }
@@ -1014,6 +1167,11 @@ function renderPaperSelectButton(tab) {
 }
 
 function renderQuestionCards() {
+  const board = document.querySelector("#questionCardBoard");
+  if (!board) {
+    renderSelectedContext();
+    return;
+  }
   const tab = getActiveTab();
   if (!tab) return;
   syncTabSelectedQuestionIds(tab);
@@ -1022,7 +1180,6 @@ function renderQuestionCards() {
   renderPaperSelectButton(tab);
 
   const sections = [...new Set(tab.questions.map(q => q.section))];
-  const board = document.querySelector("#questionCardBoard");
   board.classList.toggle("show-answers", workspace.showAnswers);
   board.innerHTML = sections.map(section => {
     const items = tab.questions.filter(q => q.section === section);
@@ -1052,7 +1209,6 @@ function renderQuestionCards() {
 function renderSelectedFooter(count) {
   const button = document.querySelector("#createQuestionList");
   const label = document.querySelector("#createQuestionListLabel");
-  const titleNode = document.querySelector("#canvasHeadTitle");
   const hint = document.querySelector("#aiSelectedHint");
   const railBadge = document.querySelector("#aiSelectedExpandCount");
   const stats = document.querySelector("#aiCanvasStats");
@@ -1061,10 +1217,11 @@ function renderSelectedFooter(count) {
   const scoreBtn = document.querySelector("#scoreQuestionList");
   const extraBtns = document.querySelectorAll(".ai-canvas-wide-btn");
   const selected = getGlobalSelectedQuestions();
-  const listTitle = getCanvasListTitle();
   if (button) button.disabled = count === 0;
   if (label) label.textContent = count ? `保存(${count})` : "保存";
-  if (titleNode) titleNode.textContent = count ? `组题画布-${listTitle}` : "组题画布";
+  applyCanvasTitleToUi();
+  bindCanvasTitleEditor(document.querySelector("#canvasHeadTitle"));
+  bindCanvasTitleEditor(document.querySelector("#canvasPaperTitle"));
   if (hint) {
     if (selectedPanelEnlarged) {
       hint.hidden = true;
@@ -1115,10 +1272,10 @@ function syncSelectedPanelChrome() {
   }
   const compactCollapse = document.querySelector("#collapseSelectedPanel");
   const topbarCollapse = document.querySelector("#topbarCollapseCanvas");
-  if (compactCollapse) compactCollapse.hidden = selectedPanelEnlarged;
-  if (topbarCollapse) topbarCollapse.hidden = !selectedPanelEnlarged;
+  if (compactCollapse) compactCollapse.hidden = false;
+  if (topbarCollapse) topbarCollapse.hidden = true;
   const leaf = document.querySelector("#breadcrumbLeaf");
-  if (selectedPanelEnlarged && leaf) leaf.textContent = "组题画布";
+  if (selectedPanelEnlarged && leaf) leaf.textContent = getCanvasListTitle();
   if (answerBtn) {
     answerBtn.hidden = true;
   }
@@ -1605,21 +1762,7 @@ function bindCanvasStudioEvents() {
     });
   });
 
-  const title = document.querySelector("#canvasPaperTitle");
-  if (title && !title.dataset.bound) {
-    title.dataset.bound = "1";
-    title.addEventListener("blur", () => {
-      const next = setCanvasListTitle(title.textContent);
-      title.textContent = next;
-      renderSelectedFooter(getGlobalSelectedQuestions().length);
-    });
-    title.addEventListener("keydown", event => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        title.blur();
-      }
-    });
-  }
+  bindCanvasTitleEditor(document.querySelector("#canvasPaperTitle"));
 
   if (!studio.dataset.toolBound) {
     studio.dataset.toolBound = "1";
@@ -1634,8 +1777,7 @@ function renderCanvasStudio() {
   if (!studio) return;
   const items = getCanvasOrderedItems();
   ensureCanvasFocus();
-  const title = document.querySelector("#canvasPaperTitle");
-  if (title && document.activeElement !== title) title.textContent = getCanvasListTitle();
+  applyCanvasTitleToUi();
   renderCanvasOrderList(items);
   const paper = document.querySelector("#aiCanvasPaperList");
   if (paper) {
@@ -1718,6 +1860,7 @@ function renderSelectedContext() {
   preview.innerHTML = visible.map((item, index) => selectedPreviewCompactHtml(item, index)).join("");
   bindSelectedPreviewEvents();
   if (selectedPanelEnlarged) renderCanvasStudio();
+  window.dispatchEvent(new CustomEvent("aiq-canvas-change"));
 }
 
 function getFilteredSidebarPapers() {
@@ -1856,19 +1999,22 @@ function bindSelectedPanelControls() {
   const expandBtn = document.querySelector("#aiSelectedExpand");
   const topbarExpandBtn = document.querySelector("#topbarExpandSelected");
 
-  // 没有已选题目时不占用正文宽度，选中第一题后再展开
-  rightPanelSectionState.selectedCollapsed = getGlobalSelectedQuestions().length === 0;
+  // 有题则默认展开；空画布收起；用户手动折叠后跨页保持收起
+  rightPanelSectionState.selectedCollapsed = shouldCanvasStartCollapsed();
 
-  collapseBtn?.addEventListener("click", () => {
-    if (isMobileLayout()) {
-      setMobileDrawer("selected", false);
+  collapseBtn?.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (selectedPanelEnlarged) {
+      setSelectedPanelEnlarged(false);
       return;
     }
-    selectedPanelEnlarged = false;
-    selectedShowAnswers = false;
-    selectedExpandedAnalysisKeys.clear();
-    rightPanelSectionState.selectedCollapsed = true;
-    applySelectedPanelState();
+    if (isMobileLayout()) {
+      setMobileDrawer("selected", false);
+      collapseSelectedPanel({ manual: true });
+      return;
+    }
+    collapseSelectedPanel({ manual: true });
     renderSelectedContext();
   });
 
@@ -1887,17 +2033,24 @@ function bindSelectedPanelControls() {
     toggleSelectedShowAnswers();
   });
 
-  const openPanel = () => {
+  const openPanel = event => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
     if (isMobileLayout()) setMobileDrawer("selected", true);
-    else expandSelectedPanel();
+    expandSelectedPanel();
   };
 
   expandBtn?.addEventListener("click", openPanel);
   topbarExpandBtn?.addEventListener("click", openPanel);
   panel?.addEventListener("click", event => {
-    if (isMobileLayout()) return;
     if (!document.querySelector("#aiWorkspace")?.classList.contains("selected-panel-collapsed")) return;
-    if (event.target.closest(".ai-selected-expand") || event.target === panel) expandSelectedPanel();
+    openPanel(event);
+  });
+  document.addEventListener("click", event => {
+    if (!event.target.closest("#aiSelectedExpand, #aiSelectedPanel")) return;
+    if (!document.querySelector("#aiWorkspace")?.classList.contains("selected-panel-collapsed")) return;
+    if (event.target.closest("#collapseSelectedPanel, #enlargeSelectedPanel, #topbarCollapseCanvas")) return;
+    openPanel(event);
   });
 
   applySelectedPanelState();
@@ -1954,8 +2107,7 @@ function openSelectedAsQuestionList() {
   clearSelectedQuestionsState();
   saveWorkspace();
   if (isMobileLayout()) setMobileDrawer("selected", false);
-  renderAll();
-  showToast(`已保存「${title}」，共 ${questions.length} 题`);
+  location.href = `./detail-ai.html?tabId=${encodeURIComponent(newTab.id)}&context=${encodeURIComponent(newTab.context || contextName)}`;
 }
 
 const AI_CREATE_CHIPS_WITH_BASE = ["再补 5 道同类型", "补 2 道压轴题", "删掉太简单的", "总共控制在 10 题"];
@@ -2149,10 +2301,7 @@ function generateAiQuestionList() {
   saveWorkspace();
   closeAiCreateModal();
   if (isMobileLayout()) setMobileDrawer("selected", false);
-  renderAll();
-  showToast(aiCount
-    ? `已生成「${title}」，共 ${listQuestions.length} 题（AI 补充 ${aiCount} 题）`
-    : `已生成「${title}」，共 ${listQuestions.length} 题`);
+  location.href = `./detail-ai.html?tabId=${encodeURIComponent(newTab.id)}&context=${encodeURIComponent(newTab.context || contextName)}`;
 }
 
 const AI_ASSISTANT_ABILITIES = [
@@ -2413,10 +2562,52 @@ function focusQuestionInView(qId) {
   });
 }
 
+function isCanvasManuallyCollapsed() {
+  try {
+    const saved = localStorage.getItem(CANVAS_COLLAPSE_KEY) ?? sessionStorage.getItem(CANVAS_COLLAPSE_KEY);
+    if (saved === "1") return true;
+    if (saved === "0") return false;
+  } catch {}
+  return Boolean(workspace.canvasManuallyCollapsed);
+}
+
+function setCanvasManuallyCollapsed(value) {
+  const next = Boolean(value);
+  workspace.canvasManuallyCollapsed = next;
+  try {
+    localStorage.setItem(CANVAS_COLLAPSE_KEY, next ? "1" : "0");
+  } catch {}
+  try {
+    sessionStorage.setItem(CANVAS_COLLAPSE_KEY, next ? "1" : "0");
+  } catch {}
+}
+
+function shouldCanvasStartCollapsed() {
+  if (!getGlobalSelectedQuestions().length) return true;
+  return isCanvasManuallyCollapsed();
+}
+
 function expandSelectedPanel() {
-  if (isMobileLayout()) return;
+  setCanvasManuallyCollapsed(false);
   rightPanelSectionState.selectedCollapsed = false;
   applySelectedPanelState();
+  saveWorkspace();
+}
+
+function collapseSelectedPanel(options = {}) {
+  const manual = options.manual !== false;
+  selectedPanelEnlarged = false;
+  selectedShowAnswers = false;
+  selectedExpandedAnalysisKeys.clear();
+  rightPanelSectionState.selectedCollapsed = true;
+  setCanvasManuallyCollapsed(manual);
+  applySelectedPanelState();
+  saveWorkspace();
+}
+
+function collapseCanvasIfEmpty() {
+  if (getGlobalSelectedQuestions().length) return;
+  collapseSelectedPanel({ manual: false });
 }
 
 function clearDragPicks() {
@@ -2686,6 +2877,7 @@ function toggleQuestionSelection(qId, force) {
     if (isMobileLayout()) setMobileDrawer("selected", true);
     showToast(`已选用第 ${q.num} 题`);
   } else {
+    collapseCanvasIfEmpty();
     showToast(`已取消选用第 ${q.num} 题`);
   }
 }
@@ -2711,15 +2903,15 @@ function toggleShowAnswers() {
 }
 
 function isHomeViewActive() {
-  return Boolean(workspace.homeActive);
+  return false;
 }
 
 function isBrowseViewActive() {
-  return Boolean(workspace.activeBrowseFilter) && !workspace.homeActive;
+  return false;
 }
 
 function isShellFrameActive() {
-  return isHomeViewActive() || isBrowseViewActive();
+  return false;
 }
 
 function getBrowseMeta(filter) {
@@ -2750,41 +2942,10 @@ function syncHomeFrameFilter(filter, options = {}) {
 
 // 首页 / 分类浏览共用 iframe；分类 tab 紧挨在「首页」后
 function applyHomeView() {
-  ensureBrowseTabs();
   const root = document.querySelector("#aiWorkspace");
   const homeView = document.querySelector("#homeView");
-  const frame = document.querySelector("#homeFrame");
-  const shellActive = isShellFrameActive();
-  const browseFilter = isBrowseViewActive() ? workspace.activeBrowseFilter : null;
-
-  root?.classList.toggle("home-view", shellActive);
-  if (homeView) homeView.hidden = !shellActive;
-  if (shellActive && frame && frame.dataset.loaded !== "1") {
-    const srcFilter = browseFilter || "all";
-    const url = new URL(HOME_FRAME_SRC, location.href);
-    if (srcFilter && srcFilter !== "all") url.searchParams.set("filter", srcFilter);
-    if (pendingBrowseOrigin) url.searchParams.set("origin", pendingBrowseOrigin);
-    frame.src = `${url.pathname}${url.search}`;
-    frame.dataset.loaded = "1";
-    frame.dataset.filter = srcFilter;
-    if (pendingBrowseOrigin) frame.dataset.origin = pendingBrowseOrigin;
-    pendingBrowseOrigin = "";
-  } else if (shellActive && frame?.dataset.loaded === "1") {
-    const nextFilter = browseFilter || "all";
-    const nextOrigin = pendingBrowseOrigin || frame.dataset.origin || "";
-    if (frame.dataset.filter !== nextFilter || (pendingBrowseOrigin && frame.dataset.origin !== pendingBrowseOrigin)) {
-      frame.dataset.filter = nextFilter;
-      syncHomeFrameFilter(nextFilter, { origin: nextOrigin });
-    }
-  }
-  if (shellActive) {
-    const meta = browseFilter ? getBrowseMeta(browseFilter) : null;
-    const context = document.querySelector("#breadcrumbContext");
-    const leaf = document.querySelector("#breadcrumbLeaf");
-    if (context) context.textContent = "题库";
-    if (leaf) leaf.textContent = meta?.label || "首页";
-    document.title = `${meta?.label || "题库首页"} · AI 试卷工作台`;
-  }
+  root?.classList.remove("home-view");
+  if (homeView) homeView.hidden = true;
   applyResponsiveChrome();
 }
 
@@ -2878,71 +3039,49 @@ function bindHomeFrameBridge() {
 
 function renderTabs() {
   const bar = document.querySelector("#docTabs");
-  if (!bar) return;
-  ensureBrowseTabs();
-  const homeActive = isHomeViewActive();
-  const browseActive = isBrowseViewActive();
-  const activeBrowse = workspace.activeBrowseFilter;
-  bar.innerHTML = `
-    <div class="doc-tabs-scroll">
-    <button class="doc-tab doc-tab-home ${homeActive ? "active" : ""}" type="button" data-home-tab aria-label="题库首页">
-      <i class="ri-home-4-line doc-tab-icon" aria-hidden="true"></i>
-      <span class="doc-tab-label">首页</span>
-    </button>
-    ${workspace.browseTabs.map(filter => {
-      const meta = getBrowseMeta(filter);
-      if (!meta) return "";
-      return `
-      <button class="doc-tab doc-tab-browse ${browseActive && activeBrowse === filter ? "active" : ""}" type="button" data-browse-filter="${filter}">
-        <i class="${meta.icon} doc-tab-icon" aria-hidden="true"></i>
-        <span class="doc-tab-label">${escapeHtml(meta.label)}</span>
-        <span class="doc-tab-close" role="button" tabindex="0" data-close-browse="${filter}" aria-label="关闭 ${escapeHtml(meta.label)}"><i class="ri-close-line"></i></span>
-      </button>`;
-    }).join("")}
-      ${workspace.tabs.map(tab => `
-      <button class="doc-tab ${!homeActive && !browseActive && tab.id === workspace.activeTabId ? "active" : ""}" type="button" data-tab-id="${tab.id}">
-        <i class="${tabDocIcon(tab)} doc-tab-icon" aria-hidden="true"></i>
-        <span class="doc-tab-label">${escapeHtml(tab.shortTitle)}</span>
-        <span class="doc-tab-close" role="button" tabindex="0" data-close-tab="${tab.id}" aria-label="关闭 ${escapeHtml(tab.shortTitle)}"><i class="ri-close-line"></i></span>
-      </button>`).join("")}
-    </div>
-    <button class="doc-tab-add" type="button" id="docTabAdd" aria-label="打开新试卷"><i class="ri-add-line"></i></button>`;
+  if (bar) bar.hidden = true;
+}
 
-  bar.querySelector("[data-home-tab]")?.addEventListener("click", () => setHomeView(true));
-  bar.querySelectorAll("[data-browse-filter]").forEach(button => {
-    button.addEventListener("click", event => {
-      if (event.target.closest("[data-close-browse]")) return;
-      setBrowseView(button.dataset.browseFilter);
-    });
+function buildDetailPageUrl(topicId, options = {}) {
+  const qs = new URLSearchParams({
+    topic: getBaseTopicId(topicId),
+    context: options.context || contextName
   });
-  bar.querySelectorAll("[data-close-browse]").forEach(button => {
-    button.addEventListener("click", event => {
-      event.stopPropagation();
-      closeBrowseTab(button.dataset.closeBrowse);
-    });
-  });
+  if (options.tabId) qs.set("tabId", options.tabId);
+  if (options.title) qs.set("title", options.title);
+  if (options.shortTitle) qs.set("shortTitle", options.shortTitle);
+  if (options.lessonKey) qs.set("lessonKey", options.lessonKey);
+  if (options.focus) qs.set("focus", options.focus);
+  if (options.reason) qs.set("reason", options.reason);
+  if (options.source) qs.set("source", options.source);
+  if (options.difficulty) qs.set("difficulty", options.difficulty);
+  if (options.questionCount) qs.set("questions", String(options.questionCount));
+  if (options.usage) qs.set("usage", String(options.usage));
+  return `./detail-ai.html?${qs.toString()}`;
+}
 
-  bar.querySelectorAll("[data-tab-id]").forEach(button => {
-    button.addEventListener("click", event => {
-      if (event.target.closest("[data-close-tab]")) return;
-      switchTab(button.dataset.tabId);
-    });
-  });
-  bar.querySelectorAll("[data-close-tab]").forEach(button => {
-    const close = event => { event.stopPropagation(); closeTab(button.dataset.closeTab); };
-    button.addEventListener("click", close);
-  });
-  document.querySelector("#docTabAdd")?.addEventListener("click", openPaperPicker);
+function openDetailPage(url) {
+  const opened = window.open(url, "_blank");
+  if (opened) {
+    opened.opener = null;
+    return;
+  }
+  location.href = url;
 }
 
 function switchTab(tabId) {
-  if (workspace.activeTabId === tabId && !isHomeViewActive() && !isBrowseViewActive()) return;
-  workspace.homeActive = false;
-  workspace.activeBrowseFilter = null;
-  workspace.activeTabId = tabId;
-  saveWorkspace();
-  syncPageChromeForTab(getActiveTab());
-  renderAll();
+  const tab = workspace.tabs.find(item => item.id === tabId);
+  if (!tab) return;
+  if (tab.isQuestionList) {
+    openDetailPage(`./detail-ai.html?tabId=${encodeURIComponent(tab.id)}&context=${encodeURIComponent(tab.context || contextName)}`);
+    return;
+  }
+  openDetailPage(buildDetailPageUrl(tab.topicId, {
+    context: tab.context,
+    title: tab.title,
+    shortTitle: tab.shortTitle,
+    lessonKey: tab.lessonKey
+  }));
 }
 
 function syncPageChromeForTab(tab) {
@@ -2963,29 +3102,22 @@ function closeTab(tabId) {
 function openTab(topicId, options = {}) {
   const baseId = getBaseTopicId(topicId);
   const tabContext = options.context || contextName;
-  const lessonKey = options.lessonKey || options.title || "";
-  const existing = workspace.tabs.find(tab =>
-    getBaseTopicId(tab.topicId) === baseId
-    && !tab.fromQuestionId
-    && !tab.isQuestionList
-    && (tab.context || contextName) === tabContext
-    && (!lessonKey || tab.lessonKey === lessonKey || tab.title === lessonKey)
-  );
-  if (existing) {
-    switchTab(existing.id);
-    showToast(`已切换到「${existing.shortTitle || existing.title}」`);
-    return existing;
+  const currentTopic = getBaseTopicId(params.get("topic") || "");
+  if (!isHomeShell && !params.get("tabId") && currentTopic === baseId && contextName === tabContext) {
+    return getActiveTab();
   }
-  const tab = createTab(topicId, tabContext, options);
-  workspace.tabs.push(tab);
-  workspace.activeTabId = tab.id;
-  workspace.homeActive = false;
-  workspace.activeBrowseFilter = null;
-  pruneOverflowTabs();
-  saveWorkspace();
-  renderAll();
-  showToast(`已打开「${tab.shortTitle || tab.title}」`);
-  return tab;
+  openDetailPage(buildDetailPageUrl(baseId, {
+    context: tabContext,
+    title: options.title,
+    shortTitle: options.shortTitle,
+    lessonKey: options.lessonKey,
+    source: options.source,
+    difficulty: options.difficulty,
+    reason: options.reason,
+    focus: options.focus,
+    questionCount: options.questionCount,
+    usage: options.usage
+  }));
 }
 
 // 标签页无限增长会让标题被挤成一串省略号，超出上限时回收最早打开且未激活的一个
@@ -3065,8 +3197,7 @@ function clearSelectedQuestionsState(options = {}) {
   });
   if (selectedPanelEnlarged) setSelectedPanelEnlarged(false);
   if (collapsePanel) {
-    rightPanelSectionState.selectedCollapsed = true;
-    applySelectedPanelState();
+    collapseSelectedPanel({ manual: false });
   }
 }
 
@@ -3218,12 +3349,60 @@ function bindEvents() {
   }
 }
 
-applyPageMode();
-ensureInitialTab();
-renderAll();
-bindEvents();
-bindHomeFrameBridge();
-bindSelectedPanelControls();
-bindAiAssistantControls();
-bindAiCreateControls();
-bindDirectoryEvents();
+if (isHomeShell) {
+  bindEvents();
+  bindSelectedPanelControls();
+  bindAiCreateControls();
+  renderSelectedContext();
+  bindCanvasSync();
+} else {
+  applyPageMode();
+  ensureInitialTab();
+  renderAll();
+  bindEvents();
+  bindSelectedPanelControls();
+  bindAiAssistantControls();
+  bindAiCreateControls();
+  bindDirectoryEvents();
+  bindCanvasSync();
+}
+
+function toggleExternalCanvasQuestion(item) {
+  ensureGlobalSelected();
+  const key = item?.selectionKey;
+  if (!key) return false;
+  const has = getGlobalSelectedQuestions().some(entry => entry.selectionKey === key);
+  if (has) {
+    workspace.globalSelectedQuestions = getGlobalSelectedQuestions().filter(entry => entry.selectionKey !== key);
+    saveWorkspace();
+    renderSelectedContext();
+    collapseCanvasIfEmpty();
+    return false;
+  }
+  if (!workspace.canvasTitle) workspace.canvasTitle = formatQuestionListTitle();
+  workspace.globalSelectedQuestions.push(item);
+  saveWorkspace();
+  renderSelectedContext();
+  expandSelectedPanel();
+  return true;
+}
+
+window.AiqCanvas = {
+  toggleQuestion: toggleExternalCanvasQuestion,
+  expand: expandSelectedPanel,
+  collapse(manual = true) {
+    if (selectedPanelEnlarged) {
+      setSelectedPanelEnlarged(false);
+      return;
+    }
+    collapseSelectedPanel({ manual });
+  },
+  has(key) {
+    return getGlobalSelectedQuestions().some(entry => entry.selectionKey === key);
+  },
+  keys() {
+    return getGlobalSelectedQuestions().map(entry => entry.selectionKey);
+  }
+};
+window.dispatchEvent(new Event("aiq-canvas-ready"));
+})();

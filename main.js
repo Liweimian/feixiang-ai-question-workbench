@@ -159,14 +159,8 @@ function matchesWorkbookType(topic, type) {
   return option?.match?.(topic) ?? true;
 }
 
-// 首页可以被 AI 试卷工作台的「首页」页签以 iframe 嵌入，此时打开题单交给外层开标签页
-const isEmbedded = (() => {
-  try {
-    return window.self !== window.top;
-  } catch {
-    return true;
-  }
-})();
+// 首页与试卷详情改为独立页面浏览，不再以 iframe 嵌入工作台
+const isEmbedded = false;
 
 function requestParentOpenTopic(topicId, context, query, extra = {}) {
   window.parent.postMessage({
@@ -2107,7 +2101,16 @@ function openTopic(id, options = {}) {
     requestParentOpenTopic(id, context, qs.toString(), { title, shortTitle, lessonKey });
     return;
   }
-  location.href = `./detail-ai.html?${qs.toString()}`;
+  openDetailPage(`./detail-ai.html?${qs.toString()}`);
+}
+
+function openDetailPage(url) {
+  const opened = window.open(url, "_blank");
+  if (opened) {
+    opened.opener = null;
+    return;
+  }
+  location.href = url;
 }
 
 function showAiDock(visible) {

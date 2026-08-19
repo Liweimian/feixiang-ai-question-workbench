@@ -58,12 +58,8 @@ const questions = [
 let sideView = "chapters";
 let activeNav = "all";
 let sortMode = "recommended";
-const selectedQuestions = new Set(["q1", "q2"]);
+const selectedQuestions = new Set();
 const savedQuestions = new Set();
-const selectedPreviewTitles = {
-  q1: "下列图形中，是轴对称图形的是（　　）。",
-  q2: "如果向东走 3 米记作 +3 米，那么向西走 5 米应记作（　　）。"
-};
 
 const bankNav = document.querySelector("#bankNav");
 const questionList = document.querySelector("#questionList");
@@ -98,8 +94,47 @@ function renderBankNav() {
   bankNavCount.textContent = `${questions.length} 题`;
 }
 
+function schoolSelectionKey(id) {
+  return `school::${id}`;
+}
+
+function isQuestionSelected(id) {
+  return window.AiqCanvas?.has(schoolSelectionKey(id)) || selectedQuestions.has(id);
+}
+
+function toCanvasQuestion(question) {
+  const index = questions.findIndex(item => item.id === question.id);
+  return {
+    selectionKey: schoolSelectionKey(question.id),
+    topicId: "school",
+    sourceTitle: "单题组卷",
+    question: {
+      id: question.id,
+      num: index >= 0 ? index + 1 : 1,
+      section: "单题组卷",
+      type: question.type,
+      difficulty: question.difficulty,
+      knowledge: question.skill,
+      minutes: question.minutes,
+      competency: question.ability,
+      badges: question.tags || [],
+      stem: question.title.replaceAll("\n", " "),
+      options: [],
+      answer: "",
+      analysis: ""
+    }
+  };
+}
+
+function syncSelectedFromCanvas() {
+  selectedQuestions.clear();
+  (window.AiqCanvas?.keys?.() || []).forEach(key => {
+    if (String(key).startsWith("school::")) selectedQuestions.add(String(key).slice(8));
+  });
+}
+
 function questionCard(question) {
-  const selected = selectedQuestions.has(question.id);
+  const selected = isQuestionSelected(question.id);
   const saved = savedQuestions.has(question.id);
   return `<article class="question-card ${selected ? "selected" : ""}" data-question-id="${question.id}">
     <div class="question-card-body">
@@ -141,22 +176,7 @@ function renderQuestions() {
 }
 
 function renderBasket() {
-  const selectedCount = document.querySelector("#selectedCount");
-  if (selectedCount) selectedCount.textContent = selectedQuestions.size;
-  const count = selectedQuestions.size;
-  ["#selectedPanelCount", "#selectedPanelTitleCount", "#selectedPanelExpandCount"].forEach(selector => {
-    const node = document.querySelector(selector);
-    if (node) node.textContent = count;
-  });
-  const expandCount = document.querySelector("#selectedPanelExpandCount");
-  if (expandCount) expandCount.hidden = count === 0;
-  document.querySelectorAll(".selected-panel-foot span").forEach(node => { node.textContent = count; });
-  const list = document.querySelector("#selectedPanelList");
-  if (list) list.innerHTML = [...selectedQuestions].map(id => {
-    const question = questions.find(item => item.id === id);
-    if (!question) return "";
-    return `<article class="selected-preview-card" data-selected-id="${id}"><header><strong>${question.type}</strong><button type="button" data-selected-remove="${id}">移出</button></header><p>${selectedPreviewTitles[id] || question.title}</p></article>`;
-  }).join("") || `<div class="selected-panel-empty">暂未选择题目</div>`;
+  syncSelectedFromCanvas();
 }
 
 function renderAll() {
@@ -209,7 +229,17 @@ questionList.addEventListener("click", event => {
   const id = card.dataset.questionId;
   const question = questions.find(item => item.id === id);
   const action = button.dataset.questionAction;
-  if (action === "select") selectedQuestions.has(id) ? selectedQuestions.delete(id) : selectedQuestions.add(id);
+  if (action === "select") {
+    if (window.AiqCanvas?.toggleQuestion) {
+      const added = window.AiqCanvas.toggleQuestion(toCanvasQuestion(question));
+      if (added) selectedQuestions.add(id);
+      else selectedQuestions.delete(id);
+    } else if (selectedQuestions.has(id)) {
+      selectedQuestions.delete(id);
+    } else {
+      selectedQuestions.add(id);
+    }
+  }
   if (action === "save") savedQuestions.has(id) ? savedQuestions.delete(id) : savedQuestions.add(id);
   if (action === "wrong") showToast("已记录为待纠错题");
   if (action === "explain") showToast(`${question.skill}解析已打开`);
@@ -227,29 +257,16 @@ document.querySelectorAll("[data-basket-action]").forEach(button => button.addEv
   showToast(messages[button.dataset.basketAction]);
 }));
 
-document.querySelector("#basketCollapse")?.addEventListener("click", () => document.querySelector("#questionBasket")?.classList.toggle("collapsed"));
-document.querySelector("#selectedPanelList")?.addEventListener("click", event => {
-  const button = event.target.closest("[data-selected-remove]");
-  if (!button) return;
-  selectedQuestions.delete(button.dataset.selectedRemove);
-  renderQuestions();
-  renderBasket();
-});
-document.querySelector("#selectedPanelClear")?.addEventListener("click", () => { selectedQuestions.clear(); renderQuestions(); renderBasket(); });
-document.querySelector("#selectedPanelCollapse")?.addEventListener("click", () => {
-  const shell = document.querySelector(".question-bank-shell");
-  shell?.classList.add("selected-panel-collapsed");
-  shell?.classList.remove("selected-panel-enlarged");
-});
-document.querySelector("#selectedPanelExpand")?.addEventListener("click", () => {
-  document.querySelector(".question-bank-shell")?.classList.remove("selected-panel-collapsed");
-});
-document.querySelector("#selectedPanelEnlarge")?.addEventListener("click", () => document.querySelector(".question-bank-shell")?.classList.toggle("selected-panel-enlarged"));
-document.querySelector("#selectedPanelCreate")?.addEventListener("click", () => showToast(`正在创建包含 ${selectedQuestions.size} 题的题单`));
-document.querySelector("#selectedPanelAi")?.addEventListener("click", () => showToast(`正在基于 ${selectedQuestions.size} 道已选题进行 AI 补充`));
-document.querySelector("#aiEntry")?.addEventListener("click", () => showToast("AI 生成题目入口已保留在顶部"));
 document.querySelector("#scopePicker").addEventListener("click", () => showToast("教材范围可在此切换"));
 document.querySelector("#filterMore")?.addEventListener("click", () => showToast("更多筛选条件即将开放"));
 document.querySelector("#imageSearch")?.addEventListener("click", () => showToast("图片搜题功能即将开放"));
 
 renderAll();
+
+function syncWhenCanvasReady() {
+  syncSelectedFromCanvas();
+  renderQuestions();
+}
+if (window.AiqCanvas) syncWhenCanvasReady();
+window.addEventListener("aiq-canvas-ready", syncWhenCanvasReady);
+window.addEventListener("aiq-canvas-change", syncWhenCanvasReady);

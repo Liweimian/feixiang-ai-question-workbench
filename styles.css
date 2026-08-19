@@ -24,6 +24,64 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--canvas); -webkit-font-smoothing: antialiased; }
+
+/* 组题画布常驻首页 / 单题组卷左侧：默认折叠条，加入题目后再展开 */
+body.index-page,
+body.school-library-page {
+  --selected-panel-width: 340px;
+}
+body.index-page .ai-workspace,
+body.school-library-page .ai-workspace {
+  display: grid;
+  grid-template-columns: var(--selected-panel-width) minmax(0, 1fr);
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+  transition: grid-template-columns .24s ease;
+}
+body.index-page .ai-workspace.selected-panel-collapsed,
+body.school-library-page .ai-workspace.selected-panel-collapsed {
+  grid-template-columns: 64px minmax(0, 1fr);
+}
+body.index-page .ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed),
+body.school-library-page .ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed) {
+  grid-template-columns: minmax(0, 1fr);
+}
+body.index-page .ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed) .ai-main-column,
+body.school-library-page .ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed) .ai-main-column {
+  display: none;
+}
+body.index-page .ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed) .ai-selected-panel,
+body.school-library-page .ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed) .ai-selected-panel {
+  width: 100%;
+  border-right: 0;
+}
+body.index-page .ai-selected-panel,
+body.school-library-page .ai-selected-panel {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 100vh;
+  align-self: start;
+}
+body.index-page .ai-workspace.selected-panel-collapsed .ai-selected-panel,
+body.school-library-page .ai-workspace.selected-panel-collapsed .ai-selected-panel {
+  cursor: pointer;
+}
+body.index-page .ai-workspace.selected-panel-collapsed .ai-selected-expand,
+body.school-library-page .ai-workspace.selected-panel-collapsed .ai-selected-expand {
+  display: flex !important;
+  pointer-events: auto;
+  cursor: pointer;
+}
+body.index-page .ai-main-column,
+body.school-library-page .ai-main-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: auto;
+  overflow: visible;
+}
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
