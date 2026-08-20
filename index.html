@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="./styles.css?v=20260819canvasopen1" />
     <link rel="stylesheet" href="./theme-v47.css?v=20260818mistlilac2" />
     <link rel="stylesheet" href="./theme-workspace-v50.css?v=20260813workspace2" />
-    <link rel="stylesheet" href="./home-revision-v51.css?v=20260820pref9" />
-    <link rel="stylesheet" href="./detail-ai.css?v=20260820canvas3" />
+    <link rel="stylesheet" href="./home-revision-v51.css?v=20260820pref10" />
+    <link rel="stylesheet" href="./detail-ai.css?v=20260820canvas6" />
   </head>
   <body class="index-page">
     <div class="ai-workspace selected-panel-collapsed" id="aiWorkspace">
@@ -138,11 +138,12 @@
           <a class="category-nav-link" href="./school.html"><span>题库选题</span></a>
         </nav>
         <div class="header-tools">
-          <button class="context-identity" type="button" data-open-preference aria-label="我的选题偏好">
-            <i class="ri-equalizer-3-line"></i>
-            <span><b>选题偏好</b><small>北京市朝阳区 7年级上 数学</small></span>
-            <i class="ri-arrow-down-s-line"></i>
-          </button>
+          <div class="context-identity" aria-label="当前教学范围">
+            <i class="ri-map-pin-2-line"></i>
+            <span>北京市朝阳区</span>
+            <i class="context-divider"></i>
+            <span>7年级上 数学</span>
+          </div>
         </div>
       </header>
 
@@ -218,45 +219,6 @@
       </section>
     </div>
 
-    <div id="preferenceMask" class="home-preference-mask" hidden>
-      <section class="home-preference-dialog" role="dialog" aria-modal="true" aria-labelledby="preferenceDialogTitle" aria-describedby="preferenceDialogDescription">
-        <header>
-          <div>
-            <span><i class="ri-equalizer-3-line"></i></span>
-            <div><h2 id="preferenceDialogTitle">我的选题偏好</h2><p id="preferenceDialogDescription">根据班级学情和日常用题习惯设置。</p></div>
-          </div>
-          <button id="closePreference" type="button" aria-label="关闭选题偏好"><i class="ri-close-line"></i></button>
-        </header>
-        <div class="home-preference-groups">
-          <section data-preference-mode="single">
-            <div class="home-preference-group-label"><h3>难度倾向</h3><p>匹配当前班级基础</p></div>
-            <div class="home-preference-options" role="group" aria-label="难度倾向">
-              <button type="button" data-preference-group="difficultyProfile" data-preference-value="基础为主"><strong>基础为主</strong></button>
-              <button type="button" data-preference-group="difficultyProfile" data-preference-value="基础中等均衡"><strong>基础中等均衡</strong></button>
-              <button type="button" data-preference-group="difficultyProfile" data-preference-value="中等提高为主"><strong>中等提高为主</strong></button>
-            </div>
-          </section>
-          <section data-preference-mode="single">
-            <div class="home-preference-group-label"><h3>题型结构</h3><p>匹配作答与讲评习惯</p></div>
-            <div class="home-preference-options" role="group" aria-label="题型结构">
-              <button type="button" data-preference-group="questionMix" data-preference-value="客观题为主"><strong>客观题为主</strong></button>
-              <button type="button" data-preference-group="questionMix" data-preference-value="主客观均衡"><strong>主客观均衡</strong></button>
-              <button type="button" data-preference-group="questionMix" data-preference-value="解答题为主"><strong>解答题为主</strong></button>
-            </div>
-          </section>
-          <section data-preference-mode="single">
-            <div class="home-preference-group-label"><h3>训练梯度</h3><p>决定题目编排方式</p></div>
-            <div class="home-preference-options" role="group" aria-label="训练梯度">
-              <button type="button" data-preference-group="progression" data-preference-value="同类巩固"><strong>同类巩固</strong></button>
-              <button type="button" data-preference-group="progression" data-preference-value="由易到难"><strong>由易到难</strong></button>
-              <button type="button" data-preference-group="progression" data-preference-value="分层挑战"><strong>分层挑战</strong></button>
-            </div>
-          </section>
-        </div>
-        <footer><button id="resetPreference" type="button">恢复默认</button><button id="savePreference" type="button">保存偏好</button></footer>
-      </section>
-    </div>
-
     <div id="aiCreateModal" class="ai-create-modal" hidden>
       <div class="ai-create-mask" data-ai-create-close></div>
       <div class="ai-create-panel" role="dialog" aria-modal="true" aria-labelledby="aiCreateTitle">
@@ -319,7 +281,7 @@
     </div>
 
     <div id="toast" class="toast" role="status"></div>
-    <script src="./main.js?v=20260820pref9"></script>
-    <script src="./detail-ai.js?v=20260820canvas5"></script>
+    <script src="./main.js?v=20260820pref10"></script>
+    <script src="./detail-ai.js?v=20260820canvas6"></script>
   </body>
 </html>

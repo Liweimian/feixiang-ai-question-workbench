@@ -33,68 +33,7 @@ body.school-library-page .header-tools {
   gap: 10px;
 }
 
-body.index-page .site-header .context-identity {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) 14px;
-  align-items: center;
-  justify-self: auto;
-  gap: 8px;
-  padding: 7px 10px;
-  color: #3a4666;
-  font-size: inherit;
-  font-weight: inherit;
-  text-align: left;
-  white-space: nowrap;
-  border: 1px solid #e0e4f2;
-  border-radius: 10px;
-  background: #fbfcff;
-  cursor: pointer;
-}
-
-body.index-page .site-header .context-identity:hover {
-  border-color: #b8c5f3;
-  background: #f2f4ff;
-}
-
-body.index-page .site-header .context-identity > i:first-child {
-  width: auto;
-  height: auto;
-  color: #607af0;
-  font-size: 16px;
-  border-radius: 0;
-  background: transparent;
-}
-
-body.index-page .site-header .context-identity > span {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-}
-
-body.index-page .site-header .context-identity b {
-  overflow: hidden;
-  font-size: 12px;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-body.index-page .site-header .context-identity small {
-  display: block;
-  overflow: hidden;
-  color: #8a93a8;
-  font-size: 10px;
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-body.index-page .site-header .context-identity > i:last-child {
-  color: #8a93a8;
-  font-size: 16px;
-}
-
+body.index-page .site-header .context-identity,
 body.school-library-page .site-header .context-identity,
 body.school-library-page .school-header .context-identity {
   min-width: 0;
@@ -114,6 +53,7 @@ body.school-library-page .school-header .context-identity {
   cursor: default;
 }
 
+body.index-page .site-header .context-identity > i:first-child,
 body.school-library-page .site-header .context-identity > i:first-child {
   width: auto;
   height: auto;
@@ -123,11 +63,13 @@ body.school-library-page .site-header .context-identity > i:first-child {
   background: transparent;
 }
 
+body.index-page .site-header .context-identity > span,
 body.school-library-page .site-header .context-identity > span {
   display: inline;
   min-width: 0;
 }
 
+body.index-page .site-header .context-identity .context-divider,
 body.school-library-page .site-header .context-identity .context-divider {
   width: 1px;
   height: 12px;

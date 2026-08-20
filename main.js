@@ -267,32 +267,6 @@ const byId = Object.fromEntries(topics.map(topic => [topic.id, topic]));
 const toneMap = { sage:"var(--sage)", cream:"var(--cream)", lilac:"var(--lilac)", mist:"var(--mist)" };
 const aiPlaceholder = "描述你想要的题单，例如：七上有理数易错题，15 题，中等难度";
 const bankStats = { libraryTotal: 41140, paperTotal: 28460, practiceTotal: 12680, weeklyNewResources: 320 };
-const HOME_PREFERENCE_KEY = "feixiang-home-preferences-v2";
-const defaultHomePreferences = {
-  difficultyProfile: ["基础中等均衡"],
-  questionMix: ["主客观均衡"],
-  progression: ["由易到难"]
-};
-
-function copyHomePreferences(source = defaultHomePreferences) {
-  return Object.fromEntries(Object.entries(defaultHomePreferences).map(([key, fallback]) => [
-    key,
-    Array.isArray(source?.[key]) ? [...source[key]] : [...fallback]
-  ]));
-}
-
-function loadHomePreferences() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(HOME_PREFERENCE_KEY) || "null");
-    return copyHomePreferences(saved);
-  } catch {
-    return copyHomePreferences();
-  }
-}
-
-let homePreferences = loadHomePreferences();
-let homePreferenceDraft = copyHomePreferences(homePreferences);
-let homePreferenceOpener = null;
 let currentFilter = "all";
 let currentQuery = "";
 let homepageSearchScope = "all";
@@ -2520,43 +2494,6 @@ function closeAi() {
   setupAiDock(currentFilter === "all" && !currentQuery);
 }
 
-function renderHomePreferenceDialog() {
-  document.querySelectorAll("[data-preference-group]").forEach(button => {
-    const group = button.dataset.preferenceGroup;
-    const active = homePreferenceDraft[group]?.includes(button.dataset.preferenceValue) || false;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
-  });
-}
-
-function openHomePreference(event) {
-  const mask = document.querySelector("#preferenceMask");
-  if (!mask) return;
-  homePreferenceOpener = event?.currentTarget || document.activeElement;
-  homePreferenceDraft = copyHomePreferences(homePreferences);
-  renderHomePreferenceDialog();
-  mask.hidden = false;
-  document.body.style.overflow = "hidden";
-  document.querySelector("#closePreference")?.focus();
-}
-
-function closeHomePreference() {
-  const mask = document.querySelector("#preferenceMask");
-  if (!mask) return;
-  mask.hidden = true;
-  if (aiMask.hidden) document.body.style.overflow = "";
-  if (homePreferenceOpener?.isConnected) homePreferenceOpener.focus();
-}
-
-function saveHomePreference() {
-  homePreferences = copyHomePreferences(homePreferenceDraft);
-  try {
-    localStorage.setItem(HOME_PREFERENCE_KEY, JSON.stringify(homePreferences));
-  } catch {}
-  closeHomePreference();
-  showToast("选题偏好已保存");
-}
-
 function showToast(message) { toast.textContent = message; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 1700); }
 
 function renderBankStats() {
@@ -2608,7 +2545,6 @@ window.addEventListener("scroll", () => {
 
 document.querySelector("#filterChips").addEventListener("click", event => { const button = event.target.closest("[data-filter]"); if (button) setMainFilter(button.dataset.filter); });
 document.querySelector("#resetFilter").addEventListener("click", () => setMainFilter("all"));
-document.querySelector("[data-open-preference]")?.addEventListener("click", openHomePreference);
 
 function bindAiForm(formSelector, inputSelector, addSelector, voiceSelector) {
   const form = document.querySelector(formSelector);
@@ -2662,33 +2598,10 @@ document.addEventListener("click", event => {
 });
 document.querySelector("#closeAi").addEventListener("click", closeAi);
 aiMask.addEventListener("click", event => { if (event.target === aiMask) closeAi(); });
-document.querySelector("#closePreference")?.addEventListener("click", closeHomePreference);
-document.querySelector("#preferenceMask")?.addEventListener("click", event => { if (event.target === event.currentTarget) closeHomePreference(); });
-document.querySelectorAll("[data-preference-group]").forEach(button => button.addEventListener("click", () => {
-  const group = button.dataset.preferenceGroup;
-  const value = button.dataset.preferenceValue;
-  const mode = button.closest("[data-preference-mode]")?.dataset.preferenceMode || "multiple";
-  if (mode === "single") {
-    homePreferenceDraft[group] = [value];
-    renderHomePreferenceDialog();
-    return;
-  }
-  const values = new Set(homePreferenceDraft[group] || []);
-  if (values.has(value)) values.delete(value);
-  else values.add(value);
-  homePreferenceDraft[group] = [...values];
-  renderHomePreferenceDialog();
-}));
-document.querySelector("#resetPreference")?.addEventListener("click", () => {
-  homePreferenceDraft = copyHomePreferences();
-  renderHomePreferenceDialog();
-});
-document.querySelector("#savePreference")?.addEventListener("click", saveHomePreference);
 document.querySelector("#generateList").addEventListener("click", event => { const button = event.currentTarget; button.disabled = true; button.querySelector("span").textContent = "正在生成题单结构…"; setTimeout(() => { document.querySelector("#aiForm").hidden = true; document.querySelector("#aiResult").hidden = false; button.disabled = false; button.querySelector("span").textContent = "生成完整题单"; }, 850); });
 document.querySelector("#regenerate").addEventListener("click", () => { document.querySelector("#aiResult").hidden = true; document.querySelector("#aiForm").hidden = false; });
 document.querySelector("#editGenerated").addEventListener("click", () => { closeAi(); showToast("AI 题单已生成，正在进入题单编辑"); });
 document.addEventListener("keydown", event => {
   if (event.key !== "Escape") return;
-  if (!document.querySelector("#preferenceMask")?.hidden) closeHomePreference();
-  else if (!aiMask.hidden) closeAi();
+  if (!aiMask.hidden) closeAi();
 });

@@ -1172,6 +1172,7 @@
 .ai-section-head .ai-selected-hint.is-count {
   color: var(--green-900);
   font-weight: 650;
+  white-space: nowrap;
 }
 
 .ai-section-head-actions {

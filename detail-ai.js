@@ -575,18 +575,40 @@ function getCanvasGroups(items = getGlobalSelectedQuestions()) {
   return groups;
 }
 
-function renderCanvasStatsText(items, options = {}) {
-  const groupCount = getCanvasGroups(items).length;
-  const parts = [`已选 ${items.length}题`];
-  if (!options.compact) {
-    const counts = countSelectedTypes(items);
-    const typeBits = ["选择", "填空", "解答"]
-      .filter(key => counts[key] > 0)
-      .map(key => `${key.replace("题", "")}${counts[key]}`);
-    if (typeBits.length) parts.push(typeBits.join(" "));
-  }
-  if (groupCount) parts.push(`来自${groupCount}份卷`);
-  return parts.join(" · ");
+function canvasQuestionMinutes(q) {
+  return Number(q?.minutes) || (q?.type === "解答题" ? 5 : q?.type === "填空题" ? 2 : 1);
+}
+
+function canvasDifficultyRank(label) {
+  const text = String(label || "");
+  if (/较难|困难/.test(text)) return 3;
+  if (/较易|简单/.test(text)) return 1;
+  return 2;
+}
+
+function canvasDifficultyLabel(rank) {
+  if (rank <= 1.4) return "较易";
+  if (rank >= 2.6) return "较难";
+  return "中等";
+}
+
+function summarizeCanvasSelection(items = getGlobalSelectedQuestions()) {
+  const count = items.length;
+  if (!count) return { count: 0, difficulty: "", minutes: 0 };
+  const labels = items.map(item => item.question?.difficulty).filter(Boolean);
+  const unique = [...new Set(labels)];
+  const avg = items.reduce((sum, item) => sum + canvasDifficultyRank(item.question?.difficulty), 0) / count;
+  return {
+    count,
+    difficulty: unique.length === 1 ? unique[0] : canvasDifficultyLabel(avg),
+    minutes: items.reduce((sum, item) => sum + canvasQuestionMinutes(item.question), 0)
+  };
+}
+
+function renderCanvasStatsText(items = getGlobalSelectedQuestions()) {
+  const { count, difficulty, minutes } = summarizeCanvasSelection(items);
+  if (!count) return "";
+  return [`${count}道`, difficulty || "中等", `${minutes}分钟`].join(" · ");
 }
 
 function findTabForTopic(topicId) {
@@ -1433,7 +1455,7 @@ function renderSelectedFooter(count) {
       hint.classList.remove("is-count");
     } else if (count > 0) {
       hint.hidden = false;
-      hint.textContent = `已选 ${count}道`;
+      hint.textContent = renderCanvasStatsText(selected);
       hint.classList.add("is-count");
     } else {
       hint.hidden = false;
