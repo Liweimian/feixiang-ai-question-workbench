@@ -1,11 +1,11 @@
 (() => {
 const paperCatalog = {
   t2: {
-    title: "2026 深圳南山区初一上期末数学真题",
-    shortTitle: "南山区期末卷",
-    focus: "深圳市南山区七年级上学期期末数学真题",
-    reason: "深圳区级真题",
-    region: "南山区",
+    title: "2026 北京市朝阳区初一上期末数学真题",
+    shortTitle: "朝阳区期末卷",
+    focus: "北京市朝阳区七年级上学期期末数学真题",
+    reason: "朝阳区级真题",
+    region: "朝阳区",
     grade: "七年级上册",
     examType: "期末",
     questionCount: 7,
@@ -13,35 +13,35 @@ const paperCatalog = {
     usage: 1206
   },
   t14: {
-    title: "2026 深圳福田区初一下期中数学真题",
-    shortTitle: "福田区期中卷",
-    focus: "深圳市福田区七年级下学期期中数学真题",
-    reason: "深圳区级真题",
-    region: "福田区",
-    grade: "七年级下册",
+    title: "2026 北京市朝阳区初一上期中数学真题",
+    shortTitle: "朝阳区期中卷",
+    focus: "北京市朝阳区七年级上学期期中数学真题",
+    reason: "朝阳区级真题",
+    region: "朝阳区",
+    grade: "七年级上册",
     examType: "期中",
     questionCount: 6,
     difficulty: "中等",
     usage: 984
   },
   t25: {
-    title: "2026 深圳罗湖区初一下期末数学真题",
-    shortTitle: "罗湖区期末卷",
-    focus: "深圳市罗湖区七年级下学期期末数学真题",
-    reason: "深圳区级真题",
-    region: "罗湖区",
-    grade: "七年级下册",
+    title: "2026 北京市朝阳区初一上期末数学真题",
+    shortTitle: "朝阳区期末卷",
+    focus: "北京市朝阳区七年级上学期期末数学真题",
+    reason: "朝阳区级真题",
+    region: "朝阳区",
+    grade: "七年级上册",
     examType: "期末",
     questionCount: 4,
     difficulty: "中等",
     usage: 1458
   },
   t4: {
-    title: "2024—2026 深圳期末真题汇编：轴对称",
+    title: "2024—2026 朝阳区期末真题汇编：轴对称",
     shortTitle: "轴对称汇编",
     focus: "把分散真题整理成可直接使用的课内专题",
     reason: "真题汇编",
-    region: "深圳",
+    region: "朝阳区",
     grade: "七年级下册",
     examType: "期末",
     questionCount: 6,
@@ -53,7 +53,7 @@ const paperCatalog = {
     shortTitle: "期末易错周测",
     focus: "名校周测，适合分层选题与命题参考",
     reason: "名校资源",
-    region: "深圳",
+    region: "朝阳区",
     grade: "七年级上册",
     examType: "周测",
     questionCount: 7,
@@ -65,7 +65,7 @@ const paperCatalog = {
     shortTitle: "期末选择题",
     focus: "高频选择题与排除方法",
     reason: "本周热门",
-    region: "龙岗区",
+    region: "朝阳区",
     grade: "七年级上册",
     examType: "期末",
     questionCount: 7,
@@ -77,7 +77,7 @@ const paperCatalog = {
     shortTitle: "期中压轴题",
     focus: "按关键步骤拆解综合题",
     reason: "名校共建",
-    region: "龙岗区",
+    region: "朝阳区",
     grade: "七年级上册",
     examType: "期中",
     questionCount: 6,
@@ -137,7 +137,7 @@ const paperQuestions = {
     { id:"1", num:1, section:"一、单项选择题", type:"选择题", difficulty:"较易", knowledge:"正负数意义", minutes:1, competency:"运算能力", badges:["AI 批改","AI 赋分"], stem:"如果向东走 3 米记作 +3 米，那么向西走 5 米应记作（　　）。", options:["A. +5 米","B. −5 米","C. +3 米","D. −3 米"], answer:"B", analysis:"向西与向东相反，应记作负数。" },
     { id:"2", num:2, section:"一、单项选择题", type:"选择题", difficulty:"较易", knowledge:"相反意义的量", minutes:1, competency:"抽象能力", badges:["创新题"], stem:"下列各组量中，具有相反意义的量是（　　）。", options:["A. 上升 5 米与向东 5 米","B. 收入 80 元与支出 50 元","C. 长大 2 岁与减少 2 千克","D. 购进 10 件与卖出 8 元"], answer:"B", analysis:"收入与支出具有相反意义。" },
     { id:"3", num:3, section:"一、单项选择题", type:"选择题", difficulty:"中等", knowledge:"负数概念", stem:"在 −3、0、2.5、−1/2 四个数中，负数共有（　　）。", options:["A. 1 个","B. 2 个","C. 3 个","D. 4 个"], answer:"B", analysis:"−3 和 −1/2 为负数。" },
-    { id:"4", num:4, section:"一、单项选择题", type:"选择题", difficulty:"简单", knowledge:"温差计算", stem:"某天深圳的最高气温为 18 ℃，最低气温为 7 ℃，这一天的温差是（　　）。", options:["A. 25 ℃","B. −25 ℃","C. 11 ℃","D. −11 ℃"], answer:"C", analysis:"温差 = 最高温 − 最低温 = 11 ℃。" },
+    { id:"4", num:4, section:"一、单项选择题", type:"选择题", difficulty:"简单", knowledge:"温差计算", stem:"某天北京的最高气温为 18 ℃，最低气温为 7 ℃，这一天的温差是（　　）。", options:["A. 25 ℃","B. −25 ℃","C. 11 ℃","D. −11 ℃"], answer:"C", analysis:"温差 = 最高温 − 最低温 = 11 ℃。" },
     { id:"5", num:5, section:"二、填空题", type:"填空题", difficulty:"简单", knowledge:"正负数应用", stem:"如果水库水位上升 0.8 米记作 +0.8 米，那么水位下降 0.5 米记作 ______ 米。", options:[], answer:"−0.5", analysis:"下降记为负。" },
     { id:"6", num:6, section:"二、填空题", type:"填空题", difficulty:"中等", knowledge:"数轴", stem:"数轴上与原点距离为 4 个单位长度的点表示的数是 ______。", options:[], answer:"4 或 −4", analysis:"距离原点 4 个单位长度有两个点。" },
     { id:"7", num:7, section:"三、解答题", type:"解答题", difficulty:"中等", knowledge:"正负数应用", stem:"某食品包装袋上标有“净含量 500±5 g”。抽检 5 袋食品的质量分别为 497 g、503 g、506 g、500 g、495 g。请用正负数表示它们相对于标准质量的偏差，并判断哪些产品合格。", options:[], answer:"497→−3，503→+3，506→+6，500→0，495→−5；497/503/500/495 合格", analysis:"合格范围为 −5 到 +5。" }
@@ -160,13 +160,15 @@ const paperQuestions = {
 
 const params = new URLSearchParams(location.search);
 const contextName = params.get("context") || "paper";
+const isComposeMode = params.get("mode") === "compose";
+const composePrompt = String(params.get("prompt") || "").trim();
 const isWorkbook = contextName === "series";
 const isCanvasShell = Boolean(document.querySelector("#aiSelectedPanel")) && !document.querySelector("#questionCardBoard");
 const isHomeShell = isCanvasShell;
 const initialTopicId = params.get("topic") || (isWorkbook ? "t9" : "t2");
 // 试卷 / 专项 / 同步等共用同一工作台，避免从首页点不同类型资源时 tab 互相隔离
 const STORAGE_KEY = "feixiang-ai-workspace-v5";
-const CANVAS_COLLAPSE_KEY = "feixiang-ai-canvas-manual-collapsed-v1";
+const CANVAS_COLLAPSE_KEY = "feixiang-ai-canvas-panel-v2";
 const LEGACY_STORAGE_KEYS = [
   "feixiang-ai-workspace-v4-paper",
   "feixiang-ai-workspace-v4-special",
@@ -405,7 +407,7 @@ function applyRemoteCanvasState(parsed) {
   workspace.canvasTitle = parsed.canvasTitle || "";
   workspace.canvasManuallyCollapsed = Boolean(parsed.canvasManuallyCollapsed);
   if (Array.isArray(parsed.favoriteQuestions)) workspace.favoriteQuestions = parsed.favoriteQuestions;
-  rightPanelSectionState.selectedCollapsed = !workspace.globalSelectedQuestions.length || workspace.canvasManuallyCollapsed;
+  rightPanelSectionState.selectedCollapsed = shouldCanvasStartCollapsed();
   applySelectedPanelState();
   renderQuestionCards();
   window.dispatchEvent(new CustomEvent("aiq-canvas-change"));
@@ -654,7 +656,7 @@ function resolveTopicMeta(topicId, tabContext = contextName, overrides = {}) {
       shortTitle: shortenTabTitle(params.get("shortTitle") || fallbackTitle),
       focus: params.get("focus") || "",
       reason: params.get("reason") || (tabContext === "special" ? "专题" : tabContext === "chapter" ? "同步练习" : "试卷"),
-      region: "深圳",
+      region: "朝阳区",
       grade: "七年级",
       examType: tabContext === "special" ? "专题" : tabContext === "chapter" ? "同步" : "试卷",
       questionCount: Number(params.get("questions") || 0),
@@ -795,6 +797,10 @@ function bindCanvasTitleEditor(node) {
 }
 
 function ensureInitialTab() {
+  if (isComposeMode) {
+    ensureComposeTab();
+    return;
+  }
   const baseId = getBaseTopicId(initialTopicId);
   const urlTitle = String(params.get("title") || "").trim();
   const urlLessonKey = String(params.get("lessonKey") || urlTitle || "").trim();
@@ -982,8 +988,10 @@ function renderMeta(tab) {
 
   const context = document.querySelector("#breadcrumbContext");
   const leaf = document.querySelector("#breadcrumbLeaf");
-  if (context) context.textContent = tabContextLabel(tab);
-  if (leaf) leaf.textContent = selectedPanelEnlarged ? getCanvasListTitle() : displayTitle;
+  if (!isComposeMode) {
+    if (context) context.textContent = tabContextLabel(tab);
+    if (leaf) leaf.textContent = selectedPanelEnlarged ? getCanvasListTitle() : displayTitle;
+  }
 }
 
 function renderWorkbookDirectory() {
@@ -1067,10 +1075,203 @@ function applyPageMode() {
   directoryPanel?.setAttribute("hidden", "");
   mobileDirectory?.setAttribute("hidden", "");
   document.querySelector("#directoryMask")?.setAttribute("hidden", "");
-  document.querySelector("#breadcrumbContext") && (document.querySelector("#breadcrumbContext").textContent = isWorkbook ? "练习册" : "试卷");
-  document.querySelector("#breadcrumbLeaf") && (document.querySelector("#breadcrumbLeaf").textContent = isWorkbook ? "章节练习" : "试卷详情");
+  applyComposeMode();
+  if (!isComposeMode) {
+    document.querySelector("#breadcrumbContext") && (document.querySelector("#breadcrumbContext").textContent = isWorkbook ? "练习册" : "试卷");
+    document.querySelector("#breadcrumbLeaf") && (document.querySelector("#breadcrumbLeaf").textContent = isWorkbook ? "章节练习" : "试卷详情");
+  }
   if (favoriteLabel) favoriteLabel.textContent = "收藏";
   if (docTabs) docTabs.setAttribute("aria-label", "已打开的题单");
+}
+
+function composePaperTitle(prompt) {
+  const text = String(prompt || "");
+  if (/期中/.test(text)) return "北京市朝阳区七年级上学期数学期中试卷";
+  if (/月考/.test(text)) return "北京市朝阳区七年级上学期数学月考试卷";
+  if (/单元/.test(text)) return "北京市朝阳区七年级上学期数学单元检测卷";
+  return "北京市朝阳区七年级上学期数学期末试卷";
+}
+
+function openComposePage(prompt) {
+  const text = String(prompt || "").trim();
+  if (!text) return false;
+  location.href = `./detail-ai.html?mode=compose&prompt=${encodeURIComponent(text)}&context=paper`;
+  return true;
+}
+
+function ensureComposeTab() {
+  const title = composePaperTitle(composePrompt);
+  const existing = workspace.tabs.find(tab => tab.composeSession && tab.meta?.aiPrompt === composePrompt);
+  if (existing) {
+    workspace.activeTabId = existing.id;
+    saveWorkspace();
+    return existing;
+  }
+  const sources = [
+    "全品学练考 · 2025-2026学年人教版七年级上册",
+    "多维导学案 · 2025-2026学年人教版七年级上册",
+    "朝阳区期末真题 · 2025-2026学年七年级上学期"
+  ];
+  const questions = (paperQuestions.t2 || []).map((q, index) => ({
+    ...q,
+    id: `compose-${q.id}`,
+    num: index + 1,
+    sourceLabel: sources[index % sources.length]
+  }));
+  tabCounter += 1;
+  const tab = {
+    id: `tab-${tabCounter}`,
+    topicId: `compose-${Date.now()}`,
+    context: "paper",
+    title,
+    shortTitle: title.length > 12 ? `${title.slice(0, 12)}…` : title,
+    meta: {
+      title,
+      shortTitle: title,
+      source: "AI 组卷",
+      difficulty: "中等",
+      questionCount: questions.length,
+      usage: 0,
+      aiPrompt: composePrompt
+    },
+    selectedQuestionIds: [],
+    removedQuestionIds: [],
+    modifiedQuestions: {},
+    questions,
+    isQuestionList: true,
+    aiGenerated: true,
+    composeSession: true
+  };
+  workspace.tabs.push(tab);
+  workspace.activeTabId = tab.id;
+  pruneOverflowTabs();
+  saveWorkspace();
+  return tab;
+}
+
+function applyComposeMode() {
+  const root = document.querySelector("#aiWorkspace");
+  const chat = document.querySelector("#aiComposeChat");
+  if (!isComposeMode) {
+    root?.classList.remove("compose-mode");
+    document.body.classList.remove("compose-mode");
+    return;
+  }
+  root?.classList.add("compose-mode");
+  document.body.classList.add("compose-mode");
+  if (chat) chat.hidden = false;
+  const title = composePaperTitle(composePrompt);
+  const trail = document.querySelector(".ai-detail-topbar .breadcrumb");
+  if (trail) {
+    trail.innerHTML = `<a href="./index.html">首页</a><i class="ri-arrow-right-s-line"></i><span>AI助手</span><i class="ri-arrow-right-s-line"></i><strong>AI组题</strong>`;
+  }
+  document.title = `${title} · AI组题`;
+  renderComposeThread();
+  closeAiAssistant();
+}
+
+function composeStepHtml() {
+  const title = composePaperTitle(composePrompt);
+  return `
+    <div class="ai-compose-job">
+      <div class="ai-compose-job-head"><i class="ri-sparkling-2-line"></i>AI作业星</div>
+      <section class="ai-compose-step is-open">
+        <button type="button" data-compose-step>
+          <i class="ri-checkbox-circle-fill"></i>
+          <span>命题参数定义与模型构建</span>
+          <i class="ri-arrow-down-s-line"></i>
+        </button>
+        <div class="ai-compose-step-body">
+          <p>场景：2025-2026学年北京市朝阳区七年级上学期期末检测，数学，闭卷 90 分钟。</p>
+          <p>结构：选择题 4 题、填空题 2 题、解答题 1 题，覆盖正负数、数轴与实际应用。</p>
+          <p>来源风格：区级真题 + 全品学练考 / 多维导学案同步题。</p>
+        </div>
+      </section>
+      <section class="ai-compose-step is-open">
+        <button type="button" data-compose-step>
+          <i class="ri-checkbox-circle-fill"></i>
+          <span>题库检索与初筛</span>
+          <i class="ri-arrow-down-s-line"></i>
+        </button>
+        <div class="ai-compose-step-body">
+          <p>已从朝阳区期末卷和同步教辅中初筛匹配题目，并完成去重。</p>
+          <a class="ai-compose-source-link" href="./detail-ai.html?topic=t2&context=paper">${escapeHtml(title)}</a>
+          <a class="ai-compose-source-link" href="./detail-ai.html?topic=t59&context=paper">2025-2026学年北京市朝阳区七年级（上）10月月考数学试卷</a>
+        </div>
+      </section>
+    </div>`;
+}
+
+function renderComposeThread(extraMessages = []) {
+  const thread = document.querySelector("#aiComposeThread");
+  if (!thread) return;
+  const prompt = composePrompt || "帮我出一份北京市朝阳区七年级上期末考试试卷";
+  const extras = extraMessages.map(item => (
+    item.role === "user"
+      ? `<article class="ai-compose-msg is-user">${escapeHtml(item.text)}</article>`
+      : `<article class="ai-compose-msg is-ai">${escapeHtml(item.text)}</article>`
+  )).join("");
+  thread.innerHTML = `<p class="ai-compose-user">${escapeHtml(prompt)}</p>${composeStepHtml()}${extras}`;
+  thread.scrollTop = thread.scrollHeight;
+}
+
+let composeFollowups = [];
+
+function bindComposeControls() {
+  if (!isComposeMode) return;
+  document.querySelector("#aiComposeSend")?.addEventListener("click", () => sendComposeFollowup());
+  document.querySelector("#aiComposeInput")?.addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendComposeFollowup();
+    }
+  });
+  document.querySelector("#aiComposeThread")?.addEventListener("click", event => {
+    const toggle = event.target.closest("[data-compose-step]");
+    if (!toggle) return;
+    const step = toggle.closest(".ai-compose-step");
+    const body = step?.querySelector(".ai-compose-step-body");
+    const arrow = toggle.querySelector(".ri-arrow-down-s-line, .ri-arrow-right-s-line");
+    if (!body) return;
+    const open = body.hidden;
+    body.hidden = !open;
+    if (arrow) arrow.className = open ? "ri-arrow-down-s-line" : "ri-arrow-right-s-line";
+  });
+  document.querySelector("#aiComposeEdit")?.addEventListener("click", () => {
+    showToast("已进入编辑，题目可直接在试卷中选用到组题画布");
+  });
+  document.querySelector("#aiComposeDownload")?.addEventListener("click", () => {
+    showToast("正在准备下载 Word");
+  });
+  document.querySelector("#aiComposeCloseDoc")?.addEventListener("click", () => {
+    if (window.history.length > 1) window.history.back();
+    else location.href = "./index.html";
+  });
+  document.querySelectorAll("[data-compose-file]").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-compose-file]").forEach(node => node.classList.toggle("is-active", node === button));
+      const showAnswer = button.dataset.composeFile === "answer";
+      workspace.showAnswers = showAnswer;
+      const board = document.querySelector("#questionCardBoard");
+      board?.classList.toggle("show-answers", showAnswer);
+      const ansBtn = document.querySelector("#toggleShowAnswer");
+      if (ansBtn) {
+        ansBtn.innerHTML = showAnswer
+          ? '<i class="ri-eye-off-line"></i><span>隐藏答案</span>'
+          : '<i class="ri-eye-line"></i><span>显示答案</span>';
+      }
+    });
+  });
+}
+
+function sendComposeFollowup() {
+  const input = document.querySelector("#aiComposeInput");
+  const text = String(input?.value || "").trim();
+  if (!text) return;
+  if (input) input.value = "";
+  composeFollowups.push({ role: "user", text });
+  composeFollowups.push({ role: "assistant", text: "已收到调整需求。你可以在右侧试卷中悬浮题目，选用到左侧组题画布继续编辑。" });
+  renderComposeThread(composeFollowups);
 }
 
 function questionDefaults(q) {
@@ -1100,6 +1301,9 @@ function questionCardHtml(q, tab) {
   const picked = dragPickIds.has(q.id);
   const favorited = isQuestionFavorited(tab.topicId, q.id);
   const selectLabel = selected ? "取消选用" : "选用";
+  const sourceLine = isComposeMode && q.sourceLabel
+    ? `<p class="q-compose-source">${escapeHtml(q.sourceLabel)}</p>`
+    : "";
   return `
     <article class="question-item ${skipped ? "is-skipped" : ""} ${selected ? "selected" : ""} ${picked ? "drag-picked" : ""} ${modified ? "modified" : ""} ${answerOpen ? "answer-open" : ""}"
       data-q="${q.id}" data-topic-id="${escapeHtml(getBaseTopicId(tab.topicId))}" tabindex="0" aria-label="第 ${q.num} 题" draggable="${skipped ? "false" : "true"}" title="勾选或点「选用」加入左侧组题画布">
@@ -1115,6 +1319,7 @@ function questionCardHtml(q, tab) {
           <span class="q-stem-text">${escapeHtml(stem)}</span>
         </p>
         ${options}
+        ${sourceLine}
       </div>
       <div class="q-answer-panel">
         <div class="q-inline-answer"><em>答案</em>${escapeHtml(modified?.answer || q.answer)}</div>
@@ -1175,7 +1380,7 @@ function renderQuestionCards() {
   const tab = getActiveTab();
   if (!tab) return;
   syncTabSelectedQuestionIds(tab);
-  document.title = `${tab.title} · AI 试卷工作台`;
+  if (!isComposeMode) document.title = `${tab.title} · AI 试卷工作台`;
   renderMeta(tab);
   renderPaperSelectButton(tab);
 
@@ -1284,12 +1489,15 @@ function syncSelectedPanelChrome() {
   const studio = document.querySelector("#aiCanvasStudio");
   if (studio) studio.hidden = !selectedPanelEnlarged;
   const footer = document.querySelector("#aiSelectedFooter");
-  const collapse = document.querySelector("#topbarCollapseCanvas");
+  const collapseBtn = document.querySelector("#collapseSelectedPanel");
   const panelBody = document.querySelector(".ai-selected-body");
-  const topbar = document.querySelector(".ai-detail-topbar");
-  if (footer && panelBody && topbar && collapse) {
-    if (selectedPanelEnlarged) topbar.insertBefore(footer, collapse);
-    else panelBody.appendChild(footer);
+  const headActions = document.querySelector("#selectedSectionHead .ai-section-head-actions");
+  if (footer && panelBody) {
+    if (selectedPanelEnlarged && headActions && collapseBtn) {
+      headActions.insertBefore(footer, collapseBtn);
+    } else {
+      panelBody.appendChild(footer);
+    }
   }
 }
 
@@ -1999,7 +2207,7 @@ function bindSelectedPanelControls() {
   const expandBtn = document.querySelector("#aiSelectedExpand");
   const topbarExpandBtn = document.querySelector("#topbarExpandSelected");
 
-  // 有题则默认展开；空画布收起；用户手动折叠后跨页保持收起
+  // 默认收起；仅「首次选用第一道题」自动展开。之后以用户展开/收起为准
   rightPanelSectionState.selectedCollapsed = shouldCanvasStartCollapsed();
 
   collapseBtn?.addEventListener("click", event => {
@@ -2304,20 +2512,13 @@ function generateAiQuestionList() {
   location.href = `./detail-ai.html?tabId=${encodeURIComponent(newTab.id)}&context=${encodeURIComponent(newTab.context || contextName)}`;
 }
 
-const AI_ASSISTANT_ABILITIES = [
-  { key: "find-q", icon: "ri-search-line", label: "找题", prompt: "帮我找10道相反数的填空题" },
-  { key: "find-paper", icon: "ri-file-text-line", label: "找卷", prompt: "帮我找一份七年级上册期中数学卷" },
-  { key: "make-q", icon: "ri-pencil-line", label: "组题", prompt: "出5道七下一元一次方程的选择题" },
-  { key: "make-list", icon: "ri-clipboard-line", label: "组题单", prompt: "帮我组一份轴对称专项题单" },
-  { key: "make-paper", icon: "ri-file-list-3-line", label: "组试卷", prompt: "按期中难度组一套七年级数学卷" },
-  { key: "upload", icon: "ri-attachment-2", label: "上传录题", prompt: "", attach: true }
-];
-
-const AI_ASSISTANT_EXAMPLES = [
-  "出5道七下一元一次方程的选择题",
-  "帮我找10道相反数的填空题",
-  "上传这张试卷图，录入题库"
-];
+function fillAiAssistantPrompt(text) {
+  const input = document.querySelector("#aiAssistantInput");
+  if (!input) return;
+  input.value = String(text || "");
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+}
 
 function syncAiAssistantChrome() {
   const panel = document.querySelector("#aiAssistantPanel");
@@ -2360,19 +2561,15 @@ function setAiAssistantAttachment(file) {
 }
 
 function aiAssistantEmptyHtml() {
-  const cards = AI_ASSISTANT_ABILITIES.map(item => `
-    <button type="button" class="ai-assistant-ability" data-ai-ability="${item.key}">
-      <i class="${item.icon}" aria-hidden="true"></i>
-      <span>${escapeHtml(item.label)}</span>
-    </button>`).join("");
-  const examples = AI_ASSISTANT_EXAMPLES.map(text => `
-    <button type="button" class="ai-assistant-example" data-ai-example="${escapeHtml(text)}">${escapeHtml(text)}</button>`).join("");
   return `
     <div class="ai-assistant-empty">
-      <p class="ai-assistant-empty-title">你可以让我帮你 ——</p>
-      <div class="ai-assistant-abilities">${cards}</div>
-      <p class="ai-assistant-example-title"><i class="ri-lightbulb-line"></i>试试对我说：</p>
-      <div class="ai-assistant-examples">${examples}</div>
+      <article class="ai-assistant-msg is-ai">
+        <div class="ai-assistant-author"><i class="ri-sparkling-2-line"></i>飞象题库AI</div>
+        <div class="ai-assistant-bubble">
+          <p>你好，我是飞象题库AI。</p>
+          <p>可以直接告诉我你想组什么题、组什么卷，或把试卷发给我录入。</p>
+        </div>
+      </article>
     </div>`;
 }
 
@@ -2402,32 +2599,7 @@ function renderAiAssistantThread() {
   thread.scrollTop = thread.scrollHeight;
 }
 
-function bindAiAssistantEmptyEvents() {
-  const thread = document.querySelector("#aiAssistantThread");
-  if (!thread) return;
-  thread.querySelectorAll("[data-ai-ability]").forEach(button => {
-    button.addEventListener("click", () => handleAiAssistantAbility(button.dataset.aiAbility));
-  });
-  thread.querySelectorAll("[data-ai-example]").forEach(button => {
-    button.addEventListener("click", () => {
-      if (button.dataset.aiExample.includes("上传")) {
-        document.querySelector("#aiAssistantFile")?.click();
-        return;
-      }
-      sendAiAssistantMessage(button.dataset.aiExample);
-    });
-  });
-}
-
-function handleAiAssistantAbility(key) {
-  const item = AI_ASSISTANT_ABILITIES.find(ability => ability.key === key);
-  if (!item) return;
-  if (item.attach) {
-    document.querySelector("#aiAssistantFile")?.click();
-    return;
-  }
-  sendAiAssistantMessage(item.prompt);
-}
+function bindAiAssistantEmptyEvents() {}
 
 function mockAiAssistantReply(text, fileName) {
   if (fileName) {
@@ -2451,7 +2623,7 @@ function mockAiAssistantReply(text, fileName) {
   if (/录题|上传/.test(text)) {
     return "可以把试卷图片、PDF 或 Word 发给我。点左侧附件按钮上传，我会帮你拆题入库。";
   }
-  return "已收到。我可以帮你找题、找卷、组题、组题单、组卷和上传录题。直接说需求，或点上方能力卡片开始。";
+  return "已收到。点下方「AI组题 / AI组卷 / AI录题」可把指令填进输入框，也可以直接输入需求。";
 }
 
 function sendAiAssistantMessage(rawText) {
@@ -2459,6 +2631,10 @@ function sendAiAssistantMessage(rawText) {
   const text = String(rawText ?? input?.value ?? "").trim();
   const fileName = aiAssistantAttachment?.name || "";
   if (!text && !fileName) return;
+  if (!isComposeMode) {
+    openComposePage(text || `请根据附件「${fileName}」录题`);
+    return;
+  }
   aiAssistantMessages.push({
     role: "user",
     text: text || "请根据附件录题",
@@ -2498,6 +2674,9 @@ function bindAiAssistantControls() {
     }
   });
   document.querySelector("#aiAssistantFileChip")?.addEventListener("click", () => setAiAssistantAttachment(null));
+  document.querySelectorAll("[data-ai-fill]").forEach(node => {
+    node.addEventListener("click", () => fillAiAssistantPrompt(node.dataset.aiFill));
+  });
 }
 
 function bindAiCreateControls() {
@@ -2562,13 +2741,17 @@ function focusQuestionInView(qId) {
   });
 }
 
-function isCanvasManuallyCollapsed() {
+function getCanvasCollapsePref() {
   try {
     const saved = localStorage.getItem(CANVAS_COLLAPSE_KEY) ?? sessionStorage.getItem(CANVAS_COLLAPSE_KEY);
     if (saved === "1") return true;
     if (saved === "0") return false;
   } catch {}
-  return Boolean(workspace.canvasManuallyCollapsed);
+  return null;
+}
+
+function isCanvasManuallyCollapsed() {
+  return getCanvasCollapsePref() === true;
 }
 
 function setCanvasManuallyCollapsed(value) {
@@ -2583,31 +2766,173 @@ function setCanvasManuallyCollapsed(value) {
 }
 
 function shouldCanvasStartCollapsed() {
-  if (!getGlobalSelectedQuestions().length) return true;
-  return isCanvasManuallyCollapsed();
+  // 只有用户点过展开才保持打开；未操作或点过收起，进页都收起
+  return getCanvasCollapsePref() !== false;
 }
 
-function expandSelectedPanel() {
-  setCanvasManuallyCollapsed(false);
+function expandSelectedPanel(options = {}) {
+  const persist = options.persist !== false;
+  if (persist) setCanvasManuallyCollapsed(false);
   rightPanelSectionState.selectedCollapsed = false;
   applySelectedPanelState();
-  saveWorkspace();
+  if (persist) saveWorkspace();
 }
 
 function collapseSelectedPanel(options = {}) {
-  const manual = options.manual !== false;
+  const persist = options.manual !== false && options.persist !== false;
   selectedPanelEnlarged = false;
   selectedShowAnswers = false;
   selectedExpandedAnalysisKeys.clear();
   rightPanelSectionState.selectedCollapsed = true;
-  setCanvasManuallyCollapsed(manual);
+  if (persist) setCanvasManuallyCollapsed(true);
   applySelectedPanelState();
   saveWorkspace();
 }
 
 function collapseCanvasIfEmpty() {
   if (getGlobalSelectedQuestions().length) return;
-  collapseSelectedPanel({ manual: false });
+  if (getCanvasCollapsePref() === false) return;
+  collapseSelectedPanel({ manual: false, persist: false });
+}
+
+function maybeOpenCanvasOnFirstAdd(wasEmpty) {
+  if (getCanvasCollapsePref() === true) return false;
+  if (!wasEmpty && getCanvasCollapsePref() !== null) return false;
+  expandSelectedPanel({ persist: false });
+  if (isMobileLayout()) setMobileDrawer("selected", true);
+  return true;
+}
+
+function snapshotQuestionEnterSource(sourceEl) {
+  const source = sourceEl?.closest?.(".question-item") || sourceEl;
+  if (!source?.getBoundingClientRect) return null;
+  const rect = source.getBoundingClientRect();
+  if (!rect.width || !rect.height) return null;
+  return {
+    rect: {
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: Math.min(rect.height, 88)
+    },
+    num: source.querySelector(".q-num-mark")?.textContent?.trim() || "",
+    stem: source.querySelector(".q-stem-text")?.textContent?.trim()
+      || source.querySelector(".q-stem")?.textContent?.trim()
+      || ""
+  };
+}
+
+function findCanvasEnterItem(qId, selectionKey) {
+  const preview = document.querySelector("#aiSelectedPreview");
+  if (!preview) return null;
+  const attr = value => String(value || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  if (selectionKey) {
+    const byKey = preview.querySelector(`.ai-canvas-item[data-selection-key="${attr(selectionKey)}"]`);
+    if (byKey) return byKey;
+  }
+  if (qId) {
+    const byId = preview.querySelector(`.ai-canvas-item[data-q="${attr(qId)}"]`);
+    if (byId) return byId;
+  }
+  return preview.querySelector(".ai-canvas-item:last-child");
+}
+
+function getCanvasEnterTarget(qId, selectionKey) {
+  const collapsed = document.querySelector("#aiWorkspace")?.classList.contains("selected-panel-collapsed");
+  if (collapsed) {
+    return document.querySelector("#aiSelectedExpand") || document.querySelector("#aiSelectedPanel");
+  }
+  return findCanvasEnterItem(qId, selectionKey)
+    || document.querySelector("#aiSelectedExpand")
+    || document.querySelector("#aiSelectedPanel");
+}
+
+function settleCanvasArrival(target, collapsed) {
+  if (collapsed) {
+    const rail = document.querySelector("#aiSelectedExpand");
+    const count = document.querySelector("#aiSelectedExpandCount");
+    rail?.classList.add("is-receiving");
+    count?.classList.add("is-receiving");
+    window.setTimeout(() => {
+      rail?.classList.remove("is-receiving");
+      count?.classList.remove("is-receiving");
+    }, 420);
+    return;
+  }
+  const item = target?.classList?.contains("ai-canvas-item") ? target : target?.closest?.(".ai-canvas-item");
+  if (!item) return;
+  item.classList.remove("is-entering");
+  item.classList.remove("is-arriving");
+  void item.offsetWidth;
+  item.classList.add("is-arriving");
+  item.scrollIntoView({ block: "nearest", inline: "nearest" });
+  window.setTimeout(() => item.classList.remove("is-arriving"), 480);
+}
+
+function playQuestionEnterCanvas(snapshot, meta = {}) {
+  const collapsed = document.querySelector("#aiWorkspace")?.classList.contains("selected-panel-collapsed");
+  const target = getCanvasEnterTarget(meta.qId, meta.selectionKey);
+  if (target?.classList?.contains("ai-canvas-item") && !collapsed) {
+    target.classList.add("is-entering");
+  }
+  const finish = () => settleCanvasArrival(target, collapsed);
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!snapshot?.rect || reduced) {
+    finish();
+    return;
+  }
+  const from = snapshot.rect;
+  const to = target?.getBoundingClientRect();
+  if (!to?.width) {
+    finish();
+    return;
+  }
+
+  const ghost = document.createElement("div");
+  ghost.className = "q-enter-canvas-ghost";
+  ghost.innerHTML = `<span class="q-enter-canvas-num">${escapeHtml(snapshot.num || "")}</span><span class="q-enter-canvas-stem">${escapeHtml(snapshot.stem || "")}</span>`;
+  const startH = Math.max(36, from.height);
+  Object.assign(ghost.style, {
+    left: `${from.left}px`,
+    top: `${from.top}px`,
+    width: `${from.width}px`,
+    height: `${startH}px`
+  });
+  document.body.appendChild(ghost);
+
+  const destW = collapsed ? Math.min(to.width, 44) : Math.min(Math.max(to.width, 140), from.width);
+  const destH = collapsed ? Math.min(to.height, 44) : Math.min(Math.max(to.height, 34), 48);
+  const destX = collapsed ? to.left + (to.width - destW) / 2 : to.left;
+  const destY = collapsed ? to.top + (to.height - destH) / 2 : to.top;
+  const dx = destX - from.left;
+  const dy = destY - from.top;
+  const sx = destW / from.width;
+  const sy = destH / startH;
+  const midX = dx * 0.48;
+  const midY = dy * 0.36 - 18;
+
+  const done = () => {
+    ghost.remove();
+    finish();
+  };
+  try {
+    const anim = ghost.animate(
+      [
+        { transform: "translate(0, 0) scale(1)", opacity: 1 },
+        { transform: `translate(${midX}px, ${midY}px) scale(${Math.min(0.92, Math.max(sx, 0.46) + 0.12)})`, opacity: 0.96 },
+        { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, opacity: 0.12 }
+      ],
+      { duration: 540, easing: "cubic-bezier(.22,.72,.16,1)", fill: "forwards" }
+    );
+    if (!anim) {
+      done();
+      return;
+    }
+    anim.addEventListener("finish", done);
+    anim.addEventListener("cancel", done);
+  } catch {
+    done();
+  }
 }
 
 function clearDragPicks() {
@@ -2674,7 +2999,6 @@ function startQuestionDrag(event, qIds, options = {}) {
   ids.forEach(id => document.querySelector(`.question-item[data-q="${id}"]`)?.classList.add("is-drag-group"));
   if (options.sourceEl) options.sourceEl.classList.add("is-dragging");
   setQuestionDropTargetActive(true);
-  expandSelectedPanel();
   return true;
 }
 
@@ -2685,37 +3009,46 @@ function endQuestionDrag() {
   document.querySelectorAll(".question-item.is-dragging, .question-item.is-drag-group, .question-section-head.is-dragging").forEach(node => {
     node.classList.remove("is-dragging", "is-drag-group");
   });
+  if (isCanvasManuallyCollapsed()) {
+    rightPanelSectionState.selectedCollapsed = true;
+    applySelectedPanelState();
+  }
 }
 
-function addQuestionsToSelected(qIds) {
+function addQuestionsToSelected(qIds, options = {}) {
   const tab = getActiveTab();
   if (!tab || !Array.isArray(qIds) || !qIds.length) return 0;
+  const wasEmpty = !getGlobalSelectedQuestions().length;
+  const snapshot = options.animate === false ? null : snapshotQuestionEnterSource(options.sourceEl);
   let added = 0;
+  let lastEntry = null;
   qIds.forEach(qId => {
     const q = tab.questions.find(item => item.id === qId);
     if (!q) return;
     restoreSkippedQuestion(qId, { silent: true });
     if (isQuestionGloballySelected(tab.topicId, qId)) return;
     if (!workspace.canvasTitle) workspace.canvasTitle = formatQuestionListTitle();
-    workspace.globalSelectedQuestions.push(buildGlobalSelectedEntry(tab, q));
+    lastEntry = buildGlobalSelectedEntry(tab, q);
+    workspace.globalSelectedQuestions.push(lastEntry);
     added += 1;
   });
   if (!added) return 0;
   syncTabSelectedQuestionIds(tab);
   saveWorkspace();
   clearDragPicks();
+  maybeOpenCanvasOnFirstAdd(wasEmpty);
   renderQuestionCards();
-  expandSelectedPanel();
-  if (isMobileLayout()) setMobileDrawer("selected", true);
+  if (snapshot && added === 1 && lastEntry) {
+    playQuestionEnterCanvas(snapshot, { qId: lastEntry.question.id, selectionKey: lastEntry.selectionKey });
+  }
   return added;
 }
 
-function addQuestionToSelected(qId) {
-  const added = addQuestionsToSelected([qId]);
+function addQuestionToSelected(qId, options = {}) {
+  const added = addQuestionsToSelected([qId], options);
   const q = getActiveTab()?.questions.find(item => item.id === qId);
   if (!added) {
     showToast(`第 ${q?.num || ""} 题已在画布中`);
-    expandSelectedPanel();
     return;
   }
   showToast(`已选用第 ${q?.num || ""} 题`);
@@ -2853,7 +3186,7 @@ function removeQuestionFromSelected(qId) {
   showToast(`第 ${q?.num || ""} 题已移出已选题目`);
 }
 
-function toggleQuestionSelection(qId, force) {
+function toggleQuestionSelection(qId, force, options = {}) {
   const tab = getActiveTab();
   if (!tab) return;
   const q = tab.questions.find(item => item.id === qId);
@@ -2863,8 +3196,17 @@ function toggleQuestionSelection(qId, force) {
   const has = isQuestionGloballySelected(tab.topicId, qId);
   const next = typeof force === "boolean" ? force : !has;
   if (next && !has) {
+    const wasEmpty = !getGlobalSelectedQuestions().length;
+    const snapshot = snapshotQuestionEnterSource(options.sourceEl);
     if (!workspace.canvasTitle) workspace.canvasTitle = formatQuestionListTitle();
     workspace.globalSelectedQuestions.push(buildGlobalSelectedEntry(tab, q));
+    syncTabSelectedQuestionIds(tab);
+    saveWorkspace();
+    maybeOpenCanvasOnFirstAdd(wasEmpty);
+    renderQuestionCards();
+    playQuestionEnterCanvas(snapshot, { qId, selectionKey: key });
+    showToast(`已选用第 ${q.num} 题`);
+    return;
   }
   if (!next) {
     workspace.globalSelectedQuestions = getGlobalSelectedQuestions().filter(item => item.selectionKey !== key);
@@ -2872,14 +3214,8 @@ function toggleQuestionSelection(qId, force) {
   syncTabSelectedQuestionIds(tab);
   saveWorkspace();
   renderQuestionCards();
-  if (next) {
-    expandSelectedPanel();
-    if (isMobileLayout()) setMobileDrawer("selected", true);
-    showToast(`已选用第 ${q.num} 题`);
-  } else {
-    collapseCanvasIfEmpty();
-    showToast(`已取消选用第 ${q.num} 题`);
-  }
+  collapseCanvasIfEmpty();
+  showToast(`已取消选用第 ${q.num} 题`);
 }
 
 function addToBasket(qId) {
@@ -3253,8 +3589,8 @@ function bindQuestionCardEvents() {
         showToast(added ? `已收藏第 ${q?.num} 题` : `已取消收藏第 ${q?.num} 题`);
       }
       if (action === "similar") showToast(`正在查找第 ${q?.num} 题的相似题…`);
-      if (action === "select") toggleQuestionSelection(qId);
-      if (action === "add-selected") addQuestionToSelected(qId);
+      if (action === "select") toggleQuestionSelection(qId, undefined, { sourceEl: button.closest(".question-item") || button });
+      if (action === "add-selected") addQuestionToSelected(qId, { sourceEl: button.closest(".question-item") || button });
       if (action === "remove-selected") removeQuestionFromSelected(qId);
       if (action === "analysis") toggleQuestionAnalysis(qId);
     });
@@ -3362,6 +3698,7 @@ if (isHomeShell) {
   bindEvents();
   bindSelectedPanelControls();
   bindAiAssistantControls();
+  bindComposeControls();
   bindAiCreateControls();
   bindDirectoryEvents();
   bindCanvasSync();
@@ -3380,10 +3717,11 @@ function toggleExternalCanvasQuestion(item) {
     return false;
   }
   if (!workspace.canvasTitle) workspace.canvasTitle = formatQuestionListTitle();
+  const wasEmpty = !getGlobalSelectedQuestions().length;
   workspace.globalSelectedQuestions.push(item);
   saveWorkspace();
+  maybeOpenCanvasOnFirstAdd(wasEmpty);
   renderSelectedContext();
-  expandSelectedPanel();
   return true;
 }
 

@@ -46,11 +46,11 @@ const knowledgePoints = [
 const questions = [
   { id: "q1", chapter: "ch1", knowledge: "k1", source: "真题汇编", sourceDetail: "2026·北京东城区·七年级上期末", citation: 2, type: "填空题", difficulty: "中等", minutes: 1, title: "若一个角的补角等于它的余角的3倍，则这个角的度数为______。", skill: "余角和补角的计算", ability: "几何直观、运算能力", tone: "amber", updated: 6, tags: ["AI批改", "AI赋分"] },
   { id: "q2", chapter: "ch1", knowledge: "k2", source: "教材同步", sourceDetail: "26-27·七年级上全品作业本", citation: 3, type: "单项选择题", difficulty: "较易", minutes: 1, title: "下列各组有理数的大小关系中，正确的是（　　）\nA. 1＜−2　　　　 B. −3＜4　　　　 C. −5＜−6　　　　 D. 0＜−1", skill: "有理数直接比较大小", ability: "抽象能力", tone: "green", updated: 5, tags: ["创新题", "AI批改", "AI赋分"] },
-  { id: "q3", chapter: "ch1", knowledge: "k2", source: "校本题库", sourceDetail: "启航实验学校·七（2）班错题重组", citation: 1, type: "解答题", difficulty: "中等", minutes: 4, title: "在数轴上表示数−3、0、2.5、−1/2，并按从小到大的顺序排列。", skill: "数轴与有理数大小比较", ability: "数形结合", tone: "blue", updated: 4, tags: ["班级错题"] },
+  { id: "q3", chapter: "ch1", knowledge: "k2", source: "校本题库", sourceDetail: "望京实验学校·七（2）班错题重组", citation: 1, type: "解答题", difficulty: "中等", minutes: 4, title: "在数轴上表示数−3、0、2.5、−1/2，并按从小到大的顺序排列。", skill: "数轴与有理数大小比较", ability: "数形结合", tone: "blue", updated: 4, tags: ["班级错题"] },
   { id: "q4", chapter: "ch2", knowledge: "k3", source: "教材同步", sourceDetail: "人教版七年级上册·第二章", citation: 2, type: "单项选择题", difficulty: "简单", minutes: 1, title: "计算：−8＋3−(−5)的结果是（　　）", skill: "有理数加减法则", ability: "运算能力", tone: "green", updated: 3, tags: ["AI批改", "AI赋分"] },
   { id: "q5", chapter: "ch2", knowledge: "k3", source: "校本题库", sourceDetail: "七（1）班周末分层作业", citation: 1, type: "填空题", difficulty: "中等", minutes: 2, title: "若|a|=3，则a的值为______。", skill: "绝对值的意义", ability: "概念理解", tone: "violet", updated: 2, tags: ["高频错题"] },
   { id: "q6", chapter: "ch3", knowledge: "k4", source: "教材同步", sourceDetail: "人教版七年级上册·第三章", citation: 2, type: "解答题", difficulty: "中等", minutes: 4, title: "先化简，再求值：2(3x−1)−(x＋2)，其中x=−1。", skill: "整式化简与求值", ability: "符号运算", tone: "amber", updated: 1, tags: ["AI批改"] },
-  { id: "q7", chapter: "ch4", knowledge: "k4", source: "真题汇编", sourceDetail: "2025·深圳中考模拟题", citation: 3, type: "单项选择题", difficulty: "较难", minutes: 2, title: "若单项式−2x²y与3xᵐyⁿ是同类项，则m＋n的值为（　　）", skill: "同类项辨析", ability: "代数推理", tone: "blue", updated: 7, tags: ["创新题"] },
+  { id: "q7", chapter: "ch4", knowledge: "k4", source: "真题汇编", sourceDetail: "2025·北京中考模拟题", citation: 3, type: "单项选择题", difficulty: "较难", minutes: 2, title: "若单项式−2x²y与3xᵐyⁿ是同类项，则m＋n的值为（　　）", skill: "同类项辨析", ability: "代数推理", tone: "blue", updated: 7, tags: ["创新题"] },
   { id: "q8", chapter: "ch5", knowledge: "k5", source: "校本题库", sourceDetail: "七（3）班高频失分题", citation: 2, type: "解答题", difficulty: "中等", minutes: 4, title: "解方程：3x−7=2x＋5，并写出检验过程。", skill: "一元一次方程的解法", ability: "规范表达", tone: "green", updated: 8, tags: ["班级错题", "AI赋分"] },
   { id: "q9", chapter: "ch6", knowledge: "k6", source: "教材同步", sourceDetail: "人教版七年级上册·第六章", citation: 1, type: "填空题", difficulty: "简单", minutes: 1, title: "经过两点有且只有______条直线。", skill: "直线的基本性质", ability: "空间观念", tone: "violet", updated: 9, tags: ["AI批改"] }
 ];
@@ -107,11 +107,11 @@ function toCanvasQuestion(question) {
   return {
     selectionKey: schoolSelectionKey(question.id),
     topicId: "school",
-    sourceTitle: "单题组卷",
+    sourceTitle: "题库选题",
     question: {
       id: question.id,
       num: index >= 0 ? index + 1 : 1,
-      section: "单题组卷",
+      section: "题库选题",
       type: question.type,
       difficulty: question.difficulty,
       knowledge: question.skill,

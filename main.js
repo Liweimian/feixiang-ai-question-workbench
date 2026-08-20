@@ -1,43 +1,43 @@
 const topics = [
-  { id:"t1", title:"龙岗易错二练：有理数符号与运算", focus:"错因诊断、针对变式、二次过关", reason:"龙岗易错二练", questions:15, minutes:20, difficulty:"中等", source:"龙岗区易错专题", usage:386, tag:"special", tone:"sage" },
-  { id:"t2", title:"2025-2026学年广东省深圳市南山区七年级（上）期末统考数学试卷", focus:"深圳市南山区七年级上学期期末数学真题", reason:"深圳区级真题", highlight:"区级真题", questions:22, minutes:40, difficulty:"中等", source:"南山区初一上期末真题", usage:1206, tag:"paper", tone:"cream" },
-  { id:"t3", title:"深圳情境数学：代数式建模专项题单", focus:"深圳真实情境改编，考点不变、题面更新", reason:"深圳情境题", highlight:"名师推荐", questions:12, minutes:25, difficulty:"中等", source:"深圳情境题专题", usage:842, tag:"special", tone:"lilac" },
-  { id:"t4", title:"2024—2026 深圳期末真题汇编：轴对称", focus:"把分散真题整理成可直接使用的课内专题", reason:"真题汇编", highlight:"精品", questions:24, minutes:35, difficulty:"较难", source:"深圳初一下期末真题", usage:1532, tag:"compilation", legacy:true, tone:"mist" },
-  { id:"t5", title:"2025—2026 深圳期末真题汇编：全等三角形", focus:"按考点重组近两年深圳区级真题", reason:"真题汇编", highlight:"精品", questions:18, minutes:30, difficulty:"中等", source:"深圳初一下期末真题", usage:613, tag:"compilation", legacy:true, tone:"sage" },
-  { id:"t6", title:"初一期末高频易错周测题单", focus:"期末高频易错题与周测题单", reason:"周测题单", highlight:"精品", questions:18, minutes:30, difficulty:"较难", source:"深圳外国语学校龙岗学校", usage:1089, tag:"special", tone:"cream" },
+  { id:"t1", title:"朝阳易错二练：有理数符号与运算", focus:"错因诊断、针对变式、二次过关", reason:"朝阳易错二练", questions:15, minutes:20, difficulty:"中等", source:"朝阳区易错专题", usage:386, tag:"special", tone:"sage" },
+  { id:"t2", title:"2025-2026学年北京市朝阳区七年级（上）期末统考数学试卷", focus:"北京市朝阳区七年级上学期期末数学真题", reason:"朝阳区级真题", highlight:"区级真题", questions:22, minutes:40, difficulty:"中等", source:"朝阳区初一上期末真题", usage:1206, tag:"paper", tone:"cream" },
+  { id:"t3", title:"朝阳情境数学：代数式建模专项题单", focus:"朝阳真实情境改编，考点不变、题面更新", reason:"朝阳情境题", highlight:"名师推荐", questions:12, minutes:25, difficulty:"中等", source:"朝阳情境题专题", usage:842, tag:"special", tone:"lilac" },
+  { id:"t4", title:"2024—2026 朝阳区期末真题汇编：轴对称", focus:"把分散真题整理成可直接使用的课内专题", reason:"真题汇编", highlight:"精品", questions:24, minutes:35, difficulty:"较难", source:"北京初一下期末真题", usage:1532, tag:"compilation", legacy:true, tone:"mist" },
+  { id:"t5", title:"2025—2026 朝阳区期末真题汇编：全等三角形", focus:"按考点重组近两年朝阳区级真题", reason:"真题汇编", highlight:"精品", questions:18, minutes:30, difficulty:"中等", source:"北京初一下期末真题", usage:613, tag:"compilation", legacy:true, tone:"sage" },
+  { id:"t6", title:"初一期末高频易错周测题单", focus:"期末高频易错题与周测题单", reason:"周测题单", highlight:"精品", questions:18, minutes:30, difficulty:"较难", source:"北京市朝阳外国语学校", usage:1089, tag:"special", tone:"cream" },
   { id:"t7", title:"整式运算高频易错巩固题单", focus:"整式运算常见错误归纳", reason:"热门系列", questions:14, minutes:20, difficulty:"中等", source:"全品学练考", usage:522, tag:"workbook", tone:"lilac" },
   { id:"t8", title:"七上正负数与数轴：概念理解过关题单", focus:"理解实际意义，准确判断", reason:"七上第1章", questions:16, minutes:20, difficulty:"简单", source:"区教研精选", usage:762, tag:"chapter", tone:"sage" },
   { id:"t9", title:"有理数运算基础过关：含易错自测", focus:"贴近教材知识链与能力层级", reason:"本地教辅", highlight:"精品", questions:20, minutes:25, difficulty:"中等", source:"多维导学案", usage:1143, tag:"workbook", tone:"cream" },
-  { id:"t10", title:"整式加减高频易错：去括号与合并同类项", focus:"合并同类项与化简", reason:"七上第3章", questions:18, minutes:20, difficulty:"简单", source:"龙岗区教研室", usage:908, tag:"chapter", tone:"lilac" },
-  { id:"t11", title:"一元一次方程应用：审题建模专项", focus:"顺序解题方法与实际应用", reason:"本校老师共建", questions:22, minutes:25, difficulty:"中等", source:"启航实验学校数学组", author:{ name:"李老师", school:"启航实验学校", tone:"amber" }, usage:1221, tag:"school", tone:"mist" },
-  { id:"t12", title:"几何初步：图形语言与概念辨析", focus:"直线、射线和线段", reason:"七上第4章", questions:14, minutes:15, difficulty:"简单", source:"龙岗区实验学校", author:{ name:"赵老师", school:"龙岗区实验学校", tone:"mint" }, usage:669, tag:"school", tone:"sage" },
+  { id:"t10", title:"整式加减高频易错：去括号与合并同类项", focus:"合并同类项与化简", reason:"七上第3章", questions:18, minutes:20, difficulty:"简单", source:"朝阳区教研室", usage:908, tag:"chapter", tone:"lilac" },
+  { id:"t11", title:"一元一次方程应用：审题建模专项", focus:"顺序解题方法与实际应用", reason:"本校老师共建", questions:22, minutes:25, difficulty:"中等", source:"望京实验学校数学组", author:{ name:"李老师", school:"望京实验学校", tone:"amber" }, usage:1221, tag:"school", tone:"mist" },
+  { id:"t12", title:"几何初步：图形语言与概念辨析", focus:"直线、射线和线段", reason:"七上第4章", questions:14, minutes:15, difficulty:"简单", source:"朝阳实验中学", author:{ name:"赵老师", school:"朝阳实验中学", tone:"mint" }, usage:669, tag:"school", tone:"sage" },
   { id:"t13", title:"有理数混合运算：方法进阶与提速", focus:"综合运算与技巧提升", reason:"七上第5章", questions:20, minutes:25, difficulty:"中等", source:"区教研精选", usage:1015, tag:"chapter", tone:"cream" },
-  { id:"t14", title:"2025-2026学年广东省深圳市福田区七年级（下）期中统考数学试卷", focus:"深圳市福田区七年级下学期期中数学真题", reason:"深圳区级真题", highlight:"新上", questions:20, minutes:35, difficulty:"较难", source:"福田区初一下期中真题", usage:984, tag:"paper", tone:"sage" },
-  { id:"t15", title:"坂田片区七上课堂小测：整式加减", focus:"课堂检测，及时巩固", reason:"课堂小测", highlight:"最新", questions:12, minutes:15, difficulty:"简单", source:"坂田片区教研", author:{ name:"黄老师", school:"坂田实验学校", tone:"amber" }, usage:512, tag:"chapter", tone:"cream" },
-  { id:"t16", title:"月考前查漏补缺：七上核心考点精选", focus:"月考精选，重点突破", reason:"月考精选", questions:18, minutes:25, difficulty:"中等", source:"龙岗区实验学校", author:{ name:"赵老师", school:"龙岗区实验学校", tone:"mint" }, usage:1266, tag:"school", tone:"lilac" },
-  { id:"t17", title:"七上易错题二次过关：概念到变式", focus:"教研共建，优质共享", reason:"教研共建", highlight:"最新", questions:16, minutes:20, difficulty:"中等", source:"平湖片区教研", author:{ name:"刘老师", school:"平湖外国语学校", tone:"violet" }, usage:698, tag:"school", tone:"mist" },
-  { id:"t18", title:"深圳中考衔接：数与式思维进阶题单", focus:"教材变式、探究题与优生挑战", reason:"巩固复习", highlight:"名师推荐", questions:22, minutes:35, difficulty:"较难", source:"深圳中考专题", usage:1374, tag:"special", tone:"sage" },
+  { id:"t14", title:"2025-2026学年北京市朝阳区七年级（上）期中统考数学试卷", focus:"北京市朝阳区七年级上学期期中数学真题", reason:"朝阳区级真题", highlight:"新上", questions:20, minutes:35, difficulty:"较难", source:"朝阳区初一上期中真题", usage:984, tag:"paper", tone:"sage" },
+  { id:"t15", title:"望京片区七上课堂小测：整式加减", focus:"课堂检测，及时巩固", reason:"课堂小测", highlight:"最新", questions:12, minutes:15, difficulty:"简单", source:"望京片区教研", author:{ name:"黄老师", school:"望京实验学校", tone:"amber" }, usage:512, tag:"chapter", tone:"cream" },
+  { id:"t16", title:"月考前查漏补缺：七上核心考点精选", focus:"月考精选，重点突破", reason:"月考精选", questions:18, minutes:25, difficulty:"中等", source:"朝阳实验中学", author:{ name:"赵老师", school:"朝阳实验中学", tone:"mint" }, usage:1266, tag:"school", tone:"lilac" },
+  { id:"t17", title:"七上易错题二次过关：概念到变式", focus:"教研共建，优质共享", reason:"教研共建", highlight:"最新", questions:16, minutes:20, difficulty:"中等", source:"劲松片区教研", author:{ name:"刘老师", school:"劲松外国语学校", tone:"violet" }, usage:698, tag:"school", tone:"mist" },
+  { id:"t18", title:"北京中考衔接：数与式思维进阶题单", focus:"教材变式、探究题与优生挑战", reason:"巩固复习", highlight:"名师推荐", questions:22, minutes:35, difficulty:"较难", source:"北京中考专题", usage:1374, tag:"special", tone:"sage" },
   { id:"t19", title:"课内基础到探究题：进阶提升题单", focus:"从课内基础过渡到探究与培优", reason:"提优配套", questions:18, minutes:30, difficulty:"中等", source:"常用提优训练系列", usage:831, tag:"workbook", tone:"cream" },
   { id:"t20", title:"典型错法拆解：有理数与方程方法点拨", focus:"归纳典型错法并配套针对变式", reason:"老师收藏较多", questions:16, minutes:25, difficulty:"中等", source:"易错方法系列", usage:742, tag:"workbook", tone:"lilac" },
-  { id:"t21", title:"期中错题重组：三个班高频失分题", focus:"基于三个班真实易错题", reason:"本校老师共建", questions:15, minutes:22, difficulty:"中等", source:"启航实验学校数学组", author:{ name:"陈老师", school:"启航实验学校", tone:"blue" }, usage:96, tag:"school", tone:"mist" },
-  { id:"t22", title:"有理数课堂诊断：概念掌握过关题单", focus:"当堂检测概念掌握情况", reason:"课堂小测", questions:8, minutes:5, difficulty:"简单", source:"龙城初级中学", author:{ name:"周老师", school:"龙城初级中学", tone:"rose" }, usage:728, tag:"chapter", tone:"sage" },
+  { id:"t21", title:"期中错题重组：三个班高频失分题", focus:"基于三个班真实易错题", reason:"本校老师共建", questions:15, minutes:22, difficulty:"中等", source:"望京实验学校数学组", author:{ name:"陈老师", school:"望京实验学校", tone:"blue" }, usage:96, tag:"school", tone:"mist" },
+  { id:"t22", title:"有理数课堂诊断：概念掌握过关题单", focus:"当堂检测概念掌握情况", reason:"课堂小测", questions:8, minutes:5, difficulty:"简单", source:"日坛中学", author:{ name:"周老师", school:"日坛中学", tone:"rose" }, usage:728, tag:"chapter", tone:"sage" },
   { id:"t23", title:"一元一次方程移项与符号易错专练", focus:"集中突破移项与符号错误", reason:"高频易错", questions:14, minutes:18, difficulty:"中等", source:"区教研精选", usage:1186, tag:"chapter", tone:"cream" },
-  { id:"t24", title:"线段与角：易混概念辨析与规范表达", focus:"易混概念判断与规范表达", reason:"概念辨析", questions:12, minutes:15, difficulty:"简单", source:"龙岗区实验学校", usage:635, tag:"chapter", tone:"lilac" },
-  { id:"t25", title:"2025-2026学年广东省深圳市罗湖区七年级（下）期末统考数学试卷", focus:"深圳市罗湖区七年级下学期期末数学真题", reason:"深圳区级真题", highlight:"新上", questions:20, minutes:30, difficulty:"中等", source:"罗湖区初一下期末真题", usage:1458, tag:"paper", tone:"mist" },
+  { id:"t24", title:"线段与角：易混概念辨析与规范表达", focus:"易混概念判断与规范表达", reason:"概念辨析", questions:12, minutes:15, difficulty:"简单", source:"朝阳实验中学", usage:635, tag:"chapter", tone:"lilac" },
+  { id:"t25", title:"2025-2026学年北京市朝阳区七年级（上）期末统考数学试卷", focus:"北京市朝阳区七年级上学期期末数学真题", reason:"朝阳区级真题", highlight:"新上", questions:20, minutes:30, difficulty:"中等", source:"朝阳区初一上期末真题", usage:1458, tag:"paper", tone:"mist" },
   { id:"t26", title:"整式运算同步精练：基础到综合", focus:"同步巩固整式化简方法", reason:"热门系列", questions:18, minutes:25, difficulty:"中等", source:"原创新课堂", usage:884, tag:"workbook", tone:"sage" },
-  { id:"t27", title:"期末选择题高频考法：审题与快速提分", focus:"高频选择题与排除方法", reason:"选择题专题", questions:16, minutes:20, difficulty:"中等", source:"龙岗区教研室", usage:1328, tag:"special", tone:"cream" },
+  { id:"t27", title:"期末选择题高频考法：审题与快速提分", focus:"高频选择题与排除方法", reason:"选择题专题", questions:16, minutes:20, difficulty:"中等", source:"朝阳区教研室", usage:1328, tag:"special", tone:"cream" },
   { id:"t28", title:"数学阅读理解：真实情境信息提取", focus:"从真实情境中提取数量关系", reason:"情境专项", questions:10, minutes:22, difficulty:"较难", source:"区教研精选", usage:576, tag:"special", tone:"lilac" },
-  { id:"t29", title:"周末分层作业 A：基础巩固与补弱", focus:"面向基础薄弱学生巩固", reason:"基础巩固", questions:15, minutes:20, difficulty:"简单", source:"启航实验学校数学组", author:{ name:"陈老师", school:"启航实验学校", tone:"blue" }, usage:168, tag:"school", tone:"mist" },
-  { id:"t30", title:"周末分层作业 B：综合应用与提升", focus:"基础巩固后的综合应用", reason:"综合应用", questions:18, minutes:28, difficulty:"中等", source:"启航实验学校数学组", author:{ name:"陈老师", school:"启航实验学校", tone:"blue" }, usage:152, tag:"school", tone:"sage" },
-  { id:"t31", title:"代数式建模：真实情境列式专项", focus:"由情境列式并解释代数式", reason:"方法专项", questions:13, minutes:18, difficulty:"中等", source:"平湖片区教研", usage:692, tag:"special", tone:"cream" },
-  { id:"t32", title:"几何语言：符号转换与规范书写专项", focus:"训练符号语言与文字表达", reason:"规范表达专项", questions:12, minutes:20, difficulty:"中等", source:"龙岗区教研室", usage:804, tag:"special", tone:"lilac" },
-  { id:"t33", title:"期中压轴题：关键步骤分层拆解", focus:"按关键步骤拆解综合题", reason:"联考题源汇编", questions:9, minutes:30, difficulty:"较难", source:"龙岗区四中联考", usage:1036, tag:"compilation", tone:"mist" },
+  { id:"t29", title:"周末分层作业 A：基础巩固与补弱", focus:"面向基础薄弱学生巩固", reason:"基础巩固", questions:15, minutes:20, difficulty:"简单", source:"望京实验学校数学组", author:{ name:"陈老师", school:"望京实验学校", tone:"blue" }, usage:168, tag:"school", tone:"mist" },
+  { id:"t30", title:"周末分层作业 B：综合应用与提升", focus:"基础巩固后的综合应用", reason:"综合应用", questions:18, minutes:28, difficulty:"中等", source:"望京实验学校数学组", author:{ name:"陈老师", school:"望京实验学校", tone:"blue" }, usage:152, tag:"school", tone:"sage" },
+  { id:"t31", title:"代数式建模：真实情境列式专项", focus:"由情境列式并解释代数式", reason:"方法专项", questions:13, minutes:18, difficulty:"中等", source:"劲松片区教研", usage:692, tag:"special", tone:"cream" },
+  { id:"t32", title:"几何语言：符号转换与规范书写专项", focus:"训练符号语言与文字表达", reason:"规范表达专项", questions:12, minutes:20, difficulty:"中等", source:"朝阳区教研室", usage:804, tag:"special", tone:"lilac" },
+  { id:"t33", title:"期中压轴题：关键步骤分层拆解", focus:"按关键步骤拆解综合题", reason:"联考题源汇编", questions:9, minutes:30, difficulty:"较难", source:"朝阳区四中联考", usage:1036, tag:"compilation", tone:"mist" },
   { id:"t34", title:"一元一次方程：典型题型与变式突破", focus:"典型方程题型与变式训练", reason:"热门系列", questions:20, minutes:30, difficulty:"中等", source:"多维导学案", usage:916, tag:"workbook", tone:"sage" },
-  { id:"t35", title:"月考前查漏补缺：本月高频易错", focus:"快速覆盖本月教学重点", reason:"查漏补缺", highlight:"最新", questions:14, minutes:20, difficulty:"中等", source:"坂田片区教研", usage:1274, tag:"chapter", tone:"cream" },
-  { id:"t36", title:"七上有理数方法：公开课配套小测", focus:"从概念辨析到方法迁移的课堂练习", reason:"名校公开交流", highlight:"精品", questions:12, minutes:18, difficulty:"中等", source:"深圳中学龙岗学校", usage:1682, tag:"school", tone:"sage" },
-  { id:"t37", title:"期中压轴题：关键步骤与分层选题", focus:"按关键步骤拆分综合题，适合分层使用", reason:"名校教研共建", highlight:"精品", questions:10, minutes:28, difficulty:"较难", source:"龙岗区实验学校", usage:1436, tag:"school", tone:"cream" },
-  { id:"t38", title:"数学阅读与真实情境建模题单", focus:"从真实语境中提取数量关系与条件", reason:"名校公开交流", highlight:"精品", questions:14, minutes:25, difficulty:"中等", source:"龙岗区外国语学校", usage:1298, tag:"school", tone:"lilac" },
-  { id:"t39", title:"几何语言规范与推理进阶题单", focus:"强化图形语言、推理步骤与规范书写", reason:"名校教研共建", highlight:"精品", questions:16, minutes:24, difficulty:"中等", source:"龙城初级中学", usage:1184, tag:"school", tone:"mist" },
+  { id:"t35", title:"月考前查漏补缺：本月高频易错", focus:"快速覆盖本月教学重点", reason:"查漏补缺", highlight:"最新", questions:14, minutes:20, difficulty:"中等", source:"望京片区教研", usage:1274, tag:"chapter", tone:"cream" },
+  { id:"t36", title:"七上有理数方法：公开课配套小测", focus:"从概念辨析到方法迁移的课堂练习", reason:"名校公开交流", highlight:"精品", questions:12, minutes:18, difficulty:"中等", source:"北京市第八十中学", usage:1682, tag:"school", tone:"sage" },
+  { id:"t37", title:"期中压轴题：关键步骤与分层选题", focus:"按关键步骤拆分综合题，适合分层使用", reason:"名校教研共建", highlight:"精品", questions:10, minutes:28, difficulty:"较难", source:"朝阳实验中学", usage:1436, tag:"school", tone:"cream" },
+  { id:"t38", title:"数学阅读与真实情境建模题单", focus:"从真实语境中提取数量关系与条件", reason:"名校公开交流", highlight:"精品", questions:14, minutes:25, difficulty:"中等", source:"朝阳外国语学校", usage:1298, tag:"school", tone:"lilac" },
+  { id:"t39", title:"几何语言规范与推理进阶题单", focus:"强化图形语言、推理步骤与规范书写", reason:"名校教研共建", highlight:"精品", questions:16, minutes:24, difficulty:"中等", source:"日坛中学", usage:1184, tag:"school", tone:"mist" },
   { id:"t40", title:"有理数概念课时过关：数轴、相反数与绝对值", focus:"概念辨析、数轴表示与相反数", reason:"同步巩固", questions:16, minutes:20, difficulty:"简单", source:"多维导学案", usage:968, tag:"workbook", tone:"sage" },
   { id:"t41", title:"有理数单元检测：运算、应用与探究", focus:"覆盖运算法则、混合运算与实际应用", reason:"单元检测", highlight:"精品", questions:22, minutes:35, difficulty:"中等", source:"多维导学案", usage:1046, tag:"workbook", tone:"mist" },
   { id:"t42", title:"整式加减课时精练：去括号与合并同类项", focus:"合并同类项与去括号课时训练", reason:"热门系列", questions:14, minutes:18, difficulty:"简单", source:"全品学练考", usage:786, tag:"workbook", tone:"cream" },
@@ -50,25 +50,31 @@ const topics = [
   { id:"t49", title:"几何初步同步方法：图形语言与推理", focus:"直线、射线、线段与角的规范表达", reason:"热门系列", questions:16, minutes:22, difficulty:"中等", source:"原创新课堂", usage:744, tag:"workbook", tone:"cream" },
   { id:"t50", title:"一元一次方程题型突破：解法到应用", focus:"分类掌握方程典型题型和变式", reason:"热门系列", questions:18, minutes:28, difficulty:"中等", source:"多维导学案", usage:936, tag:"workbook", tone:"lilac" },
   { id:"t51", title:"几何语言专题：读图、转换与规范表达", focus:"训练几何语言转换与推理书写", reason:"热门系列", questions:14, minutes:24, difficulty:"中等", source:"多维导学案", usage:868, tag:"workbook", tone:"mist" },
-  { id:"t52", title:"2024—2026 深圳初一下期末真题汇编：图形的轴对称", focus:"近三年深圳各区真题去重汇编，覆盖核心考法", reason:"本地真题汇编", highlight:"最新", questions:28, minutes:40, difficulty:"中等", source:"深圳各区期末真题", usage:1528, tag:"compilation", tone:"mist" },
-  { id:"t53", title:"2025—2026 深圳初一下期末真题汇编：全等三角形", focus:"按考点和难度梯度重组本地期末真题", reason:"本地真题汇编", highlight:"最新", questions:24, minutes:38, difficulty:"中等", source:"深圳各区期末真题", usage:1316, tag:"compilation", tone:"sage" },
-  { id:"t54", title:"龙岗区七上期中真题汇编：有理数高频题（2023—2025）", focus:"汇集区统考与重点校高频题，解析已经复核", reason:"地区真题汇编", highlight:"精品", questions:32, minutes:45, difficulty:"中等", source:"龙岗区教研精选", usage:1842, tag:"compilation", tone:"cream" },
-  { id:"t55", title:"深圳重点校七年级上学期期末压轴题汇编", focus:"精选重点校压轴与探究题，按解法模型归类", reason:"名校汇编", highlight:"名师推荐", questions:18, minutes:45, difficulty:"较难", source:"深圳重点校公开试卷", usage:1238, tag:"compilation", tone:"lilac" },
-  { id:"t56", title:"深圳各区近三年真题汇编：一元一次方程", focus:"按题型、场景和易错点完成去重编排", reason:"年度汇编", highlight:"精品", questions:30, minutes:42, difficulty:"中等", source:"深圳区级真题库", usage:1464, tag:"compilation", tone:"sage" },
-  { id:"t57", title:"深圳七年级数学真实情境题真题汇编", focus:"保留本地真实语境，集中训练信息提取与建模", reason:"情境题汇编", highlight:"最新", questions:20, minutes:35, difficulty:"较难", source:"深圳本地真题库", usage:986, tag:"compilation", tone:"mist" },
-  { id:"t58", title:"深圳中学初一上期末周测模拟卷", focus:"期末周测模拟与高频考法", reason:"周测模拟", highlight:"名校题源", questions:22, minutes:40, difficulty:"较难", source:"深圳中学教研精选", usage:1168, tag:"paper", tone:"cream" },
-  { id:"t59", title:"2025-2026学年广东省深圳市龙岗区七年级（上）10月月考数学试卷", focus:"深圳市龙岗区七年级上学期 10 月月考数学试卷", reason:"龙岗区月考", highlight:"新上", questions:20, minutes:40, difficulty:"中等", source:"龙岗区七上 10 月月考", usage:754, tag:"paper", tone:"sage" },
-  { id:"t60", title:"七上有理数单元测验卷", focus:"概念、运算、应用与探究的单元测验", reason:"单元测验", highlight:"精品", questions:24, minutes:45, difficulty:"中等", source:"龙岗区初中数学教研组", usage:1026, tag:"special", tone:"lilac" },
-  { id:"t61", title:"深圳七年级数与式中考衔接诊断卷", focus:"初一核心知识与中考命题方式衔接", reason:"中考衔接", questions:18, minutes:35, difficulty:"较难", source:"深圳初中数学衔接专题", usage:892, tag:"special", tone:"mist" },
-  { id:"t62", title:"2025-2026学年广东省深圳中学七年级（下）期中数学试卷", focus:"深圳中学七年级下学期期中数学试卷", reason:"学校真实考试", questions:22, minutes:90, difficulty:"较难", source:"深圳中学公开试卷", usage:1684, tag:"paper", tone:"cream" },
-  { id:"t63", title:"2025-2026学年广东省深圳实验学校中学部七年级（下）期中数学试卷", focus:"深圳实验学校中学部七年级下学期期中数学试卷", reason:"学校真实考试", questions:24, minutes:90, difficulty:"中等", source:"深圳实验学校中学部公开试卷", usage:1326, tag:"paper", tone:"sage" },
-  { id:"t64", title:"2025-2026学年广东省深圳市宝安区七年级（下）期中统考数学试卷", focus:"深圳市宝安区七年级下学期期中数学试卷", reason:"深圳区级真题", questions:22, minutes:90, difficulty:"中等", source:"宝安区七年级期中真题", usage:1108, tag:"paper", tone:"mist" },
-  { id:"t65", title:"2025-2026学年广东省深圳市育才中学教育集团七年级（下）期中联考数学试卷", focus:"育才中学教育集团七年级下学期期中数学试卷", reason:"集团校联考", questions:23, minutes:90, difficulty:"中等", source:"育才中学教育集团公开试卷", usage:896, tag:"paper", tone:"lilac" },
-  { id:"t66", title:"2026年广东省深圳市中考数学真题试卷", focus:"深圳市中考数学真题，覆盖核心考点与新题型", reason:"中考真题", highlight:"新上", questions:25, minutes:120, difficulty:"较难", source:"深圳市中考公开真题", usage:2186, tag:"paper", tone:"mist" },
-  { id:"t67", title:"2025-2026学年广东省深圳外国语学校七年级（下）期末数学试卷", focus:"深圳外国语学校七年级下学期期末数学试卷", reason:"名校公开试卷", questions:24, minutes:90, difficulty:"较难", source:"深圳外国语学校公开试卷", usage:1542, tag:"paper", tone:"cream" },
-  { id:"t68", title:"2025-2026学年广东省深圳高级中学（集团）七年级（下）期中数学试卷", focus:"深圳高级中学集团七年级下学期期中数学试卷", reason:"名校公开试卷", questions:23, minutes:90, difficulty:"中等", source:"深圳高级中学（集团）公开试卷", usage:1438, tag:"paper", tone:"sage" },
-  { id:"t69", title:"2025-2026学年广东省红岭中学（集团）七年级（上）期末数学试卷", focus:"红岭中学集团七年级上学期期末数学试卷", reason:"名校公开试卷", questions:25, minutes:90, difficulty:"较难", source:"红岭中学（集团）公开试卷", usage:1288, tag:"paper", tone:"lilac" },
-  { id:"t70", title:"2025-2026学年广东省南山外国语学校（集团）七年级（上）月考数学试卷", focus:"南山外国语学校集团七年级上学期月考数学试卷", reason:"名校公开试卷", questions:20, minutes:60, difficulty:"中等", source:"南山外国语学校（集团）公开试卷", usage:1164, tag:"paper", tone:"mist" }
+  { id:"t52", title:"2024—2026 北京初一下期末真题汇编：图形的轴对称", focus:"近三年朝阳区真题去重汇编，覆盖核心考法", reason:"本地真题汇编", highlight:"最新", questions:28, minutes:40, difficulty:"中等", source:"朝阳区期末真题", usage:1528, tag:"compilation", tone:"mist" },
+  { id:"t53", title:"2025—2026 北京初一下期末真题汇编：全等三角形", focus:"按考点和难度梯度重组本地期末真题", reason:"本地真题汇编", highlight:"最新", questions:24, minutes:38, difficulty:"中等", source:"朝阳区期末真题", usage:1316, tag:"compilation", tone:"sage" },
+  { id:"t54", title:"朝阳区七上期中真题汇编：有理数高频题（2023—2025）", focus:"汇集区统考与重点校高频题，解析已经复核", reason:"地区真题汇编", highlight:"精品", questions:32, minutes:45, difficulty:"中等", source:"朝阳区教研精选", usage:1842, tag:"compilation", tone:"cream" },
+  { id:"t55", title:"朝阳重点校七年级上学期期末压轴题汇编", focus:"精选重点校压轴与探究题，按解法模型归类", reason:"名校汇编", highlight:"名师推荐", questions:18, minutes:45, difficulty:"较难", source:"朝阳重点校公开试卷", usage:1238, tag:"compilation", tone:"lilac" },
+  { id:"t56", title:"朝阳区近三年真题汇编：一元一次方程", focus:"按题型、场景和易错点完成去重编排", reason:"年度汇编", highlight:"精品", questions:30, minutes:42, difficulty:"中等", source:"朝阳区级真题库", usage:1464, tag:"compilation", tone:"sage" },
+  { id:"t57", title:"北京七年级数学真实情境题真题汇编", focus:"保留本地真实语境，集中训练信息提取与建模", reason:"情境题汇编", highlight:"最新", questions:20, minutes:35, difficulty:"较难", source:"朝阳本地真题库", usage:986, tag:"compilation", tone:"mist" },
+  { id:"t58", title:"北京市第八十中学初一上期末周测模拟卷", focus:"期末周测模拟与高频考法", reason:"周测模拟", highlight:"名校题源", questions:22, minutes:40, difficulty:"较难", source:"八十中教研精选", usage:1168, tag:"paper", tone:"cream" },
+  { id:"t59", title:"2025-2026学年北京市朝阳区七年级（上）10月月考数学试卷", focus:"北京市朝阳区七年级上学期 10 月月考数学试卷", reason:"朝阳区月考", highlight:"新上", questions:20, minutes:40, difficulty:"中等", source:"朝阳区七上 10 月月考", usage:754, tag:"paper", tone:"sage" },
+  { id:"t60", title:"七上有理数单元测验卷", focus:"概念、运算、应用与探究的单元测验", reason:"单元测验", highlight:"精品", questions:24, minutes:45, difficulty:"中等", source:"朝阳区初中数学教研组", usage:1026, tag:"special", tone:"lilac" },
+  { id:"t61", title:"北京七年级数与式中考衔接诊断卷", focus:"初一核心知识与中考命题方式衔接", reason:"中考衔接", questions:18, minutes:35, difficulty:"较难", source:"北京初中数学衔接专题", usage:892, tag:"special", tone:"mist" },
+  { id:"t62", title:"2025-2026学年北京市第八十中学七年级（上）期中数学试卷", focus:"北京市第八十中学七年级上学期期中数学试卷", reason:"学校真实考试", questions:22, minutes:90, difficulty:"较难", source:"八十中公开试卷", usage:1684, tag:"paper", tone:"cream" },
+  { id:"t63", title:"2025-2026学年北京市陈经纶中学七年级（上）期中数学试卷", focus:"北京市陈经纶中学七年级上学期期中数学试卷", reason:"学校真实考试", questions:24, minutes:90, difficulty:"中等", source:"北京市陈经纶中学公开试卷", usage:1326, tag:"paper", tone:"sage" },
+  { id:"t64", title:"2025-2026学年北京市朝阳区七年级（上）期末质量监测数学试卷", focus:"北京市朝阳区七年级上学期期末质量监测数学试卷", reason:"朝阳区级真题", questions:22, minutes:90, difficulty:"中等", source:"朝阳区七年级期末质量监测", usage:1108, tag:"paper", tone:"mist" },
+  { id:"t65", title:"2025-2026学年北京中学七年级（上）期中联考数学试卷", focus:"北京中学七年级上学期期中数学试卷", reason:"集团校联考", questions:23, minutes:90, difficulty:"中等", source:"北京中学公开试卷", usage:896, tag:"paper", tone:"lilac" },
+  { id:"t66", title:"2026年北京市中考数学真题试卷", focus:"北京市中考数学真题，覆盖核心考点与新题型", reason:"中考真题", highlight:"新上", questions:25, minutes:120, difficulty:"较难", source:"北京市中考公开真题", usage:2186, tag:"paper", tone:"mist" },
+  { id:"t67", title:"2025-2026学年北京市朝阳外国语学校七年级（上）期末数学试卷", focus:"北京市朝阳外国语学校七年级上学期期末数学试卷", reason:"名校公开试卷", questions:24, minutes:90, difficulty:"较难", source:"北京市朝阳外国语学校公开试卷", usage:1542, tag:"paper", tone:"cream" },
+  { id:"t68", title:"2025-2026学年北京市日坛中学七年级（上）期中数学试卷", focus:"北京市日坛中学七年级上学期期中数学试卷", reason:"名校公开试卷", questions:23, minutes:90, difficulty:"中等", source:"北京市日坛中学公开试卷", usage:1438, tag:"paper", tone:"sage" },
+  { id:"t69", title:"2025-2026学年北京市第十七中学七年级（上）期末数学试卷", focus:"北京市第十七中学七年级上学期期末数学试卷", reason:"名校公开试卷", questions:25, minutes:90, difficulty:"较难", source:"北京市第十七中学公开试卷", usage:1288, tag:"paper", tone:"lilac" },
+  { id:"t70", title:"2025-2026学年北京市第八十中学分校七年级（上）月考数学试卷", focus:"北京市第八十中学分校七年级上学期月考数学试卷", reason:"名校公开试卷", questions:20, minutes:60, difficulty:"中等", source:"北京市第八十中学分校公开试卷", usage:1164, tag:"paper", tone:"mist" },
+  { id:"t71", title:"2025-2026学年北京市第四中学七年级（上）期中数学试卷", focus:"西城区北京四中七年级上学期期中数学试卷", reason:"西城名校", questions:23, minutes:90, difficulty:"较难", source:"北京市第四中学公开试卷", usage:1896, tag:"paper", tone:"cream" },
+  { id:"t72", title:"2025-2026学年北京市第八中学七年级（上）期末数学试卷", focus:"西城区北京八中七年级上学期期末数学试卷", reason:"西城名校", questions:24, minutes:90, difficulty:"中等", source:"北京市第八中学公开试卷", usage:1642, tag:"paper", tone:"sage" },
+  { id:"t73", title:"2025-2026学年中国人民大学附属中学七年级（上）期中数学试卷", focus:"海淀区人大附中七年级上学期期中数学试卷", reason:"海淀名校", questions:24, minutes:90, difficulty:"较难", source:"人大附中公开试卷", usage:2148, tag:"paper", tone:"lilac" },
+  { id:"t74", title:"2025-2026学年清华大学附属中学七年级（上）期末数学试卷", focus:"海淀区清华附中七年级上学期期末数学试卷", reason:"海淀名校", questions:25, minutes:90, difficulty:"较难", source:"清华附中公开试卷", usage:1986, tag:"paper", tone:"mist" },
+  { id:"t75", title:"2025-2026学年北京大学附属中学七年级（上）月考数学试卷", focus:"海淀区北大附中七年级上学期月考数学试卷", reason:"海淀名校", questions:20, minutes:60, difficulty:"中等", source:"北大附中公开试卷", usage:1764, tag:"paper", tone:"cream" },
+  { id:"t76", title:"2025-2026学年北京师范大学附属中学七年级（上）期末数学试卷", focus:"西城区师大附中七年级上学期期末数学试卷", reason:"西城名校", questions:24, minutes:90, difficulty:"中等", source:"北师大附中公开试卷", usage:1812, tag:"paper", tone:"sage" }
 ];
 const workbookAlbums = [
   { id: "duowei", name: "多维导学案", subtitle: "课时练 + 单元检测", source: "多维导学案" },
@@ -194,13 +200,11 @@ const byId = Object.fromEntries(topics.map(topic => [topic.id, topic]));
 const toneMap = { sage:"var(--sage)", cream:"var(--cream)", lilac:"var(--lilac)", mist:"var(--mist)" };
 const aiPlaceholder = "描述你想要的题单，例如：七上有理数易错题，15 题，中等难度";
 const bankStats = { libraryTotal: 41140, paperTotal: 28460, practiceTotal: 12680, weeklyNewResources: 320 };
-const HOME_PREFERENCE_KEY = "feixiang-home-preferences-v1";
+const HOME_PREFERENCE_KEY = "feixiang-home-preferences-v2";
 const defaultHomePreferences = {
-  regions: ["龙岗区", "深圳名校"],
-  sources: ["多维导学案", "全品学练考"],
-  types: ["同步练习", "试卷", "真题整理"],
-  truthTypes: ["期中·期末", "区级真题", "名校真题"],
-  difficulties: ["基础", "中等"]
+  difficultyProfile: ["基础中等均衡"],
+  questionMix: ["主客观均衡"],
+  progression: ["由易到难"]
 };
 
 function copyHomePreferences(source = defaultHomePreferences) {
@@ -225,7 +229,7 @@ let homePreferenceOpener = null;
 let currentFilter = "all";
 let currentQuery = "";
 let homepageSearchScope = "all";
-const homepagePaperLaneLimit = 5;
+const homepagePaperLaneLimit = 4;
 let aiDockObserver = null;
 let aiModalOpen = false;
 let hasUserScrolled = false;
@@ -271,14 +275,14 @@ const paperGradeOptions = [
 const paperSourceOptions = [
   { id: "all", label: "全部" },
   { id: "public", label: "飞象公共库", match: topic => !topic.author && !/私有/.test(topic.source) },
-  { id: "district", label: "龙岗区私有库", match: topic => /龙岗/.test(`${topic.source} ${topic.author?.school || ""}`) },
+  { id: "district", label: "朝阳区私有库", match: topic => /朝阳/.test(`${topic.source} ${topic.author?.school || ""}`) },
   { id: "school", label: "本校私有库", match: topic => Boolean(topic.author) }
 ];
 const specialFilterState = { category: "all", difficulty: "all", origin: "all", query: "" };
 const compilationFilterState = { category: "all", signal: "all", query: "" };
 const compilationCategories = [
   { id: "all", label: "全部汇编", match: () => true },
-  { id: "region", label: "地区真题汇编", match: topic => /深圳|龙岗|各区|地区/.test(`${topic.title} ${topic.source} ${topic.reason}`) },
+  { id: "region", label: "地区真题汇编", match: topic => /北京|朝阳|各区|地区/.test(`${topic.title} ${topic.source} ${topic.reason}`) },
   { id: "annual", label: "年度汇编", match: topic => /近三年|202[3-6]|年度/.test(`${topic.title} ${topic.reason}`) },
   { id: "school", label: "名校汇编", match: topic => /名校|重点校/.test(`${topic.title} ${topic.source} ${topic.reason}`) },
   { id: "topic", label: "专题汇编", match: topic => /轴对称|三角形|方程|有理数|情境|考点|题型/.test(`${topic.title} ${topic.focus}`) },
@@ -286,7 +290,7 @@ const compilationCategories = [
 ];
 const compilationSignals = [
   { id: "all", label: "全部汇编", match: () => true },
-  { id: "local", label: "深圳本地", match: topic => /深圳|龙岗/.test(`${topic.title} ${topic.source}`) },
+  { id: "local", label: "朝阳本地", match: topic => /北京|朝阳/.test(`${topic.title} ${topic.source}`) },
   { id: "recent", label: "近三年", match: topic => /近三年|202[3-6]/.test(topic.title) },
   { id: "dedup", label: "已去重", match: topic => /去重/.test(`${topic.focus} ${topic.reason}`) },
   { id: "verified", label: "解析已校验", match: topic => /校验|复核/.test(`${topic.focus} ${topic.reason}`) }
@@ -353,7 +357,7 @@ function primaryTag(topic) {
   if (homepagePaperItems[topic.id]?.examType === "mock") return "中考模拟";
   if (topic.tag === "compilation" && topic.title.includes("真题")) return "真题汇编";
   if (topic.title.includes("易错")) return "高频易错";
-  if (topic.author?.school && /深圳中学|龙岗区实验|龙岗区外国语|龙城初级|深圳外国语/.test(topic.author.school)) return "名校资源";
+  if (topic.author?.school && /八十中|陈经纶|朝阳实验|朝阳外国语|日坛中学|第十七中学|北京中学/.test(topic.author.school)) return "名校资源";
   if (topic.tag === "school") return "本地精选";
   if (topic.tag === "workbook") return "系列题单";
   if (topic.tag === "special") return "培优突破";
@@ -379,7 +383,7 @@ function topicBrief(topic) {
   const briefs = {
     t36:"从概念辨析到方法迁移，适合公开课后的课堂巩固。",
     t37:"按关键步骤拆分综合题，方便课堂分层选题。",
-    t4:"按考点重组深圳重点校真题，直观覆盖几何核心概念。",
+    t4:"按考点重组朝阳重点校真题，直观覆盖几何核心概念。",
     t18:"覆盖数与式多个单元，适合阶段复习与综合提升。"
   };
   return briefs[topic.id] || `${topic.focus}，共 ${topic.questions} 题，适合直接选用。`;
@@ -525,27 +529,33 @@ function homepageEntryOptions(filter, entry) {
 
 const homepagePaperItems = {
   // DEMO 日期用于演示「本地新上」排序；正式环境由资源服务返回平台首次上线时间。
-  t2: { id:"t2", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"440305", publishedAt:"2026-08-11" },
-  t14: { id:"t14", authority:"district", examType:"midterm", sourceVerified:true, scopeVerified:true, districtCode:"440304", publishedAt:"2026-08-06" },
-  t25: { id:"t25", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"440303", publishedAt:"2026-08-07" },
-  t59: { id:"t59", authority:"local", examType:"monthly", sourceVerified:true, districtCode:"440307", publishedAt:"2026-08-13" },
-  t62: { id:"t62", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-12", uploader:{ name:"深中教研组", tone:"amber" } },
-  t63: { id:"t63", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, peerMatched:true, publishedAt:"2026-08-09", uploader:{ name:"实验教研组", tone:"blue" } },
-  t64: { id:"t64", authority:"district", examType:"midterm", sourceVerified:true, scopeVerified:true, districtCode:"440306", publishedAt:"2026-08-08" },
-  t65: { id:"t65", authority:"group", examType:"midterm", sourceVerified:true, scopeVerified:true, publishedAt:"2026-08-10", uploader:{ name:"育才教研组", tone:"violet" } },
-  t58: { id:"t58", authority:"school", examType:"mock", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-05", uploader:{ name:"深中数学组", tone:"amber" } },
+  t2: { id:"t2", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"110105", publishedAt:"2026-08-11" },
+  t14: { id:"t14", authority:"district", examType:"midterm", sourceVerified:true, scopeVerified:true, districtCode:"110105", publishedAt:"2026-08-06" },
+  t25: { id:"t25", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"110105", publishedAt:"2026-08-07" },
+  t59: { id:"t59", authority:"local", examType:"monthly", sourceVerified:true, districtCode:"110105", publishedAt:"2026-08-13" },
+  t62: { id:"t62", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-12", uploader:{ name:"八十中教研组", tone:"amber" } },
+  t63: { id:"t63", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, peerMatched:true, publishedAt:"2026-08-09", uploader:{ name:"经纶教研组", tone:"blue" } },
+  t64: { id:"t64", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"110105", publishedAt:"2026-08-08" },
+  t65: { id:"t65", authority:"group", examType:"midterm", sourceVerified:true, scopeVerified:true, publishedAt:"2026-08-10", uploader:{ name:"北京中学教研组", tone:"violet" } },
+  t58: { id:"t58", authority:"school", examType:"mock", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-05", uploader:{ name:"八十中数学组", tone:"amber" } },
   t66: { id:"t66", authority:"district", examType:"real", sourceVerified:true, scopeVerified:true, publishedAt:"2026-08-04" },
-  t67: { id:"t67", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-03", uploader:{ name:"深外教研组", tone:"rose" } },
-  t68: { id:"t68", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-02", uploader:{ name:"深高教研组", tone:"blue" } },
-  t69: { id:"t69", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-01", uploader:{ name:"红岭教研组", tone:"amber" } },
-  t70: { id:"t70", authority:"school", examType:"monthly", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-07-31", uploader:{ name:"南外教研组", tone:"violet" } }
+  t67: { id:"t67", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-03", uploader:{ name:"朝外教研组", tone:"rose" } },
+  t68: { id:"t68", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-02", uploader:{ name:"日坛教研组", tone:"blue" } },
+  t69: { id:"t69", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-01", uploader:{ name:"十七中教研组", tone:"amber" } },
+  t70: { id:"t70", authority:"school", examType:"monthly", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-07-31", uploader:{ name:"八十中分校教研组", tone:"violet" } },
+  t71: { id:"t71", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, districtCode:"110102", publishedAt:"2026-08-12", uploader:{ name:"四中教研组", tone:"amber" } },
+  t72: { id:"t72", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, districtCode:"110102", publishedAt:"2026-08-08", uploader:{ name:"八中教研组", tone:"blue" } },
+  t73: { id:"t73", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, districtCode:"110108", publishedAt:"2026-08-13", uploader:{ name:"人大附中教研组", tone:"violet" } },
+  t74: { id:"t74", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, districtCode:"110108", publishedAt:"2026-08-10", uploader:{ name:"清华附中教研组", tone:"rose" } },
+  t75: { id:"t75", authority:"school", examType:"monthly", sourceVerified:true, famousSchoolVerified:true, districtCode:"110108", publishedAt:"2026-08-06", uploader:{ name:"北大附中教研组", tone:"amber" } },
+  t76: { id:"t76", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, districtCode:"110102", publishedAt:"2026-08-09", uploader:{ name:"师大附中教研组", tone:"blue" } }
 };
 
 // DEMO 运营白名单：正式环境按城市、学年和租户配置，不从标题或使用量推断。
 const strongDistrictPolicy = {
   label: "强区",
   schoolYear: "2025-2026",
-  districtCodes: new Set(["440305", "440304"])
+  districtCodes: new Set(["110105", "110102", "110108"])
 };
 
 function isStrongDistrictPaper(item) {
@@ -601,13 +611,13 @@ const homepageSyncItems = {
   t42: { type:"课时练", source:"全品学练考", level:"基础" },
   t9: { type:"课后巩固", source:"多维导学案", level:"中等" },
   t41: { type:"单元检测", source:"多维导学案", level:"中等" },
-  t54: { type:"章节真题", source:"龙岗区教研精选", level:"中等" },
-  t56: { type:"章节真题", source:"深圳区级真题库", level:"中等" }
+  t54: { type:"章节真题", source:"朝阳区教研精选", level:"中等" },
+  t56: { type:"章节真题", source:"朝阳区级真题库", level:"中等" }
 };
 
 const homepageFeaturedData = {
   local: {
-    description: "优先展示深圳近期新上资源，按资源类型分区呈现",
+    description: "优先展示朝阳近期新上资源，按资源类型分区呈现",
     papers: [
       homepagePaperItems.t59,
       homepagePaperItems.t62,
@@ -642,14 +652,14 @@ const homepageFeaturedData = {
   famous: {
     description: "优先展示已核验的名校与集团校试卷",
     papers: [
+      homepagePaperItems.t73,
+      homepagePaperItems.t74,
+      homepagePaperItems.t71,
       homepagePaperItems.t62,
-      homepagePaperItems.t63,
-      homepagePaperItems.t58,
-      homepagePaperItems.t65,
+      homepagePaperItems.t76,
+      homepagePaperItems.t72,
       homepagePaperItems.t67,
-      homepagePaperItems.t68,
-      homepagePaperItems.t69,
-      homepagePaperItems.t70
+      homepagePaperItems.t68
     ]
   }
 };
@@ -685,6 +695,20 @@ function getHomepagePaperTypeFacts(item) {
   return type ? [{ label:type.label, className:["real", "mock"].includes(type.id) ? "is-paper-nature" : "is-paper-stage" }] : [];
 }
 
+function getHomepagePaperDistrictFact(item, topic) {
+  const text = `${topic?.title || ""} ${topic?.source || ""} ${topic?.reason || ""}`;
+  if (item?.districtCode === "110102" || /西城|第四中学|第八中学|师大附中|北京师范大学附属/.test(text)) {
+    return { label:"西城", className:"is-xicheng" };
+  }
+  if (item?.districtCode === "110108" || /海淀|人大附中|清华附中|北大附中|中国人民大学附属|清华大学附属|北京大学附属/.test(text)) {
+    return { label:"海淀", className:"is-haidian" };
+  }
+  if (item?.districtCode === "110105" || /朝阳|八十中|陈经纶|日坛|十七中|朝阳外国语/.test(text)) {
+    return { label:"朝阳", className:"is-chaoyang" };
+  }
+  return null;
+}
+
 function getHomepagePaperUploader(item, topic) {
   const mapped = item?.uploader || topic?.author;
   if (!mapped?.name) return null;
@@ -699,22 +723,20 @@ function homepagePaperCard(item, options = {}) {
   const topic = byId[item.id];
   if (!topic) return "";
   const presentation = getHomepagePaperPresentation(item);
-  const secondaryFact = item.peerMatched
-    ? { label:"同类校", className:"is-peer" }
-    : isStrongDistrictPaper(item)
-      ? { label:strongDistrictPolicy.label, className:"is-strong" }
-      : null;
+  const districtFact = getHomepagePaperDistrictFact(item, topic);
   const facts = [
-    { ...presentation },
-    ...(secondaryFact ? [secondaryFact] : []),
+    ...(districtFact ? [districtFact] : []),
+    ...(options.lane === "download" ? [] : [{ ...presentation }]),
     ...getHomepagePaperTypeFacts(item)
   ];
   const filters = getHomepagePaperFilters(item);
   const typeIds = getHomepagePaperTypeIds(item);
   const publishedText = item.publishedAt ? item.publishedAt.replaceAll("-", "/") : "";
   const uploader = options.lane === "famous" ? getHomepagePaperUploader(item, topic) : null;
+  const rank = Number(options.rank) || 0;
   return `
-    <button class="home-paper-card" type="button" data-topic="${topic.id}" data-context="paper" data-featured-paper-card data-paper-filters="${filters.join(" ")}" data-paper-types="${typeIds.join(" ")}">
+    <button class="home-paper-card${rank ? " is-ranked" : ""}" type="button" data-topic="${topic.id}" data-context="paper" data-featured-paper-card data-paper-filters="${filters.join(" ")}" data-paper-types="${typeIds.join(" ")}">
+      ${rank ? `<span class="home-paper-rank${rank <= 3 ? " is-top" : ""}">${String(rank).padStart(2, "0")}</span>` : ""}
       <span class="home-paper-copy">
         <span class="home-featured-resource-title"><b>${topic.title}</b></span>
         <span class="home-paper-meta-row">
@@ -722,7 +744,8 @@ function homepagePaperCard(item, options = {}) {
           <small>
             ${uploader ? `<span class="home-paper-uploader"><span class="teacher-avatar ${uploader.tone}">${uploader.initial}</span>${uploader.name}</span>` : ""}
             ${options.lane === "hot" ? `<span><i class="ri-user-line"></i>${topic.usage.toLocaleString()} 人使用</span>` : ""}
-            ${publishedText ? `<span class="home-paper-published"><i class="ri-time-line"></i>${publishedText}</span>` : ""}
+            ${options.lane === "download" ? `<span><i class="ri-download-2-line"></i>${topic.usage.toLocaleString()}</span>` : ""}
+            ${options.lane === "download" ? "" : publishedText ? `<span class="home-paper-published"><i class="ri-time-line"></i>${publishedText}</span>` : ""}
           </small>
         </span>
       </span>
@@ -744,43 +767,53 @@ function homepageCompactResource(topicId, options = {}) {
 }
 
 function homepagePaperLane(mode, title, papers) {
-  const icons = { latest: "ri-time-line", hot: "ri-fire-line", famous: "ri-building-4-line" };
+  const icons = { latest: "ri-time-line", hot: "ri-fire-line", famous: "ri-building-4-line", download: "ri-bar-chart-2-line" };
   const visiblePapers = papers.slice(0, homepagePaperLaneLimit);
   return `
     <section class="home-paper-lane is-${mode}" data-paper-lane="${mode}" aria-label="${title}">
       <header>
         <h3><i class="${icons[mode] || "ri-file-list-3-line"}"></i>${title}</h3>
-        <button type="button" class="home-paper-lane-more" data-open-filter="paper">更多 <i class="ri-arrow-right-s-line"></i></button>
+        <button type="button" class="home-paper-lane-more" data-open-filter="paper">更多 <i class="ri-arrow-right-line"></i></button>
       </header>
-      <div class="home-paper-lane-list">${visiblePapers.map(item => homepagePaperCard(item, { lane:mode })).join("")}</div>
+      <div class="home-paper-lane-list">${visiblePapers.map((item, index) => homepagePaperCard(item, { lane:mode, rank: mode === "download" ? index + 1 : 0 })).join("")}</div>
       <div class="home-paper-lane-empty" role="status" ${visiblePapers.length ? "hidden" : ""}>当前暂无资源</div>
     </section>`;
 }
 
 function homepageFeaturedPanel() {
-  const latestPapers = [...homepageFeaturedData.local.papers]
-    .sort((a, b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")));
-  const hotPapers = [...homepageFeaturedData.adopted.papers]
-    .sort((a, b) => (byId[b.id]?.usage || 0) - (byId[a.id]?.usage || 0));
+  const recommendPapers = [
+    homepagePaperItems.t59,
+    homepagePaperItems.t73,
+    homepagePaperItems.t62,
+    homepagePaperItems.t71,
+    homepagePaperItems.t2,
+    homepagePaperItems.t74,
+    homepagePaperItems.t63,
+    homepagePaperItems.t76,
+    homepagePaperItems.t25,
+    homepagePaperItems.t72
+  ].filter(Boolean);
   const famousPapers = [...homepageFeaturedData.famous.papers]
     .sort((a, b) => (byId[b.id]?.usage || 0) - (byId[a.id]?.usage || 0));
-  const paperLanes = [
-    { id:"latest", label:"最新试卷", papers:latestPapers },
-    { id:"hot", label:"热门试卷", papers:hotPapers },
-    { id:"famous", label:"名校试卷", papers:famousPapers }
-  ];
   const syncData = homepageFeaturedData.local;
   return `
     <div class="home-featured-panel" data-featured-panel="combined">
       <div class="home-featured-layout" data-featured-layout>
         <section class="home-featured-paper">
-          <div class="home-paper-columns">
-            ${paperLanes.map(lane => homepagePaperLane(lane.id, lane.label, lane.papers)).join("")}
+          <div class="home-paper-recommend-layout">
+            <section class="home-recommend-module" aria-label="精选试卷">
+              <header>
+                <h3><i class="ri-file-paper-2-line"></i>精选试卷</h3>
+                <button type="button" class="home-paper-lane-more" data-open-filter="paper">更多 <i class="ri-arrow-right-line"></i></button>
+              </header>
+              <div class="home-recommend-grid">${recommendPapers.map(item => homepagePaperCard(item, { lane:"recommend" })).join("")}</div>
+            </section>
+            ${homepagePaperLane("download", "老师都在用", famousPapers)}
           </div>
         </section>
         ${homepageAlbumResourceSection(true)}
         <section class="home-featured-sync home-featured-learning" aria-labelledby="home-sync-practice-title">
-          <header class="home-featured-subhead home-sync-shared-head"><div class="home-paper-title-line home-sync-title-line"><span id="home-sync-practice-title"><i class="ri-book-open-line"></i>同步练习</span></div><button type="button" data-open-filter="chapter">查看全部 <i class="ri-arrow-right-line"></i></button></header>
+          <header class="home-featured-subhead home-sync-shared-head"><div class="home-paper-title-line home-sync-title-line"><span id="home-sync-practice-title"><i class="ri-book-open-line"></i>同步练习</span></div><button type="button" class="home-paper-lane-more" data-open-filter="chapter">更多 <i class="ri-arrow-right-line"></i></button></header>
           <div>
             ${syncData.sync.map(id => homepageCompactResource(id, { type:"练习册", context:"series" })).join("")}
             ${syncData.compilations.map(id => homepageCompactResource(id, { type:"真题整理", context:"paper" })).join("")}
@@ -793,7 +826,7 @@ function homepageFeaturedPanel() {
 function homepageFeaturedResources() {
   return `
     <section class="home-section home-featured-section" aria-label="本地资源">
-      <div class="home-mobile-scope" aria-label="当前教学范围"><i class="ri-map-pin-2-line"></i><span>龙岗区 · 七年级数学 · 人教版上册</span></div>
+      <div class="home-mobile-scope" aria-label="当前教学范围"><i class="ri-map-pin-2-line"></i><span>朝阳区 · 七年级上 数学 · 人教版上册</span></div>
       ${homepageFeaturedPanel()}
     </section>`;
 }
@@ -803,7 +836,7 @@ function homepageSectionHeading(options) {
     <header class="home-resource-section-heading">
       <span class="home-resource-section-icon"><i class="${options.icon}"></i></span>
       <div><h2>${options.title}</h2></div>
-      <button type="button" data-open-filter="${options.filter}" ${options.entry ? `data-resource-entry="${options.entry}"` : ""}>${options.cta || "查看全部"} <i class="ri-arrow-right-line"></i></button>
+      <button type="button" data-open-filter="${options.filter}" ${options.entry ? `data-resource-entry="${options.entry}"` : ""}>${options.cta || "更多"} <i class="ri-arrow-right-line"></i></button>
     </header>`;
 }
 
@@ -851,14 +884,14 @@ function homepagePaperResourceSection() {
 function homepageSpecialResourceSection() {
   const specialItems = [
     { id:"t18", number:"01", tags:["阶段复习", "培优提高"], title:"数与式综合：有理数、整式与方程", level:"中等—提高" },
-    { id:"t3", number:"02", tags:["情境应用", "建模"], title:"深圳真实情境：代数式建模专项", level:"中等" },
+    { id:"t3", number:"02", tags:["情境应用", "建模"], title:"朝阳真实情境：代数式建模专项", level:"中等" },
     { id:"t32", number:"03", tags:["方法突破", "规范表达"], title:"几何语言转换与规范表达", level:"基础—中等" },
     { id:"t1", number:"04", tags:["易错补弱", "二次过关"], title:"有理数符号与运算易错二练", level:"中等" },
     { id:"t28", number:"05", tags:["阅读理解", "情境应用"], title:"数学阅读理解：情境信息提取", level:"较难" }
   ];
   return `
     <section class="home-resource-section home-special-resource-section">
-      ${homepageSectionHeading({ icon:"ri-focus-3-line", title:"专题", filter:"special", cta:"更多专题" })}
+      ${homepageSectionHeading({ icon:"ri-focus-3-line", title:"专题", filter:"special" })}
       <div class="home-special-resource-grid">
         ${specialItems.map(item => {
           const topic = byId[item.id];
@@ -886,19 +919,19 @@ function homepageAlbumResourceSection(inFeatured = false) {
     if (!album) return "";
 
     const albumTopics = topics.filter(topic => topic.tag === "workbook" && topic.source === album.source);
-    const totalUsage = albumTopics.reduce((sum, topic) => sum + topic.usage, 0);
+    const totalQuestions = albumTopics.reduce((sum, topic) => sum + (Number(topic.questions) || 0), 0);
     const display = albumPresentation[album.id] || { tone:"indigo", spine:"练习册", kind:"练习册", scene:"" };
 
     return `<button type="button" class="home-workbook-card is-${display.tone}" data-album-jump="${album.source}">
       <span class="home-workbook-spine"><i class="ri-book-2-line"></i><em>${display.spine}</em></span>
-      <span class="home-workbook-copy"><small>${display.kind}</small><b>${album.name}</b><p>${display.scene}</p><em>整本 · ${albumTopics.length} 份练习 · ${totalUsage.toLocaleString()} 次使用</em></span>
+      <span class="home-workbook-copy"><small>${display.kind}</small><b>${album.name}</b><p>${display.scene}</p><em>${albumTopics.length}份练习 · ${totalQuestions}道题</em></span>
       <i class="ri-arrow-right-s-line"></i>
     </button>`;
   }).join("");
 
   return `
     <section class="home-resource-section home-album-resource-section ${inFeatured ? "home-featured-workbook" : ""}">
-      ${homepageSectionHeading({ icon:"ri-book-2-line", title:"练习册", filter:"workbook", cta:"进入练习册" })}
+      ${homepageSectionHeading({ icon:"ri-book-2-line", title:"练习册", filter:"workbook" })}
       <div class="home-workbook-panel" data-home-workbook-shelf>
         ${renderWorkbookCards(homepageWorkbookShelfIds)}
       </div>
@@ -995,7 +1028,7 @@ function homepageSearchResults(query, scope = "all") {
     .filter(tagMatch)
     .filter(topic => `${topic.title} ${topic.focus} ${topic.reason} ${topic.source}`.toLowerCase().includes(keyword))
     .sort((a, b) => {
-      const localDelta = Number(/深圳|龙岗/.test(`${b.title} ${b.source}`)) - Number(/深圳|龙岗/.test(`${a.title} ${a.source}`));
+      const localDelta = Number(/北京|朝阳/.test(`${b.title} ${b.source}`)) - Number(/北京|朝阳/.test(`${a.title} ${a.source}`));
       return localDelta || b.usage - a.usage;
     });
 }
@@ -1121,7 +1154,7 @@ function paperCategoryView() {
             ${paperFilterTagGroup("学年", paperYearOptions, paperFilterState.year, "data-paper-year")}
             <div class="paper-filter-row">
               <span class="paper-filter-label">地区</span>
-              <button class="paper-filter-select" type="button"><span>深圳市龙岗区</span><i class="ri-arrow-down-s-line"></i></button>
+              <button class="paper-filter-select" type="button"><span>北京市朝阳区</span><i class="ri-arrow-down-s-line"></i></button>
             </div>
             ${paperFilterTagGroup("年级", paperGradeOptions, paperFilterState.grade, "data-paper-grade")}
             ${paperFilterTagGroup("题源", paperAuthorityOptions, paperFilterState.authority, "data-paper-authority")}
@@ -1408,7 +1441,7 @@ function chapterCategoryView() {
             ${paperFilterTagGroup("来源", paperSourceOptions, chapterFilterState.source, "data-chapter-source")}
             <div class="paper-filter-row">
               <span class="paper-filter-label">地区</span>
-              <button class="paper-filter-select chapter-filter-select" type="button"><span>深圳市龙岗区</span><i class="ri-arrow-down-s-line"></i></button>
+              <button class="paper-filter-select chapter-filter-select" type="button"><span>北京市朝阳区</span><i class="ri-arrow-down-s-line"></i></button>
             </div>
             <label class="paper-filter-search">
               <span class="paper-filter-label">搜索</span>
@@ -1560,7 +1593,7 @@ function categoryBrowserView(kind) {
   const config = {
     chapter: { label:"同步练习", navLabel:"教材章节", nav:["正数与负数","有理数及其运算","整式的加减","一元一次方程","图形初步认识"], topics:["t8","t9","t10","t11","t12","t13"], chips:["全部同步", "课时练习", "单元检测", "易错巩固"], selector:"人教版七上" },
     special: { label:"专题", navLabel:"知识领域", nav:["数与式","方程与不等式","函数","图形与几何","统计与概率"], topics:["t1","t3","t5","t23","t28","t31","t32"], chips:["全部专题", "易错巩固", "方法突破", "情境应用", "培优提高"], selector:"全部难度" },
-    paper: { label:"试卷", navLabel:"考试类型", nav:["期末考试","期中考试","月考","单元测试","中考真题"], topics:["t2","t4","t6","t14","t25","t27","t33"], chips:["本地优先", "使用最多", "真题汇编"], selector:"深圳市 · 七年级数学" }
+    paper: { label:"试卷", navLabel:"考试类型", nav:["期末考试","期中考试","月考","单元测试","中考真题"], topics:["t2","t4","t6","t14","t25","t27","t33"], chips:["本地优先", "使用最多", "真题汇编"], selector:"北京市朝阳区 · 七年级上 数学" }
   }[kind];
   if (kind === "paper") return paperCategoryView();
   if (kind === "special") return specialCategoryView();
@@ -1783,8 +1816,8 @@ function topicMatchesFeedFilters(topic) {
   const difficultyMatch = feedFilterState.difficulty === "all" || topic.difficulty === feedFilterState.difficulty;
   const sourceText = `${topic.source} ${topic.author?.school || ""}`;
   const sourceMatch = feedFilterState.source === "all"
-    || (feedFilterState.source === "local" && /龙岗|坂田|平湖|龙城|深圳/.test(sourceText))
-    || (feedFilterState.source === "famous" && /深圳中学|深圳实验|深圳外国语|龙岗区实验|龙岗区外国语|龙城初级/.test(sourceText))
+    || (feedFilterState.source === "local" && /朝阳|望京|劲松|日坛|北京/.test(sourceText))
+    || (feedFilterState.source === "famous" && /八十中|陈经纶|朝阳外国语|朝阳实验|日坛中学|第十七中学|北京中学|第四中学|第八中学|人大附中|清华附中|北大附中|师大附中/.test(sourceText))
     || (feedFilterState.source === "school" && Boolean(topic.author))
     || (feedFilterState.source === "series" && topic.tag === "workbook");
   const text = `${topic.title} ${topic.focus} ${topic.reason}`;
@@ -2141,15 +2174,13 @@ function syncAiInputs(value, sourceId) {
 }
 
 function openAi(prompt = "") {
-  const value = prompt || document.querySelector("#aiQuickInput")?.value || "";
-  if (value) syncAiInputs(value, "");
-  document.querySelector("#aiForm").hidden = false;
-  document.querySelector("#aiResult").hidden = true;
-  if (value) document.querySelector(".prompt-box textarea").value = value;
-  aiModalOpen = true;
-  showAiDock(false);
-  aiMask.hidden = false;
-  document.body.style.overflow = "hidden";
+  const value = (prompt || document.querySelector("#aiQuickInput")?.value || "").trim();
+  if (!value) {
+    showToast("先描述一下想要什么题单");
+    document.querySelector("#aiQuickInput")?.focus();
+    return;
+  }
+  location.href = `./detail-ai.html?mode=compose&prompt=${encodeURIComponent(value)}&context=paper`;
 }
 
 function closeAi() {
@@ -2248,6 +2279,7 @@ window.addEventListener("scroll", () => {
 document.querySelector("#filterChips").addEventListener("click", event => { const button = event.target.closest("[data-filter]"); if (button) setMainFilter(button.dataset.filter); });
 document.querySelector("#resetFilter").addEventListener("click", () => setMainFilter("all"));
 document.querySelector("[data-open-preference]")?.addEventListener("click", openHomePreference);
+document.querySelector("[data-open-my-resources]")?.addEventListener("click", () => showToast("我的资源即将开放"));
 
 function bindAiForm(formSelector, inputSelector, addSelector, voiceSelector) {
   const form = document.querySelector(formSelector);
@@ -2261,10 +2293,10 @@ function bindAiForm(formSelector, inputSelector, addSelector, voiceSelector) {
 
 const aiHintExamples = {
   "找题": "帮我找七年级有理数易错题，15 题，中等难度",
-  "找卷": "帮我找深圳龙岗区七年级上期末数学试卷",
+  "找卷": "帮我找北京朝阳区七年级上期末数学试卷",
   "AI 组卷": "帮我组一份七年级有理数单元检测卷，45 分钟，中等难度",
   "AI 组练习": "帮我组一份七年级有理数随堂练习，15 分钟，基础为主，加入 2 道易错题",
-  "AI 改编": "把这份题单改编成深圳情境题，考点不变",
+  "AI 改编": "把这份题单改编成朝阳情境题，考点不变",
   "AI 命题": "帮我命制 5 道有理数应用题，中等难度",
   "AI 录题": "帮我把这张试卷图片录入为题单"
 };
@@ -2306,6 +2338,12 @@ document.querySelector("#preferenceMask")?.addEventListener("click", event => { 
 document.querySelectorAll("[data-preference-group]").forEach(button => button.addEventListener("click", () => {
   const group = button.dataset.preferenceGroup;
   const value = button.dataset.preferenceValue;
+  const mode = button.closest("[data-preference-mode]")?.dataset.preferenceMode || "multiple";
+  if (mode === "single") {
+    homePreferenceDraft[group] = [value];
+    renderHomePreferenceDialog();
+    return;
+  }
   const values = new Set(homePreferenceDraft[group] || []);
   if (values.has(value)) values.delete(value);
   else values.add(value);

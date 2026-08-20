@@ -5,12 +5,12 @@ const fromAi = params.get("from") === "ai";
 const sourceTabId = params.get("tabId") || "";
 
 const topicTitles = {
-  t2: "2026 深圳南山区初一上期末数学真题",
+  t2: "2026 北京市朝阳区初一上期末数学真题",
   t8: "正数与负数概念巩固题单",
   t9: "有理数运算基础过关配套题单",
-  t14: "2026 深圳福田区初一下期中数学真题",
-  t15: "坂田片区课堂小测精选题单",
-  t25: "2025 深圳中考数学基础题单",
+  t14: "2026 北京市朝阳区初一下期中数学真题",
+  t15: "望京片区课堂小测精选题单",
+  t25: "2025 北京中考数学基础题单",
   t31: "代数式实际意义专项题单"
 };
 
@@ -292,7 +292,7 @@ function replaceQuestion(id) {
 
 function initPageChrome() {
   $("#paperTitle").textContent = documentTitle;
-  document.title = `${documentTitle} · 飞象 AI 题库`;
+  document.title = `${documentTitle} · 飞象题库`;
   $("#breadcrumbLeaf").textContent = payload?.isQuestionList ? "新建题单" : "排版题单";
 
   const backLink = $("#backLink");

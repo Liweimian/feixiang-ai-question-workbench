@@ -23,6 +23,41 @@ body.school-library-page .school-header .category-tabs .category-nav-link {
   color: #4d5f89;
 }
 
+body.index-page .header-tools {
+  gap: 10px;
+}
+
+body.index-page .site-header .header-my-resources {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 8px;
+  color: #5a6788;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0;
+  white-space: nowrap;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+body.index-page .site-header .header-my-resources i {
+  font-size: 15px;
+  color: #7a86a8;
+}
+
+body.index-page .site-header .header-my-resources:hover {
+  color: #526bcf;
+  background: #eef1fb;
+}
+
+body.index-page .site-header .header-my-resources:hover i {
+  color: #526bcf;
+}
+
 /* Preference recommendations and library-wide scale --------------------- */
 body.index-page.is-home-view .home-preference-section {
   overflow: hidden;
@@ -336,7 +371,7 @@ body.index-page.is-home-view .home-preference-reason i { color: #99a2b2; }
 .home-preference-mask[hidden] { display: none !important; }
 
 .home-preference-dialog {
-  width: min(620px, 100%);
+  width: min(480px, 100%);
   max-height: calc(100vh - 40px);
   max-height: calc(100dvh - 40px);
   display: grid;
@@ -393,22 +428,50 @@ body.index-page.is-home-view .home-preference-reason i { color: #99a2b2; }
   background: #f0f2f7;
 }
 
-.home-preference-groups { display: grid; gap: 0; overflow-y: auto; padding: 5px 18px; }
-.home-preference-groups > section { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid #f0f2f7; }
+.home-preference-groups { display: grid; gap: 0; overflow-y: auto; padding: 8px 20px 7px; }
+.home-preference-groups > section { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: center; gap: 10px; padding: 13px 0; border-bottom: 1px solid #f0f2f7; }
 .home-preference-groups > section:last-child { border-bottom: 0; }
+.home-preference-group-label { padding-top: 0; }
 .home-preference-groups h3 { margin: 0; color: #3f4964; font-size: 12px; font-weight: 750; }
-.home-preference-groups section > div { display: flex; flex-wrap: wrap; gap: 7px; }
-.home-preference-groups button {
-  min-height: 30px;
-  padding: 0 11px;
+.home-preference-groups p { margin: 4px 0 0; color: #929aab; font-size: 9.5px; line-height: 1.4; }
+.home-preference-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.home-preference-options button {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 6px 20px 6px 8px;
+  text-align: center;
   color: #66718b;
-  font-size: 11px;
   border: 1px solid #dfe4ef;
   border-radius: 8px;
   background: #fff;
 }
-.home-preference-groups button:hover { color: #4e65ca; border-color: #b9c5f1; background: #f6f7ff; }
-.home-preference-groups button.active { color: #fff; border-color: #617bf2; background: #617bf2; box-shadow: 0 4px 10px rgba(97, 123, 242, .18); }
+.home-preference-options button strong { overflow: hidden; color: #46516d; font-size: 12px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.home-preference-options button small { display: none; }
+.home-preference-options button:hover { border-color: #b9c5f1; background: #f8f9ff; }
+.home-preference-options button.active { border-color: #617bf2; background: #f1f4ff; box-shadow: 0 4px 12px rgba(97, 123, 242, .12); }
+.home-preference-options button.active::after {
+  content: "\2713";
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 9px;
+  border-radius: 50%;
+  background: #617bf2;
+  transform: translateY(-50%);
+}
+.home-preference-options button.active strong { color: #526bd7; }
+.home-preference-options button.active small { color: #7782a0; }
 
 .home-preference-dialog > footer { display: flex; align-items: center; justify-content: flex-end; gap: 9px; padding: 12px 18px 15px; border-top: 1px solid #edf0f6; background: #fbfbfd; }
 .home-preference-dialog > footer button { min-height: 36px; padding: 0 16px; font-size: 11px; font-weight: 750; border-radius: 9px; }
@@ -696,6 +759,300 @@ body.index-page.is-home-view .home-paper-columns .home-paper-lane-empty {
   font-size: 11px;
 }
 
+/* 精选试卷 + 老师都在用 ------------------------------------------- */
+body.index-page.is-home-view .home-paper-recommend-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: stretch;
+  gap: 14px;
+}
+
+body.index-page.is-home-view .home-recommend-module,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 42px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid #e6eaf3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: none;
+}
+
+body.index-page.is-home-view .home-recommend-module > header,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download > header {
+  position: relative;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 14px;
+  color: #1f2a44;
+  border-bottom: 1px solid #eef1f6;
+  background: #fff;
+}
+
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download > header::before {
+  content: none;
+  display: none;
+}
+
+body.index-page.is-home-view .home-recommend-module > header h3,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download > header h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #1f2a44;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+body.index-page.is-home-view .home-recommend-module > header h3 i {
+  color: #4d67e8;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download > header h3 i {
+  color: #4d67e8;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+body.index-page.is-home-view .home-recommend-module > header .home-paper-lane-more,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download > header .home-paper-lane-more,
+body.index-page.is-home-view .home-featured-workbook .home-resource-section-heading > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 0;
+  color: #526bcf;
+  font-size: 12px;
+  font-weight: 700;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+body.index-page.is-home-view .home-recommend-module > header .home-paper-lane-more i,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download > header .home-paper-lane-more i,
+body.index-page.is-home-view .home-featured-workbook .home-resource-section-heading > button i {
+  font-size: 13px;
+}
+
+body.index-page.is-home-view .home-recommend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  align-content: stretch;
+  height: 100%;
+  min-height: 0;
+  gap: 0;
+  padding: 0;
+}
+
+body.index-page.is-home-view .home-recommend-grid .home-paper-card,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-card {
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 0;
+  padding: 8px 12px;
+  border: 0;
+  border-top: 1px solid #f0f2f7;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+body.index-page.is-home-view .home-recommend-grid .home-paper-card {
+  min-height: 58px;
+}
+
+body.index-page.is-home-view .home-recommend-grid .home-paper-card:nth-child(-n+2),
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-card:first-child {
+  border-top: 0;
+}
+
+body.index-page.is-home-view .home-recommend-grid .home-paper-card:nth-child(odd) {
+  padding-right: 16px;
+}
+
+body.index-page.is-home-view .home-recommend-grid .home-paper-card:nth-child(even) {
+  padding-left: 16px;
+  border-left: 1px solid #f0f2f7;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-copy,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-copy {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-copy > .home-featured-resource-title > b,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-copy > .home-featured-resource-title > b {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #243049;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.45;
+  white-space: normal;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-meta-row,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-meta-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-facts,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 4px;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em {
+  padding: 2px 6px;
+  color: #5f6a82;
+  font-size: 12px;
+  font-weight: 650;
+  font-style: normal;
+  border: 0;
+  border-radius: 4px;
+  background: #f4f6fa;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-xicheng,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em.is-xicheng {
+  color: #6a4fb3;
+  background: #f3f0fb;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-haidian,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em.is-haidian {
+  color: #2f6aa8;
+  background: #eef5fb;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-chaoyang,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em.is-chaoyang {
+  color: #2d7a58;
+  background: #eef7f2;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-meta-row > small,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-meta-row > small {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #8b93a6;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-meta-row {
+  justify-content: space-between;
+}
+
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-meta-row > small {
+  margin-left: 8px;
+  justify-content: flex-end;
+  text-align: right;
+  font-size: 12px;
+}
+
+body.index-page.is-home-view .home-recommend-grid .home-paper-card:hover,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-card:hover {
+  border-color: #f0f2f7;
+  background: #f7f8fc;
+  box-shadow: none;
+  transform: none;
+}
+
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-card.is-ranked {
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px;
+  min-height: 0;
+  height: 100%;
+  padding: 8px 12px 8px 10px;
+}
+
+body.index-page.is-home-view .home-paper-rank {
+  flex: none;
+  padding-top: 2px;
+  color: #b0b8c8;
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+body.index-page.is-home-view .home-paper-rank.is-top {
+  color: #e08a2c;
+}
+
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane-list {
+  display: grid;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  align-content: stretch;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts {
+  display: inline-flex;
+}
+
+@media (max-width: 1100px) {
+  body.index-page.is-home-view .home-paper-recommend-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  body.index-page.is-home-view .home-recommend-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.index-page.is-home-view .home-recommend-grid .home-paper-card:nth-child(even) {
+    padding-left: 12px;
+    border-left: 0;
+  }
+
+  body.index-page.is-home-view .home-recommend-grid .home-paper-card:nth-child(-n+2) {
+    border-top: 1px solid #f0f2f7;
+  }
+
+  body.index-page.is-home-view .home-recommend-grid .home-paper-card:first-child {
+    border-top: 0;
+  }
+}
+
 /* Synchronous practice follows papers ----------------------------------- */
 body.index-page.is-home-view .home-featured-layout > .home-featured-sync {
   min-width: 0;
@@ -725,7 +1082,7 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-sync .home-s
 
 body.index-page.is-home-view .home-featured-layout > .home-featured-sync .home-sync-title-line > span {
   color: #202a49;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.25;
 }
@@ -739,7 +1096,7 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-sync > heade
   align-items: center;
   gap: 4px;
   color: #526bcf;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   border: 0;
   background: transparent;
@@ -778,6 +1135,9 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-learning .ho
 body.index-page.is-home-view .home-featured-layout > .home-featured-learning .home-compact-copy .home-featured-resource-title > b {
   display: block;
   overflow: hidden;
+  color: #243049;
+  font-size: 15px;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -786,17 +1146,17 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-learning .ho
 body.index-page.is-home-view .home-featured-layout > .home-featured-learning .home-compact-meta .home-compact-task,
 body.index-page.is-home-view .home-featured-layout > .home-featured-learning .home-compact-resource.is-compilation .home-compact-meta .home-compact-source,
 body.index-page.is-home-view .home-featured-layout > .home-featured-learning .home-compact-resource.is-compilation .home-compact-meta .home-compact-task {
-  padding: 2px 5px;
-  color: #7d8698;
-  font-size: 9px;
-  font-weight: 600;
+  padding: 2px 7px;
+  color: #5f6a82;
+  font-size: 12px;
+  font-weight: 650;
   border-color: #edf0f5;
   background: #f7f8fb;
 }
 
 body.index-page.is-home-view .home-featured-layout > .home-featured-learning .home-compact-meta > span > i {
-  color: #8992a4;
-  font-size: 9px;
+  color: #6d778c;
+  font-size: 12px;
   font-weight: 500;
   border-color: #f0f2f6;
   background: #f8f9fb;
@@ -828,7 +1188,10 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-learning .ho
 
 @media (max-width: 700px) {
   .home-preference-dialog { border-radius: 15px; }
+  .home-preference-scope { margin-inline: 14px; }
+  .home-preference-groups { padding-inline: 14px; }
   .home-preference-groups > section { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .home-preference-group-label { padding-top: 0; }
 
   body.index-page.is-home-view .home-featured-subhead.home-paper-shared-head {
     padding: 0 14px;
@@ -837,6 +1200,10 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-learning .ho
   body.index-page.is-home-view .home-featured-layout > .home-featured-learning > div {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+@media (max-width: 520px) {
+  .home-preference-options { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* Workbook shelf (练习册模块书架层) ------------------------------------ */
@@ -877,7 +1244,7 @@ body.index-page.is-home-view .home-workbook-panel::after {
 
 body.index-page.is-home-view .home-workbook-card {
   min-width: 0;
-  min-height: 108px;
+  min-height: 118px;
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) 14px;
   align-items: center;
@@ -934,15 +1301,15 @@ body.index-page.is-home-view .home-workbook-copy {
 }
 
 body.index-page.is-home-view .home-workbook-copy > small {
-  color: #6f7db1;
-  font-size: 7.5px;
+  color: #5b6aa8;
+  font-size: 12px;
   font-weight: 700;
 }
 
 body.index-page.is-home-view .home-workbook-copy > b {
   overflow: hidden;
-  color: #303b59;
-  font-size: 12px;
+  color: #243049;
+  font-size: 15px;
   font-weight: 780;
   line-height: 1.35;
   text-overflow: ellipsis;
@@ -952,15 +1319,15 @@ body.index-page.is-home-view .home-workbook-copy > b {
 body.index-page.is-home-view .home-workbook-copy > p {
   overflow: hidden;
   margin: 0;
-  color: #7d879b;
-  font-size: 8px;
+  color: #6d778c;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 body.index-page.is-home-view .home-workbook-copy > em {
-  color: #969dac;
-  font-size: 7px;
+  color: #7a8498;
+  font-size: 12px;
   font-style: normal;
 }
 
@@ -1113,7 +1480,7 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-sync .home-s
 body.index-page.is-home-view .home-special-resource-section .home-resource-section-heading h2,
 body.index-page.is-home-view .home-album-resource-section .home-resource-section-heading h2,
 body.index-page.is-home-view .home-featured-workbook .home-resource-section-heading h2 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.25;
 }
