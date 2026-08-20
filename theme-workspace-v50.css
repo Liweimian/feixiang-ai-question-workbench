@@ -357,9 +357,9 @@ body.school-library-page .school-header .category-tabs > a.active::after {
 }
 
 body.school-library-page .school-header .context-identity {
-  color: #3a4666;
-  border: 1px solid #dbe2f1;
-  background: #f8f9fe;
+  color: #5a6788;
+  border: 0;
+  background: transparent;
 }
 
 body.school-library-page .question-bank-shell,

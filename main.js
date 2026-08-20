@@ -2278,8 +2278,6 @@ window.addEventListener("scroll", () => {
 
 document.querySelector("#filterChips").addEventListener("click", event => { const button = event.target.closest("[data-filter]"); if (button) setMainFilter(button.dataset.filter); });
 document.querySelector("#resetFilter").addEventListener("click", () => setMainFilter("all"));
-document.querySelector("[data-open-preference]")?.addEventListener("click", openHomePreference);
-document.querySelector("[data-open-my-resources]")?.addEventListener("click", () => showToast("我的资源即将开放"));
 
 function bindAiForm(formSelector, inputSelector, addSelector, voiceSelector) {
   const form = document.querySelector(formSelector);
