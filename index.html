@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="飞象题库 · 教师整套资源与智能组题工作台" />
-    <title>飞象题库 · 教师资源工作台</title>
+    <meta name="description" content="飞象AI题库 · 教师整套资源与智能组题工作台" />
+    <title>飞象AI题库 · 教师资源工作台</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
     <link rel="stylesheet" href="./styles.css?v=20260819canvasopen1" />
     <link rel="stylesheet" href="./theme-v47.css?v=20260818mistlilac2" />
     <link rel="stylesheet" href="./theme-workspace-v50.css?v=20260813workspace2" />
-    <link rel="stylesheet" href="./home-revision-v51.css?v=20260820book3" />
+    <link rel="stylesheet" href="./home-revision-v51.css?v=20260820pref9" />
     <link rel="stylesheet" href="./detail-ai.css?v=20260820canvas3" />
   </head>
   <body class="index-page">
@@ -124,9 +124,9 @@
       <div class="ai-main-column" id="aiMainColumn">
     <main class="page">
       <header class="discovery site-header" aria-label="题库首页导航">
-        <a class="brand-mark" href="./index.html" aria-label="飞象题库首页">
+        <a class="brand-mark" href="./index.html" aria-label="飞象AI题库首页">
           <span class="brand-mark-glyph" aria-hidden="true"><i class="ri-sparkling-2-fill"></i></span>
-          <span class="brand-mark-copy"><b>飞象题库</b><small>教师资源工作台</small></span>
+          <span class="brand-mark-copy"><b>飞象AI题库</b><small>教师资源工作台</small></span>
         </a>
         <nav id="filterChips" class="filter-chips category-tabs" aria-label="主要功能">
           <button type="button" class="active" data-filter="all" aria-current="page"><span>首页</span></button>
@@ -138,12 +138,11 @@
           <a class="category-nav-link" href="./school.html"><span>题库选题</span></a>
         </nav>
         <div class="header-tools">
-          <div class="context-identity" aria-label="当前教学范围">
-            <i class="ri-map-pin-2-line"></i>
-            <span>北京市朝阳区</span>
-            <i class="context-divider"></i>
-            <span>7年级上 数学</span>
-          </div>
+          <button class="context-identity" type="button" data-open-preference aria-label="我的选题偏好">
+            <i class="ri-equalizer-3-line"></i>
+            <span><b>选题偏好</b><small>北京市朝阳区 7年级上 数学</small></span>
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
         </div>
       </header>
 
@@ -320,7 +319,7 @@
     </div>
 
     <div id="toast" class="toast" role="status"></div>
-    <script src="./main.js?v=20260820book4"></script>
+    <script src="./main.js?v=20260820pref9"></script>
     <script src="./detail-ai.js?v=20260820canvas5"></script>
   </body>
 </html>
