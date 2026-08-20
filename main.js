@@ -85,7 +85,74 @@ const workbookAlbums = [
 ];
 // 首页“练习册”模块：书架层固定展示四本（无需 tab）。
 const homepageWorkbookShelfIds = ["duowei", "quanpin", "yuanchuang", "tiyou"];
-const albumFilterState = { view: "album", origin: "all", textbook: "all", year: "all", query: "" };
+const albumFilterState = { view: "album", albumId: "", nodeId: "ch1-1-m1", openNodes: ["ch1", "ch1-1", "ch1-2", "ch1-2-1"], origin: "all", textbook: "all", year: "all", query: "" };
+
+function workbookModules(prefix, topicIds = ["t40", "t9", "t34", "t50", "t41"]) {
+  return ["达标检测", "基础练习", "能力提升", "拓展训练", "自我反思"].map((title, index) => ({
+    id: `${prefix}-m${index + 1}`,
+    title,
+    topicId: topicIds[index] || topicIds[0]
+  }));
+}
+
+const workbookCatalogTree = [
+  {
+    id: "ch1",
+    title: "第一章 有理数",
+    status: ["上线"],
+    children: [
+      { id: "ch1-1", title: "1.1 正数和负数", status: ["上线", "已关联"], modules: workbookModules("ch1-1") },
+      {
+        id: "ch1-2",
+        title: "1.2 有理数",
+        status: ["上线"],
+        children: [
+          { id: "ch1-2-1", title: "1.2.1 有理数", status: ["上线", "已关联"], modules: workbookModules("ch1-2-1", ["t9", "t40", "t41", "t50", "t51"]) }
+        ]
+      }
+    ]
+  },
+  {
+    id: "ch2",
+    title: "第二章 有理数的运算",
+    status: ["上线"],
+    children: [
+      { id: "ch2-1", title: "2.1 有理数的加法", status: ["上线", "已关联"], modules: workbookModules("ch2-1", ["t7", "t26", "t48", "t46", "t41"]) }
+    ]
+  },
+  {
+    id: "ch3",
+    title: "第三章 代数式",
+    status: ["上线"],
+    children: [
+      { id: "ch3-1", title: "3.1 字母表示数", status: ["上线", "已关联"], modules: workbookModules("ch3-1", ["t48", "t26", "t19", "t44", "t41"]) }
+    ]
+  },
+  {
+    id: "ch4",
+    title: "第四章 整式的加减",
+    status: ["上线"],
+    children: [
+      { id: "ch4-1", title: "4.1 整式", status: ["上线", "已关联"], modules: workbookModules("ch4-1", ["t42", "t48", "t7", "t26", "t41"]) }
+    ]
+  },
+  {
+    id: "ch5",
+    title: "第五章 一元一次方程",
+    status: ["上线"],
+    children: [
+      { id: "ch5-1", title: "5.1 从算式到方程", status: ["上线", "已关联"], modules: workbookModules("ch5-1", ["t43", "t34", "t50", "t45", "t47"]) }
+    ]
+  },
+  {
+    id: "ch6",
+    title: "第六章 几何图形初步",
+    status: ["上线"],
+    children: [
+      { id: "ch6-1", title: "6.1 几何图形", status: ["上线", "已关联"], modules: workbookModules("ch6-1", ["t49", "t51", "t12", "t24", "t41"]) }
+    ]
+  }
+];
 const workbookTypeOptions = [
   {
     id: "sync",
@@ -418,7 +485,7 @@ function topicCard(topic, options = "default") {
     ? `<span class="card-reason paper-source-signal ${paperPresentation?.className || "is-local"}">${paperPresentation?.label || "学校试卷"}</span>${paperMeta?.peerMatched ? '<span class="card-tag-list"><em class="paper-peer-signal">同类校</em></span>' : ""}`
     : "";
   return `
-    <article class="topic-card${variant === "featured" ? " featured-topic-card" : ""}${examClass}" data-topic="${topic.id}" data-source-name="${topic.source}" tabindex="0" role="button" aria-label="查看${topic.title}" style="--tone:${toneMap[topic.tone] || "var(--sage)"}">
+    <article class="topic-card${variant === "featured" ? " featured-topic-card" : ""}${examClass}" data-topic="${topic.id}" data-source-name="${topic.source}"${options.asPaper || context === "paper" ? ' data-context="paper"' : context === "series" ? ' data-context="series"' : ""}${options.lessonTitle ? ` data-lesson-title="${String(options.lessonTitle).replace(/"/g, "&quot;")}"` : ""} tabindex="0" role="button" aria-label="查看${topic.title}" style="--tone:${toneMap[topic.tone] || "var(--sage)"}">
       <div class="card-cover">
         <div class="card-signals">${paperSignal || `<span class="card-reason">${primaryTag(topic)}</span><span class="card-tag-list">${topicTags(topic).map(tag => `<em>${tag}</em>`).join("")}</span>`}</div>
         <h3>${topic.title}</h3>
@@ -488,14 +555,14 @@ function homepageEntryOptions(filter, entry) {
       "基于整卷改编": { examType: "all" }
     },
     workbook: {
-      "本地教辅": { view: "topic", query: "本地教辅", keepAlbumState: true },
-      "热门教辅": { view: "topic", query: "热门系列", keepAlbumState: true },
-      "同步训练": { view: "topic", query: "同步", keepAlbumState: true },
-      "导学案": { view: "topic", query: "导学案", keepAlbumState: true },
-      "分层作业": { view: "topic", query: "基础到综合", keepAlbumState: true },
-      "复习训练": { view: "topic", query: "进阶", keepAlbumState: true },
-      "同步备课": { view: "topic", query: "同步", keepAlbumState: true },
-      "课后巩固": { view: "topic", query: "过关", keepAlbumState: true }
+      "本地教辅": { view: "album", keepAlbumState: true },
+      "热门教辅": { view: "album", keepAlbumState: true },
+      "同步训练": { view: "album", keepAlbumState: true },
+      "导学案": { view: "album", albumId: "duowei", keepAlbumState: true },
+      "分层作业": { view: "album", keepAlbumState: true },
+      "复习训练": { view: "album", keepAlbumState: true },
+      "同步备课": { view: "album", keepAlbumState: true },
+      "课后巩固": { view: "album", keepAlbumState: true }
     },
     compilation: {
       "地区真题汇编": { category: "region" },
@@ -780,19 +847,48 @@ function homepagePaperLane(mode, title, papers) {
     </section>`;
 }
 
+function homepageFeaturedPickCard(pick) {
+  if (pick.kind === "paper") {
+    const item = homepagePaperItems[pick.id];
+    return item ? homepagePaperCard(item, { lane: "recommend" }) : "";
+  }
+  const topic = byId[pick.id];
+  if (!topic) return "";
+  const kindMeta = {
+    compilation: { label: "真题汇编", className: "is-kind-compilation", context: "paper" },
+    workbook: { label: "同步练习", className: "is-kind-workbook", context: "series" },
+    special: { label: "专题", className: "is-kind-special", context: "special" }
+  }[pick.kind] || { label: "精选", className: "", context: "paper" };
+  const publishedText = (pick.publishedAt || "").replaceAll("-", "/");
+  const facts = [
+    `<em class="${kindMeta.className}">${kindMeta.label}</em>`,
+    `<em>${topic.questions}题 · ${topic.minutes}分钟 · ${topic.difficulty}</em>`
+  ].join("");
+  return `
+    <button class="home-paper-card" type="button" data-topic="${topic.id}" data-context="${kindMeta.context}">
+      <span class="home-paper-copy">
+        <span class="home-featured-resource-title"><b>${topic.title}</b></span>
+        <span class="home-paper-meta-row">
+          <span class="home-paper-facts">${facts}</span>
+          <small>${publishedText ? `<span class="home-paper-published"><i class="ri-time-line"></i>${publishedText}</span>` : ""}</small>
+        </span>
+      </span>
+    </button>`;
+}
+
 function homepageFeaturedPanel() {
-  const recommendPapers = [
-    homepagePaperItems.t59,
-    homepagePaperItems.t73,
-    homepagePaperItems.t62,
-    homepagePaperItems.t71,
-    homepagePaperItems.t2,
-    homepagePaperItems.t74,
-    homepagePaperItems.t63,
-    homepagePaperItems.t76,
-    homepagePaperItems.t25,
-    homepagePaperItems.t72
-  ].filter(Boolean);
+  const featuredPicks = [
+    { kind: "paper", id: "t59" },
+    { kind: "paper", id: "t73" },
+    { kind: "paper", id: "t71" },
+    { kind: "compilation", id: "t54", publishedAt: "2026-08-11" },
+    { kind: "paper", id: "t62" },
+    { kind: "workbook", id: "t40", publishedAt: "2026-08-12" },
+    { kind: "paper", id: "t2" },
+    { kind: "special", id: "t1", publishedAt: "2026-08-09" },
+    { kind: "paper", id: "t74" },
+    { kind: "paper", id: "t72" }
+  ];
   const famousPapers = [...homepageFeaturedData.famous.papers]
     .sort((a, b) => (byId[b.id]?.usage || 0) - (byId[a.id]?.usage || 0));
   const syncData = homepageFeaturedData.local;
@@ -801,12 +897,12 @@ function homepageFeaturedPanel() {
       <div class="home-featured-layout" data-featured-layout>
         <section class="home-featured-paper">
           <div class="home-paper-recommend-layout">
-            <section class="home-recommend-module" aria-label="精选试卷">
+            <section class="home-recommend-module" aria-label="精选">
               <header>
-                <h3><i class="ri-file-paper-2-line"></i>精选试卷</h3>
+                <h3><i class="ri-star-smile-line"></i>精选</h3>
                 <button type="button" class="home-paper-lane-more" data-open-filter="paper">更多 <i class="ri-arrow-right-line"></i></button>
               </header>
-              <div class="home-recommend-grid">${recommendPapers.map(item => homepagePaperCard(item, { lane:"recommend" })).join("")}</div>
+              <div class="home-recommend-grid">${featuredPicks.map(homepageFeaturedPickCard).join("")}</div>
             </section>
             ${homepagePaperLane("download", "老师都在用", famousPapers)}
           </div>
@@ -906,34 +1002,35 @@ function homepageSpecialResourceSection() {
     </section>`;
 }
 
-function homepageAlbumResourceSection(inFeatured = false) {
+function renderWorkbookShelfCards(albumIds = homepageWorkbookShelfIds) {
   const albumPresentation = {
     duowei: { tone:"indigo", spine:"同步", kind:"教材同步目录", scene:"课时练 + 单元检测" },
     quanpin: { tone:"rose", spine:"同步", kind:"教材同步目录", scene:"分层巩固 + 单元练习" },
     yuanchuang: { tone:"violet", spine:"同步", kind:"教材同步目录", scene:"课堂同步训练 + 题型梯度" },
-    tiyou: { tone:"slate", spine:"综合", kind:"独立目录", scene:"阶段复习 + 能力培优" }
+    tiyou: { tone:"slate", spine:"综合", kind:"独立目录", scene:"阶段复习 + 能力培优" },
+    yicuo: { tone:"rose", spine:"综合", kind:"独立目录", scene:"错因拆解与变式" }
   };
 
-  const renderWorkbookCards = albumIds => albumIds.map(albumId => {
+  return albumIds.map(albumId => {
     const album = workbookAlbums.find(item => item.id === albumId);
     if (!album) return "";
-
     const albumTopics = topics.filter(topic => topic.tag === "workbook" && topic.source === album.source);
     const totalQuestions = albumTopics.reduce((sum, topic) => sum + (Number(topic.questions) || 0), 0);
-    const display = albumPresentation[album.id] || { tone:"indigo", spine:"练习册", kind:"练习册", scene:"" };
-
-    return `<button type="button" class="home-workbook-card is-${display.tone}" data-album-jump="${album.source}">
+    const display = albumPresentation[album.id] || { tone:"indigo", spine:"练习册", kind:"练习册", scene: album.subtitle || "" };
+    return `<button type="button" class="home-workbook-card is-${display.tone}" data-album-open="${album.id}">
       <span class="home-workbook-spine"><i class="ri-book-2-line"></i><em>${display.spine}</em></span>
       <span class="home-workbook-copy"><small>${display.kind}</small><b>${album.name}</b><p>${display.scene}</p><em>${albumTopics.length}份练习 · ${totalQuestions}道题</em></span>
       <i class="ri-arrow-right-s-line"></i>
     </button>`;
   }).join("");
+}
 
+function homepageAlbumResourceSection(inFeatured = false) {
   return `
     <section class="home-resource-section home-album-resource-section ${inFeatured ? "home-featured-workbook" : ""}">
       ${homepageSectionHeading({ icon:"ri-book-2-line", title:"练习册", filter:"workbook" })}
       <div class="home-workbook-panel" data-home-workbook-shelf>
-        ${renderWorkbookCards(homepageWorkbookShelfIds)}
+        ${renderWorkbookShelfCards(homepageWorkbookShelfIds)}
       </div>
     </section>`;
 }
@@ -1616,9 +1713,8 @@ function categoryBrowserView(kind) {
 }
 
 function seriesCategoryView() {
-  const albumView = albumFilterState.view === "album";
+  if (albumFilterState.view === "catalog") return workbookCatalogView();
   const albums = filteredWorkbookAlbums();
-  const list = filteredWorkbookTopics();
   const allSeriesOptions = ["全部系列", ...workbookSeriesOptions];
   return `
     <section class="category-detail album-category-view">
@@ -1644,20 +1740,196 @@ function seriesCategoryView() {
           </div>
         </label>
       </div>
-      <div class="album-toolbar">
-        <div class="album-view-tabs" role="tablist" aria-label="练习册浏览方式">
-          <button type="button" class="${albumView ? "active" : ""}" data-album-view="album" role="tab" aria-selected="${albumView}">练习册</button>
-          <button type="button" class="${!albumView ? "active" : ""}" data-album-view="topic" role="tab" aria-selected="${!albumView}">单卷</button>
-        </div>
-      </div>
-      <div class="album-panel album-by-album" data-album-panel="album" ${albumView ? "" : "hidden"}>
-        <div class="series-library-grid album-grid">${albums.map(albumCard).join("")}</div>
+      <div class="album-shelf-panel">
+        <div class="home-workbook-panel album-shelf-grid">${renderWorkbookShelfCards(albums.map(album => album.id))}</div>
         <div class="album-empty" ${albums.length ? "hidden" : ""}>没有找到匹配的练习册，换个关键词试试。</div>
       </div>
-      <div class="album-panel album-by-topic" data-album-panel="topic" ${albumView ? "hidden" : ""}>
-        <div class="album-topic-meta"><b>全部题单</b><span data-album-topic-count>共 ${list.length.toLocaleString()} 份</span></div>
-        <div class="series-topic-grid album-topic-grid">${list.map(topic => topicCard(topic, { context: "series" })).join("")}</div>
-        <div class="album-empty" ${list.length ? "hidden" : ""}>没有找到匹配的题单，换个关键词试试。</div>
+    </section>`;
+}
+
+function currentWorkbookAlbum() {
+  return workbookAlbums.find(item => item.id === albumFilterState.albumId)
+    || workbookAlbums.find(item => item.source === albumFilterState.query)
+    || workbookAlbums[0];
+}
+
+function walkWorkbookNodes(nodes, visit, parents = []) {
+  (nodes || []).forEach(node => {
+    visit(node, parents);
+    if (node.children?.length) walkWorkbookNodes(node.children, visit, [...parents, node]);
+    if (node.modules?.length) walkWorkbookNodes(node.modules, visit, [...parents, node]);
+  });
+}
+
+function findWorkbookNode(nodeId) {
+  let found = null;
+  walkWorkbookNodes(workbookCatalogTree, (node, parents) => {
+    if (node.id === nodeId) found = { node, parents };
+  });
+  return found;
+}
+
+function workbookNodeSets(node) {
+  if (!node) return [];
+  if (node.topicId) return [node];
+  const sets = [];
+  (node.modules || []).forEach(item => sets.push(...workbookNodeSets(item)));
+  (node.children || []).forEach(item => sets.push(...workbookNodeSets(item)));
+  return sets;
+}
+
+function workbookStatusTags(status = []) {
+  return status.map(label => `<em class="${label === "已关联" ? "is-linked" : "is-online"}">${label}</em>`).join("");
+}
+
+function renderWorkbookTreeNodes(nodes, depth = 0) {
+  const openNodes = new Set(albumFilterState.openNodes);
+  const activeId = albumFilterState.nodeId;
+  return nodes.map(node => {
+    const hasChildren = Boolean(node.children?.length || node.modules?.length);
+    const open = openNodes.has(node.id);
+    const children = [...(node.children || []), ...(node.modules || [])];
+    const active = node.id === activeId;
+    return `
+      <div class="workbook-tree-node ${open ? "open" : ""} ${active ? "active" : ""}" data-depth="${depth}">
+        <div class="workbook-tree-row ${active ? "active" : ""} ${hasChildren ? "has-children" : "is-leaf"}">
+          ${hasChildren
+            ? `<button type="button" class="workbook-tree-toggle" data-workbook-toggle="${node.id}" aria-expanded="${open}"><i class="ri-arrow-${open ? "down" : "right"}-s-line"></i></button>`
+            : `<span class="workbook-tree-toggle is-placeholder"></span>`}
+          <button type="button" class="workbook-tree-main" data-workbook-node="${node.id}">
+            <span class="workbook-tree-title">${node.title}</span>
+            ${node.status?.length ? `<span class="workbook-tree-tags">${workbookStatusTags(node.status)}</span>` : ""}
+          </button>
+        </div>
+        ${hasChildren ? `<div class="workbook-tree-children" ${open ? "" : "hidden"}>${renderWorkbookTreeNodes(children, depth + 1)}</div>` : ""}
+      </div>`;
+  }).join("");
+}
+
+function workbookSetDisplayTopic(setNode, album, parentTitle) {
+  const source = byId[setNode.topicId] || {
+    id: setNode.topicId || "t40",
+    title: setNode.title,
+    focus: `${album.name}章节题单`,
+    reason: "练习册题单",
+    questions: 12,
+    minutes: 20,
+    difficulty: "中等",
+    source: album.source,
+    usage: 680,
+    tag: "workbook",
+    tone: "sage"
+  };
+  const title = parentTitle ? `${parentTitle} · ${setNode.title}` : setNode.title;
+  return { ...source, title };
+}
+
+function htmlEscape(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+const workbookPaperQuestions = [
+  { id:"1", num:1, section:"一、单项选择题", type:"选择题", difficulty:"较易", knowledge:"正负数意义", minutes:1, competency:"运算能力", stem:"如果向东走 3 米记作 +3 米，那么向西走 5 米应记作（　　）。", options:["A. +5 米","B. −5 米","C. +3 米","D. −3 米"], answer:"B", analysis:"向西与向东相反，应记作负数。" },
+  { id:"2", num:2, section:"一、单项选择题", type:"选择题", difficulty:"较易", knowledge:"相反意义的量", minutes:1, competency:"抽象能力", stem:"下列各组量中，具有相反意义的量是（　　）。", options:["A. 上升 5 米与向东 5 米","B. 收入 80 元与支出 50 元","C. 长大 2 岁与减少 2 千克","D. 购进 10 件与卖出 8 元"], answer:"B", analysis:"收入与支出具有相反意义。" },
+  { id:"3", num:3, section:"一、单项选择题", type:"选择题", difficulty:"中等", knowledge:"负数概念", stem:"在 −3、0、2.5、−1/2 四个数中，负数共有（　　）。", options:["A. 1 个","B. 2 个","C. 3 个","D. 4 个"], answer:"B", analysis:"−3 和 −1/2 为负数。" },
+  { id:"4", num:4, section:"一、单项选择题", type:"选择题", difficulty:"简单", knowledge:"温差计算", stem:"某天北京的最高气温为 18 ℃，最低气温为 7 ℃，这一天的温差是（　　）。", options:["A. 25 ℃","B. −25 ℃","C. 11 ℃","D. −11 ℃"], answer:"C", analysis:"温差 = 最高温 − 最低温 = 11 ℃。" },
+  { id:"5", num:5, section:"二、填空题", type:"填空题", difficulty:"简单", knowledge:"正负数应用", stem:"如果水库水位上升 0.8 米记作 +0.8 米，那么水位下降 0.5 米记作 ______ 米。", options:[], answer:"−0.5", analysis:"下降记为负。" },
+  { id:"6", num:6, section:"二、填空题", type:"填空题", difficulty:"中等", knowledge:"数轴", stem:"数轴上与原点距离为 4 个单位长度的点表示的数是 ______。", options:[], answer:"4 或 −4", analysis:"距离原点 4 个单位长度有两个点。" },
+  { id:"7", num:7, section:"三、解答题", type:"解答题", difficulty:"中等", knowledge:"正负数应用", stem:"某食品包装袋上标有“净含量 500±5 g”。抽检 5 袋食品的质量分别为 497 g、503 g、506 g、500 g、495 g。请用正负数表示它们相对于标准质量的偏差，并判断哪些产品合格。", options:[], answer:"497→−3，503→+3，506→+6，500→0，495→−5；497/503/500/495 合格", analysis:"合格范围为 −5 到 +5。" }
+];
+
+function resolveWorkbookLeaf(nodeId) {
+  const found = findWorkbookNode(nodeId) || findWorkbookNode("ch1-1-m1");
+  if (!found) return null;
+  if (found.node.topicId) return found;
+  const firstSet = workbookNodeSets(found.node)[0];
+  return firstSet ? findWorkbookNode(firstSet.id) : found;
+}
+
+function workbookPaperQuestionHtml(q) {
+  const optionList = q.options || [];
+  const singleColumn = optionList.some(opt => String(opt).length > 20);
+  const options = optionList.length
+    ? `<div class="q-options ${singleColumn ? "q-options-single" : ""}">${optionList.map(opt => `<span>${htmlEscape(opt)}</span>`).join("")}</div>`
+    : "";
+  return `
+    <article class="question-item" data-q="${q.id}" aria-label="第 ${q.num} 题">
+      <div class="q-body">
+        <p class="q-stem">
+          <span class="q-num-mark">${q.num}</span>
+          <span class="q-stem-text">${htmlEscape(q.stem)}</span>
+        </p>
+        ${options}
+      </div>
+      <div class="q-answer-panel">
+        <div class="q-inline-answer"><em>答案</em>${htmlEscape(q.answer)}</div>
+        <div class="q-inline-analysis"><em>解析</em>${htmlEscape(q.analysis)}</div>
+      </div>
+    </article>`;
+}
+
+function renderWorkbookCatalogMain() {
+  const album = currentWorkbookAlbum();
+  const found = resolveWorkbookLeaf(albumFilterState.nodeId);
+  const node = found?.node;
+  const parentTitle = found?.parents[found.parents.length - 1]?.title || "";
+  const topic = node ? workbookSetDisplayTopic(node, album, parentTitle) : { title: "章节题单", difficulty: "简单", usage: 0, questions: 7, reason: "同步巩固" };
+  const questions = workbookPaperQuestions;
+  const sections = [...new Set(questions.map(q => q.section))];
+  albumFilterState.nodeId = node?.id || albumFilterState.nodeId;
+  const facts = [topic.reason || "同步巩固", "朝阳区", "七年级", "试卷", `${questions.length} 题`, `难度 ${topic.difficulty || "简单"}`, `${Number(topic.usage || 0).toLocaleString()} 次下载`];
+  return `
+    <div class="paper-detail-layout workbook-paper-preview">
+      <div class="paper-main-column">
+        <section class="paper-meta-bar">
+          <div class="paper-meta-main">
+            <h2>${htmlEscape(topic.title)}</h2>
+            <p class="paper-meta-facts">${facts.map(text => `<span>${htmlEscape(text)}</span>`).join("")}</p>
+          </div>
+          <div class="paper-meta-inline-actions">
+            <button type="button" class="paper-action-ghost" data-workbook-show-answer><i class="ri-eye-line"></i><span>显示答案</span></button>
+            <button type="button" class="paper-action-ghost" data-workbook-favorite><i class="ri-star-line"></i><span>收藏</span></button>
+            <button type="button" class="paper-action-ghost" data-workbook-download><i class="ri-download-2-line"></i><span>下载</span></button>
+            <button type="button" class="paper-action-primary" data-workbook-select-all><i class="ri-checkbox-multiple-line"></i><span>整卷选用</span></button>
+          </div>
+        </section>
+        <div class="question-card-board" data-workbook-paper-board>
+          ${sections.map(section => {
+            const items = questions.filter(q => q.section === section);
+            return `
+              <section class="question-section">
+                <header class="question-section-head">
+                  <div class="question-section-head-main">
+                    <i class="ri-draggable question-section-drag" aria-hidden="true"></i>
+                    <h3>${htmlEscape(section)}</h3>
+                  </div>
+                  <div class="question-section-head-actions"><span>${items.length} 题</span></div>
+                </header>
+                <div class="paper-sheet">
+                  <div class="question-list-flow">${items.map(workbookPaperQuestionHtml).join("")}</div>
+                </div>
+              </section>`;
+          }).join("")}
+        </div>
+      </div>
+    </div>`;
+}
+
+function workbookCatalogView() {
+  const album = currentWorkbookAlbum();
+  return `
+    <section class="category-detail album-category-view album-catalog-view">
+      <div class="workbook-catalog-bar">
+        <button type="button" class="workbook-catalog-back" data-album-back><i class="ri-arrow-left-s-line"></i>练习册</button>
+        <span>${album.name}</span>
+      </div>
+      <div class="resource-browser workbook-catalog-browser">
+        <nav class="workbook-catalog-tree" aria-label="${album.name}目录">
+          ${renderWorkbookTreeNodes(workbookCatalogTree)}
+        </nav>
+        <div class="workbook-catalog-main" data-workbook-catalog-main>
+          ${renderWorkbookCatalogMain()}
+        </div>
       </div>
     </section>`;
 }
@@ -1716,10 +1988,27 @@ function albumCard(album) {
 
 function applyAlbumView(options = {}) {
   if (options.view) albumFilterState.view = options.view;
+  if (options.albumId) albumFilterState.albumId = options.albumId;
+  if (options.nodeId) albumFilterState.nodeId = options.nodeId;
   if (options.origin) albumFilterState.origin = options.origin;
   if (options.textbook) albumFilterState.textbook = options.textbook;
   if (options.year) albumFilterState.year = options.year;
   if (typeof options.query === "string") albumFilterState.query = options.query;
+  if (options.toggleNode) {
+    const open = new Set(albumFilterState.openNodes);
+    if (open.has(options.toggleNode)) open.delete(options.toggleNode);
+    else open.add(options.toggleNode);
+    albumFilterState.openNodes = [...open];
+  }
+  if (options.nodeId) {
+    const found = resolveWorkbookLeaf(options.nodeId);
+    if (found) {
+      albumFilterState.nodeId = found.node.id;
+      const open = new Set(albumFilterState.openNodes);
+      found.parents.forEach(parent => open.add(parent.id));
+      albumFilterState.openNodes = [...open];
+    }
+  }
   if (![{ id: "all" }, ...workbookTypeOptions].some(option => option.id === albumFilterState.origin)) {
     albumFilterState.origin = "all";
   }
@@ -1731,17 +2020,25 @@ function applyAlbumView(options = {}) {
   }
 
   const panel = document.querySelector(".album-category-view");
-  if (!panel) return;
+  const wantCatalog = albumFilterState.view === "catalog";
+  if (!panel || panel.classList.contains("album-catalog-view") !== wantCatalog) {
+    render();
+    return;
+  }
 
-  const albumView = albumFilterState.view === "album";
+  if (wantCatalog) {
+    const tree = panel.querySelector(".workbook-catalog-tree");
+    const main = panel.querySelector("[data-workbook-catalog-main]");
+    if (tree) tree.innerHTML = renderWorkbookTreeNodes(workbookCatalogTree);
+    if (main) {
+      main.innerHTML = renderWorkbookCatalogMain();
+      bindWorkbookPaperPreview(main);
+    }
+    bindContentEvents(tree);
+    return;
+  }
+
   const albums = filteredWorkbookAlbums();
-  const list = filteredWorkbookTopics();
-
-  panel.querySelectorAll("[data-album-view]").forEach(button => {
-    const active = button.dataset.albumView === albumFilterState.view;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-selected", String(active));
-  });
   panel.querySelectorAll("[data-album-origin]").forEach(button => {
     button.classList.toggle("active", button.dataset.albumOrigin === albumFilterState.origin);
   });
@@ -1756,30 +2053,37 @@ function applyAlbumView(options = {}) {
     const active = value ? albumFilterState.query === value : !albumFilterState.query.trim();
     button.classList.toggle("active", active);
   });
-  panel.querySelectorAll("[data-album-panel]").forEach(section => {
-    section.hidden = section.dataset.albumPanel !== albumFilterState.view;
-  });
-
-  const albumGrid = panel.querySelector(".album-grid");
-  if (albumGrid) {
-    albumGrid.innerHTML = albums.map(albumCard).join("");
-    bindContentEvents(albumGrid);
-  }
-  const topicGrid = panel.querySelector(".album-topic-grid");
-  if (topicGrid) {
-    topicGrid.innerHTML = list.map(topic => topicCard(topic, { context: "series" })).join("");
-    bindContentEvents(topicGrid);
-  }
-
-  const albumEmpty = panel.querySelector(".album-by-album .album-empty");
-  if (albumEmpty) albumEmpty.hidden = albums.length > 0;
-  const topicEmpty = panel.querySelector(".album-by-topic .album-empty");
-  if (topicEmpty) topicEmpty.hidden = list.length > 0;
-  const topicCount = panel.querySelector("[data-album-topic-count]");
-  if (topicCount) topicCount.textContent = `共 ${list.length.toLocaleString()} 份`;
-
   const search = panel.querySelector("[data-album-search]");
   if (search && search.value !== albumFilterState.query) search.value = albumFilterState.query;
+  const shelf = panel.querySelector(".album-shelf-grid");
+  if (shelf) {
+    shelf.innerHTML = renderWorkbookShelfCards(albums.map(album => album.id));
+    bindContentEvents(shelf);
+  }
+  const albumEmpty = panel.querySelector(".album-empty");
+  if (albumEmpty) albumEmpty.hidden = albums.length > 0;
+}
+
+function bindWorkbookPaperPreview(root = document) {
+  const board = root.querySelector("[data-workbook-paper-board]");
+  if (!board) return;
+  const answerBtn = root.querySelector("[data-workbook-show-answer]");
+  answerBtn?.addEventListener("click", () => {
+    const open = board.classList.toggle("show-answers");
+    answerBtn.innerHTML = open
+      ? '<i class="ri-eye-off-line"></i><span>隐藏答案</span>'
+      : '<i class="ri-eye-line"></i><span>显示答案</span>';
+  });
+  root.querySelector("[data-workbook-favorite]")?.addEventListener("click", event => {
+    const button = event.currentTarget;
+    const saved = button.classList.toggle("saved");
+    button.innerHTML = saved
+      ? '<i class="ri-star-fill"></i><span>已收藏</span>'
+      : '<i class="ri-star-line"></i><span>收藏</span>';
+    showToast(saved ? "已收藏该题单" : "已取消收藏");
+  });
+  root.querySelector("[data-workbook-download]")?.addEventListener("click", () => showToast("正在准备下载 Word"));
+  root.querySelector("[data-workbook-select-all]")?.addEventListener("click", () => showToast("已整卷选用到组题画布"));
 }
 
 function render() {
@@ -1980,15 +2284,29 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-album-year]").forEach(button => button.addEventListener("click", () => applyAlbumView({ year: button.dataset.albumYear })));
   root.querySelectorAll("[data-album-series]").forEach(button => button.addEventListener("click", () => applyAlbumView({ query: button.dataset.albumSeries || "" })));
   root.querySelectorAll("[data-album-search]").forEach(input => input.addEventListener("input", () => applyAlbumView({ query: input.value })));
-  root.querySelectorAll("[data-album-open]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "topic", query: button.dataset.albumOpen })));
-  root.querySelectorAll("[data-album-jump]").forEach(button => button.addEventListener("click", () => {
+  root.querySelectorAll("[data-album-open]").forEach(button => button.addEventListener("click", () => {
     if (isEmbedded) {
-      requestParentOpenFilter("workbook", { view:"topic", query:button.dataset.albumJump, keepAlbumState:true });
+      requestParentOpenFilter("workbook", { view: "catalog", albumId: button.dataset.albumOpen, keepAlbumState: true });
       return;
     }
-    openSeries(button.dataset.albumJump);
+    openWorkbookAlbum(button.dataset.albumOpen);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }));
+  root.querySelectorAll("[data-album-jump]").forEach(button => button.addEventListener("click", () => {
+    if (isEmbedded) {
+      requestParentOpenFilter("workbook", { view:"catalog", query:button.dataset.albumJump, keepAlbumState:true });
+      return;
+    }
+    openWorkbookAlbum(button.dataset.albumJump);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }));
+  root.querySelectorAll("[data-album-back]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "album", query: "" })));
+  root.querySelectorAll("[data-workbook-toggle]").forEach(button => button.addEventListener("click", event => {
+    event.stopPropagation();
+    applyAlbumView({ toggleNode: button.dataset.workbookToggle });
+  }));
+  root.querySelectorAll("[data-workbook-node]").forEach(button => button.addEventListener("click", () => applyAlbumView({ nodeId: button.dataset.workbookNode })));
+  bindWorkbookPaperPreview(root);
   root.querySelectorAll("[data-stat-jump]").forEach(button => button.addEventListener("click", () => {
     location.href = "./school.html";
   }));
@@ -2049,6 +2367,7 @@ function prepareFilterOpen(filter, options = {}) {
   }
   if (filter === "workbook") {
     if (options.view) albumFilterState.view = options.view;
+    if (options.albumId) albumFilterState.albumId = options.albumId;
     if (options.origin) albumFilterState.origin = options.origin;
     if (options.textbook) albumFilterState.textbook = options.textbook;
     if (options.year) albumFilterState.year = options.year;
@@ -2078,6 +2397,9 @@ function setMainFilter(filter, options = {}) {
   currentQuery = "";
   if (filter === "workbook" && previousFilter !== "workbook" && !options.keepAlbumState) {
     albumFilterState.view = "album";
+    albumFilterState.albumId = "";
+    albumFilterState.nodeId = "ch1-1-m1";
+    albumFilterState.openNodes = ["ch1", "ch1-1", "ch1-2", "ch1-2-1"];
     albumFilterState.origin = "all";
     albumFilterState.textbook = "all";
     albumFilterState.year = "all";
@@ -2103,10 +2425,18 @@ function setMainFilter(filter, options = {}) {
   render();
 }
 
-function openSeries(seriesName) {
-  albumFilterState.view = "topic";
-  albumFilterState.query = seriesName;
+function openWorkbookAlbum(albumIdOrSource) {
+  const album = workbookAlbums.find(item => item.id === albumIdOrSource || item.source === albumIdOrSource) || workbookAlbums[0];
+  albumFilterState.view = "catalog";
+  albumFilterState.albumId = album.id;
+  albumFilterState.nodeId = "ch1-1-m1";
+  albumFilterState.openNodes = ["ch1", "ch1-1", "ch1-2", "ch1-2-1"];
+  albumFilterState.query = "";
   setMainFilter("workbook", { keepAlbumState: true });
+}
+
+function openSeries(seriesName) {
+  openWorkbookAlbum(seriesName);
 }
 
 function openTopic(id, options = {}) {

@@ -1684,3 +1684,339 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-sync > heade
     transition: none;
   }
 }
+
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-kind-compilation {
+  color: #2d7a58;
+  background: #eef7f2;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-kind-workbook {
+  color: #445cbd;
+  background: #eef1fb;
+}
+
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-kind-special {
+  color: #6a4fb3;
+  background: #f3f0fb;
+}
+
+body.index-page.is-album-view .album-shelf-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 4px 2px 14px;
+}
+
+body.index-page.is-album-view .album-shelf-heading b {
+  color: #202a49;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+body.index-page.is-album-view .album-shelf-heading span {
+  color: #7c869f;
+  font-size: 13px;
+}
+
+body.index-page.is-album-view .home-workbook-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+}
+
+body.index-page.is-album-view .home-workbook-card {
+  min-width: 0;
+  min-height: 118px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  color: inherit;
+  text-align: left;
+  border: 1px solid #e2e8f5;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(43, 59, 109, .04);
+}
+
+body.index-page.is-album-view .home-workbook-card:hover {
+  border-color: #c8d3f1;
+  background: #fcfdff;
+  box-shadow: 0 8px 18px rgba(43, 59, 109, .08);
+}
+
+body.index-page.is-album-view .home-workbook-spine {
+  width: 44px;
+  height: 72px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  place-items: center;
+  overflow: hidden;
+  color: #fff;
+  border-radius: 6px;
+  background: linear-gradient(155deg, #586fcf, #8293e6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18);
+}
+
+body.index-page.is-album-view .home-workbook-card.is-rose .home-workbook-spine { background: linear-gradient(155deg, #a96f73, #d69a9e); }
+body.index-page.is-album-view .home-workbook-card.is-indigo .home-workbook-spine { background: linear-gradient(155deg, #3e4b7a, #6673a5); }
+body.index-page.is-album-view .home-workbook-card.is-violet .home-workbook-spine { background: linear-gradient(155deg, #6973ad, #9299d2); }
+body.index-page.is-album-view .home-workbook-card.is-slate .home-workbook-spine { background: linear-gradient(155deg, #394766, #657494); }
+
+body.index-page.is-album-view .home-workbook-spine > i { align-self: end; font-size: 16px; }
+
+body.index-page.is-album-view .home-workbook-spine > em {
+  width: 100%;
+  padding: 4px 0;
+  color: rgba(255, 255, 255, .88);
+  font-size: 7px;
+  font-style: normal;
+  text-align: center;
+  background: rgba(18, 27, 57, .12);
+}
+
+body.index-page.is-album-view .home-workbook-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+body.index-page.is-album-view .home-workbook-copy > small {
+  color: #5b6aa8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+body.index-page.is-album-view .home-workbook-copy > b {
+  overflow: hidden;
+  color: #243049;
+  font-size: 15px;
+  font-weight: 780;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.index-page.is-album-view .home-workbook-copy > p {
+  overflow: hidden;
+  margin: 0;
+  color: #6d778c;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.index-page.is-album-view .home-workbook-copy > em {
+  color: #7a8498;
+  font-size: 12px;
+  font-style: normal;
+}
+
+body.index-page.is-album-view .home-workbook-card > i {
+  color: #9fa7b6;
+  font-size: 14px;
+}
+
+body.index-page.is-album-view .workbook-catalog-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  color: #5a6788;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+body.index-page.is-album-view .workbook-catalog-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  color: #445cbd;
+  font-size: 13px;
+  font-weight: 700;
+  border: 0;
+  background: transparent;
+}
+
+body.index-page.is-album-view .workbook-catalog-browser {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 560px;
+  overflow: hidden;
+  border: 1px solid #e2e6f3;
+  border-radius: 14px;
+  background: #fff;
+}
+
+body.index-page.is-album-view .workbook-catalog-tree {
+  min-width: 0;
+  padding: 10px 8px 16px;
+  overflow: auto;
+  border-right: 1px solid #edf0f7;
+  background: #f8f9fe;
+}
+
+body.index-page.is-album-view .workbook-tree-node {
+  min-width: 0;
+}
+
+body.index-page.is-album-view .workbook-tree-row {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  gap: 2px;
+}
+
+body.index-page.is-album-view .workbook-tree-toggle {
+  width: 18px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #8a93a8;
+  border: 0;
+  background: transparent;
+}
+
+body.index-page.is-album-view .workbook-tree-toggle.is-placeholder {
+  visibility: hidden;
+}
+
+body.index-page.is-album-view .workbook-tree-main {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 4px 8px 6px;
+  color: inherit;
+  text-align: left;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+body.index-page.is-album-view .workbook-tree-row.active > .workbook-tree-main,
+body.index-page.is-album-view .workbook-tree-main:hover {
+  background: #eef1fb;
+}
+
+body.index-page.is-album-view .workbook-tree-title {
+  color: #243049;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+body.index-page.is-album-view .workbook-tree-row.is-leaf .workbook-tree-title {
+  font-weight: 550;
+}
+
+body.index-page.is-album-view .workbook-tree-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+body.index-page.is-album-view .workbook-tree-tags em {
+  padding: 1px 6px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 16px;
+  border-radius: 4px;
+}
+
+body.index-page.is-album-view .workbook-tree-tags em.is-online {
+  color: #2d7a58;
+  background: #e8f6ee;
+}
+
+body.index-page.is-album-view .workbook-tree-tags em.is-linked {
+  color: #2f6aa8;
+  background: #eaf4fb;
+}
+
+body.index-page.is-album-view .workbook-tree-children {
+  padding: 2px 0 4px 12px;
+}
+
+body.index-page.is-album-view .workbook-catalog-main {
+  min-width: 0;
+  padding: 12px 16px 20px;
+  overflow: auto;
+  background: #f7f8fc;
+}
+
+body.index-page.is-album-view .workbook-paper-preview {
+  max-width: none;
+}
+
+body.index-page.is-album-view .workbook-paper-preview .paper-meta-bar {
+  border-color: #e2e6f3;
+  box-shadow: none;
+}
+
+body.index-page.is-album-view .workbook-paper-preview .paper-meta-main h2 {
+  margin: 0 0 6px;
+  color: #202a49;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+body.index-page.is-album-view .workbook-paper-preview .paper-meta-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin: 0;
+  color: #7c869f;
+  font-size: 12px;
+}
+
+body.index-page.is-album-view .workbook-paper-preview .paper-meta-facts span + span::before {
+  content: "·";
+  margin-right: 10px;
+  color: #c3cad8;
+}
+
+body.index-page.is-album-view .workbook-paper-preview .q-num-mark {
+  pointer-events: none;
+}
+
+body.index-page.is-album-view .workbook-catalog-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+body.index-page.is-album-view .workbook-catalog-heading b {
+  color: #202a49;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+body.index-page.is-album-view .workbook-catalog-heading span {
+  color: #7c869f;
+  font-size: 12px;
+}
+
+@media (max-width: 1000px) {
+  body.index-page.is-album-view .home-workbook-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.index-page.is-album-view .workbook-catalog-browser {
+    grid-template-columns: 1fr;
+  }
+
+  body.index-page.is-album-view .workbook-catalog-tree {
+    max-height: 280px;
+    border-right: 0;
+    border-bottom: 1px solid #edf0f7;
+  }
+}
