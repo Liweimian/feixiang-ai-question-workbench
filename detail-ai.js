@@ -419,6 +419,42 @@ function cloneWorkspaceValue(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function captureCanvasStateForPaperEdit() {
+  return {
+    globalSelectedQuestions: cloneWorkspaceValue(Array.isArray(workspace.globalSelectedQuestions)
+      ? workspace.globalSelectedQuestions
+      : []),
+    canvasTitle: workspace.canvasTitle || "",
+    canvasScores: cloneWorkspaceValue(workspace.canvasScores && typeof workspace.canvasScores === "object"
+      ? workspace.canvasScores
+      : {}),
+    canvasManuallyCollapsed: Boolean(workspace.canvasManuallyCollapsed),
+    selectedQuestionIdsByTab: Object.fromEntries((workspace.tabs || []).map(tab => [
+      tab.id,
+      cloneWorkspaceValue(Array.isArray(tab.selectedQuestionIds) ? tab.selectedQuestionIds : [])
+    ]))
+  };
+}
+
+function restoreCanvasStateAfterPaperEdit(session) {
+  const snapshot = session?.canvasSnapshot;
+  if (!snapshot || typeof snapshot !== "object") return;
+  workspace.globalSelectedQuestions = cloneWorkspaceValue(Array.isArray(snapshot.globalSelectedQuestions)
+    ? snapshot.globalSelectedQuestions
+    : []);
+  workspace.canvasTitle = snapshot.canvasTitle || "";
+  workspace.canvasScores = cloneWorkspaceValue(snapshot.canvasScores && typeof snapshot.canvasScores === "object"
+    ? snapshot.canvasScores
+    : {});
+  workspace.canvasManuallyCollapsed = Boolean(snapshot.canvasManuallyCollapsed);
+  const selectedByTab = snapshot.selectedQuestionIdsByTab || {};
+  (workspace.tabs || []).forEach(tab => {
+    if (Object.prototype.hasOwnProperty.call(selectedByTab, tab.id)) {
+      tab.selectedQuestionIds = cloneWorkspaceValue(Array.isArray(selectedByTab[tab.id]) ? selectedByTab[tab.id] : []);
+    }
+  });
+}
+
 function paperSaveKey(tab) {
   return `paper-copy:${tab?.id || `${tab?.context || contextName}:${getBaseTopicId(tab?.topicId || initialTopicId)}`}`;
 }
@@ -2932,6 +2968,7 @@ function saveWholePaperEditAsQuestionList() {
   session.savedResourceId = resource?.id || session.savedResourceId;
   session.saved = true;
   session.savedAt = new Date().toISOString();
+  restoreCanvasStateAfterPaperEdit(session);
   saveWorkspace();
   renderSelectedFooter(selectedItems.length);
   showToast("试卷已保存至「我的-我的创建」");
@@ -3038,11 +3075,13 @@ function savePaperCopyAsQuestionList() {
   }
 
   workspace.paperEditSession = {
+    origin: "whole-paper-edit",
     sourceTabId: tab.id,
     sourceTopicId: getBaseTopicId(tab.topicId),
     title: String(tab.title || "").trim() || formatQuestionListTitle(),
     questions: visibleQuestions.map(q => buildGlobalSelectedEntry(tab, q)),
-    scores: {}
+    scores: {},
+    canvasSnapshot: captureCanvasStateForPaperEdit()
   };
   saveWorkspace();
   const nextUrl = new URL(location.href);
