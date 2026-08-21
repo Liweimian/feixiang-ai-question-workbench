@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
     <link rel="stylesheet" href="./detail.css" />
-    <link rel="stylesheet" href="./detail-ai.css?v=20260821recording4" />
-    <link rel="stylesheet" href="./theme-workspace-v50.css?v=20260819workspace3" />
+    <link rel="stylesheet" href="./detail-ai.css?v=20260821toast1" />
+    <link rel="stylesheet" href="./theme-workspace-v50.css?v=20260821workspace4" />
     <style id="ai-panel-legacy-toggle-hide">
       #aiPanelExpand.legacy-hidden,
       #openAiPanel,
@@ -36,10 +36,6 @@
         <i class="ri-sparkling-2-line" aria-hidden="true"></i>
         <span>AI 助手</span>
       </button>
-      <button type="button" class="my-resources-button" id="myResourcesButton" title="查看我创建的题单" aria-label="我的资源" aria-expanded="false">
-        <i class="ri-folder-user-line" aria-hidden="true"></i>
-        <span>我的资源</span>
-      </button>
       <button id="mobileDirectory" class="mobile-directory" type="button" hidden><i class="ri-list-unordered"></i>目录</button>
     </header>
 
@@ -55,10 +51,10 @@
         })();
       </script>
       <aside class="ai-selected-panel" id="aiSelectedPanel" aria-label="组题画布">
-        <button class="ai-selected-expand" id="aiSelectedExpand" type="button" aria-label="展开新题单" onclick="window.AiqCanvas&&window.AiqCanvas.expand&&window.AiqCanvas.expand()">
+        <button class="ai-selected-expand" id="aiSelectedExpand" type="button" aria-label="展开组题画布" onclick="window.AiqCanvas&&window.AiqCanvas.expand&&window.AiqCanvas.expand()">
           <i class="ri-layout-masonry-line"></i>
           <span class="ai-selected-expand-count" id="aiSelectedExpandCount" hidden>0</span>
-          <span class="ai-selected-expand-title" id="canvasRailTitle">新题单（尚未创建）</span>
+          <span class="ai-selected-expand-title" id="canvasRailTitle">组题画布</span>
         </button>
         <div class="ai-selected-body">
           <header class="ai-section-head" id="selectedSectionHead">
@@ -66,9 +62,9 @@
               <div class="ai-canvas-head-title">
                 <span class="ai-canvas-head-kicker">组题画布</span>
                 <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
-                <strong id="canvasHeadTitle" contenteditable="true" spellcheck="false">新题单（尚未创建）</strong>
+                <strong id="canvasHeadTitle" contenteditable="true" spellcheck="false">组题画布</strong>
               </div>
-              <span class="ai-selected-hint" id="aiSelectedHint">加入画布后创建题单</span>
+              <span class="ai-selected-hint" id="aiSelectedHint">加入题目后完成组题</span>
             </div>
             <div class="ai-section-head-actions">
               <button type="button" id="toggleSelectedAnswers" hidden>显示答案</button>
@@ -81,7 +77,7 @@
           <div id="aiSelectedContext" class="ai-selected-context">
             <p class="ai-selected-summary" id="aiSelectedSummary" hidden></p>
             <div id="aiSelectedPreview" class="ai-selected-preview"></div>
-            <p class="ai-selected-empty" id="aiSelectedEmpty">从右侧加入题目。创建后将存入「我的题单」。</p>
+            <p class="ai-selected-empty" id="aiSelectedEmpty">从右侧加入题目，完成组题后将存入「我的-我的创建」。</p>
           </div>
           <div class="ai-canvas-studio" id="aiCanvasStudio" hidden>
             <div class="ai-canvas-studio-toolbar">
@@ -90,9 +86,9 @@
                 <button type="button" class="ai-canvas-chip"><i class="ri-line-height-2"></i>1.5</button>
                 <button type="button" class="ai-canvas-chip"><i class="ri-indent-increase"></i>1.0</button>
                 <button type="button" class="ai-canvas-chip">A4竖向单面</button>
-                <button type="button" class="ai-canvas-chip" data-canvas-action="paper-settings">卷参设置</button>
-                <button type="button" class="ai-canvas-chip" data-canvas-action="question-frame">题目框：隐藏</button>
-                <button type="button" class="ai-canvas-chip" data-canvas-action="analyze">题单分析</button>
+                <button type="button" class="ai-canvas-chip" data-canvas-action="paper-settings"><i class="ri-settings-3-line"></i>卷参设置</button>
+                <button type="button" class="ai-canvas-chip" data-canvas-action="score-settings"><i class="ri-scales-3-line"></i>分数设置</button>
+                <button type="button" class="ai-canvas-chip" data-canvas-action="analyze"><i class="ri-bar-chart-box-line"></i>试卷分析</button>
               </div>
             </div>
             <div class="ai-canvas-studio-body">
@@ -109,7 +105,7 @@
               <section class="ai-canvas-paper" aria-label="题单预览">
                 <div class="ai-canvas-paper-scroll">
                   <article class="canvas-paper-page">
-                    <h1 class="canvas-paper-title" id="canvasPaperTitle" contenteditable="true" spellcheck="false">2026-08-19组题</h1>
+                    <h1 class="canvas-paper-title" id="canvasPaperTitle" contenteditable="true" spellcheck="false">组题画布</h1>
                     <div id="aiCanvasPaperList" class="canvas-paper-list"></div>
                   </article>
                 </div>
@@ -126,16 +122,16 @@
             <div class="ai-selected-footer-actions">
               <p class="ai-canvas-stats" id="aiCanvasStats" hidden>还没有选题</p>
               <button type="button" class="ai-selected-preview-btn" id="clearSelectedQuestions" disabled>
-                <i class="ri-delete-bin-line"></i><span>清空</span>
+                <i class="ri-delete-bin-line"></i><span>删除</span>
               </button>
               <button type="button" class="ai-selected-preview-btn ai-canvas-wide-btn" id="scoreQuestionList" disabled hidden>
                 <i class="ri-medal-line"></i><span>赋分</span>
               </button>
-              <button type="button" class="ai-selected-preview-btn" id="previewQuestionList" disabled>
+              <button type="button" class="ai-selected-preview-btn" id="previewQuestionList" disabled hidden>
                 <i class="ri-printer-line"></i><span id="previewQuestionListLabel">预览</span>
               </button>
               <button type="button" class="ai-selected-create" id="createQuestionList" disabled>
-                <i class="ri-file-add-line"></i><span id="createQuestionListLabel">创建题单</span>
+                <i class="ri-checkbox-circle-line"></i><span id="createQuestionListLabel">完成组题</span>
               </button>
               <button type="button" class="ai-selected-preview-btn ai-canvas-wide-btn" data-canvas-action="assign" disabled hidden>
                 <i class="ri-send-plane-line"></i><span>布置</span>
@@ -226,18 +222,12 @@
                     </div>
                     <div class="paper-meta-action-stack">
                       <div class="paper-meta-inline-actions">
-                        <div class="paper-action-more">
-                          <button type="button" class="paper-action-ghost" id="paperMoreActions" aria-haspopup="true" aria-expanded="false"><i class="ri-more-line"></i><span>更多</span></button>
-                          <div class="paper-action-menu" id="paperMoreMenu" role="menu" hidden>
-                            <button type="button" role="menuitem" id="favoritePaper"><i class="ri-star-line"></i><span id="favoritePaperLabel">收藏整卷</span></button>
-                            <button type="button" role="menuitem" data-action="download"><i class="ri-download-2-line"></i><span>下载整卷</span></button>
-                          </div>
-                        </div>
+                        <button type="button" class="paper-action-ghost" data-action="download"><i class="ri-download-2-line"></i><span>下载</span></button>
                         <button type="button" class="paper-action-ghost" id="toggleShowAnswer"><i class="ri-eye-line"></i><span>显示答案</span></button>
-                        <button type="button" class="paper-action-secondary" id="batchAddAllQuestions" title="将当前本卷内容追加到左侧画布，自动去重"><i class="ri-layout-left-line"></i><span>全部加入画布</span></button>
-                        <button type="button" class="paper-action-primary" id="savePaperCopy"><i class="ri-file-copy-line"></i><span id="savePaperCopyLabel">另存为我的</span></button>
+                        <button type="button" class="paper-action-secondary" id="batchAddAllQuestions" title="将当前本卷内容追加到左侧画布，自动去重"><i class="ri-layout-left-line"></i><span>加入画布</span></button>
+                        <button type="button" class="paper-action-primary" id="savePaperCopy"><i class="ri-edit-box-line"></i><span id="savePaperCopyLabel">整套编辑</span></button>
                       </div>
-                      <p class="paper-copy-note" id="paperCopyNote">另存到「我的题单」，原卷不受影响</p>
+                      <p class="paper-copy-note" id="paperCopyNote">保存到「我的-我的创建」，原卷不受影响</p>
                     </div>
                   </section>
                   <h1 class="ai-compose-paper-title" id="aiComposePaperTitle" hidden>北京市朝阳区七年级上学期数学期末试卷</h1>
@@ -319,6 +309,27 @@
       </div>
     </div>
 
+    <div id="scoreSettingsModal" class="score-settings-modal" hidden>
+      <div class="score-settings-mask" data-score-settings-close></div>
+      <section class="score-settings-panel" role="dialog" aria-modal="true" aria-labelledby="scoreSettingsTitle">
+        <header class="score-settings-head">
+          <strong id="scoreSettingsTitle"><i class="ri-scales-3-line"></i>分数设置</strong>
+          <button type="button" data-score-settings-close aria-label="关闭分数设置"><i class="ri-close-line"></i></button>
+        </header>
+        <div class="score-settings-body">
+          <div class="score-settings-summary">
+            <span>试卷总分：<b id="scoreSettingsTotal">--</b></span>
+            <span>总题数：<b id="scoreSettingsCount">0</b></span>
+          </div>
+          <div class="score-settings-list" id="scoreSettingsList"></div>
+        </div>
+        <footer class="score-settings-foot">
+          <button type="button" class="score-settings-cancel" data-score-settings-close>取消</button>
+          <button type="button" class="score-settings-save" id="saveScoreSettings"><i class="ri-check-line"></i>保存设置</button>
+        </footer>
+      </section>
+    </div>
+
     <div class="ai-assistant-panel" id="aiAssistantPanel" hidden>
       <header class="ai-assistant-head">
         <div class="ai-assistant-brand">
@@ -351,18 +362,18 @@
       </div>
     </div>
 
-    <aside class="my-resources-panel" id="myResourcesPanel" hidden aria-label="我的资源">
+    <aside class="my-resources-panel" id="myResourcesPanel" hidden aria-label="我的">
       <header class="my-resources-head">
         <div>
-          <strong><i class="ri-folder-user-line"></i>我的资源</strong>
-          <small>我创建和另存的全部题单</small>
+          <strong><i class="ri-folder-user-line"></i>我的</strong>
+          <small>我创建的文件夹和题单</small>
         </div>
-        <button type="button" id="myResourcesClose" aria-label="关闭我的资源"><i class="ri-close-line"></i></button>
+        <button type="button" id="myResourcesClose" aria-label="关闭我的"><i class="ri-close-line"></i></button>
       </header>
       <div class="my-resources-list" id="myResourcesList"></div>
     </aside>
 
     <div id="toast" class="toast" role="status"></div>
-    <script src="./detail-ai.js?v=20260821recording4"></script>
+    <script src="./detail-ai.js?v=20260821complete1"></script>
   </body>
 </html>

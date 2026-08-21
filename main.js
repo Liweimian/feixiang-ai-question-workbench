@@ -661,8 +661,8 @@ const paperAuthorityOptions = [
 ];
 
 const homepageSyncItems = {
-  t40: { type:"课时练", source:"多维导学案", level:"基础" },
-  t42: { type:"课时练", source:"全品学练考", level:"基础" },
+  t40: { type:"课时练", source:"人大附中校本练习册", level:"基础" },
+  t42: { type:"课时练", source:"北京四中校本练习册", level:"基础" },
   t9: { type:"课后巩固", source:"多维导学案", level:"中等" },
   t41: { type:"单元检测", source:"多维导学案", level:"中等" },
   t54: { type:"章节真题", source:"朝阳区教研精选", level:"中等" },
@@ -813,7 +813,7 @@ function homepageCompactResource(topicId, options = {}) {
   if (!topic) return "";
   const display = homepageSyncItems[topicId] || { type:options.type || "同步练习", source:topic.source, level:topic.difficulty };
   const detail = `${topic.questions}题 · ${topic.minutes}分钟 · ${display.level || topic.difficulty}`;
-  const brandInTitle = ["多维导学案", "全品学练考"].includes(display.source);
+  const brandInTitle = ["多维导学案", "全品学练考", "人大附中校本练习册", "北京四中校本练习册"].includes(display.source);
   const displayTitle = brandInTitle ? `[${display.source}]${topic.title}` : topic.title;
   return `
     <button class="home-compact-resource ${["章节真题", "真题整理"].includes(display.type) ? "is-compilation" : ""}" type="button" data-topic="${topic.id}" data-context="${options.context || "series"}">
@@ -890,7 +890,7 @@ function homepageFeaturedPanel() {
               </header>
               <div class="home-recommend-grid">${featuredPicks.map(homepageFeaturedPickCard).join("")}</div>
             </section>
-            ${homepagePaperLane("download", "使用排行榜", famousPapers)}
+            ${homepagePaperLane("download", "老师使用排行", famousPapers)}
           </div>
         </section>
         ${homepageAlbumResourceSection(true)}
@@ -2223,7 +2223,7 @@ function bindContentEvents(root = document) {
     element.addEventListener("click", event => { if (event.target.closest("[data-bookmark], [data-series]")) return; open(); });
     if (element.matches("[tabindex]")) element.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); } });
   });
-  root.querySelectorAll("[data-bookmark]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); button.classList.toggle("saved"); button.innerHTML = button.classList.contains("saved") ? '<i class="ri-bookmark-fill"></i>' : '<i class="ri-bookmark-line"></i>'; showToast(button.classList.contains("saved") ? "已收藏到我的题单" : "已取消收藏"); }));
+  root.querySelectorAll("[data-bookmark]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); button.classList.toggle("saved"); button.innerHTML = button.classList.contains("saved") ? '<i class="ri-bookmark-fill"></i>' : '<i class="ri-bookmark-line"></i>'; showToast(button.classList.contains("saved") ? "已收藏" : "已取消收藏"); }));
   root.querySelectorAll("[data-preview-topic]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); openTopic(button.dataset.previewTopic); }));
   root.querySelectorAll("[data-use-topic]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); location.href = `./editor.html?topic=${encodeURIComponent(button.dataset.useTopic)}`; }));
   root.querySelectorAll("[data-open-filter]").forEach(button => button.addEventListener("click", event => {

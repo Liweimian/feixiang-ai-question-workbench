@@ -107,11 +107,11 @@ function toCanvasQuestion(question) {
   return {
     selectionKey: schoolSelectionKey(question.id),
     topicId: "school",
-    sourceTitle: "单题选题",
+    sourceTitle: "章节/知识点选题",
     question: {
       id: question.id,
       num: index >= 0 ? index + 1 : 1,
-      section: "单题选题",
+      section: "章节/知识点选题",
       type: question.type,
       difficulty: question.difficulty,
       knowledge: question.skill,

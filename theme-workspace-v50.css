@@ -658,6 +658,23 @@ body.ai-detail-page .doc-tab-ai.is-open {
   background: linear-gradient(135deg, #526bd7, #6579e9);
 }
 
+/* 整套编辑保存成功后，禁用态必须覆盖全局紫色主按钮皮肤 */
+body.ai-detail-page .ai-workspace.whole-paper-editor #createQuestionList:disabled,
+body.ai-detail-page .ai-workspace.whole-paper-editor #createQuestionList.is-saved {
+  color: #8b95a7 !important;
+  border-color: #d9dee8 !important;
+  background: #edf0f5 !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+
+body.ai-detail-page .ai-workspace.whole-paper-editor #createQuestionList:disabled:hover,
+body.ai-detail-page .ai-workspace.whole-paper-editor #createQuestionList.is-saved:hover {
+  color: #8b95a7 !important;
+  border-color: #d9dee8 !important;
+  background: #edf0f5 !important;
+}
+
 body.ai-detail-page .paper-action-ghost,
 body.ai-detail-page .q-action-ghost,
 body.ai-detail-page .ai-create-chip,
