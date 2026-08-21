@@ -77,10 +77,10 @@ const topics = [
   { id:"t76", title:"2025-2026学年北京师范大学附属中学七年级（上）期末数学试卷", focus:"西城区师大附中七年级上学期期末数学试卷", reason:"西城名校", questions:24, minutes:90, difficulty:"中等", source:"北师大附中公开试卷", usage:1812, tag:"paper", tone:"sage" }
 ];
 const workbookAlbums = [
-  { id: "duowei", name: "多维导学案", subtitle: "课时练 + 单元检测", source: "多维导学案" },
-  { id: "quanpin", name: "全品学练考", subtitle: "同步精练体系", source: "全品学练考" },
-  { id: "yuanchuang", name: "原创新课堂", subtitle: "课堂同步训练", source: "原创新课堂" },
-  { id: "tiyou", name: "常用提优训练系列", subtitle: "能力进阶与培优", source: "常用提优训练系列" },
+  { id: "duowei", name: "朝阳新目标检测", subtitle: "课时练 + 单元检测", source: "多维导学案" },
+  { id: "quanpin", name: "西城学习探究诊断", subtitle: "同步精练体系", source: "全品学练考" },
+  { id: "yuanchuang", name: "海淀名师伴你学", subtitle: "课堂同步训练", source: "原创新课堂" },
+  { id: "tiyou", name: "真题圈北京版", subtitle: "阶段复习 + 能力培优", source: "常用提优训练系列" },
   { id: "yicuo", name: "易错方法系列", subtitle: "错因拆解与变式", source: "易错方法系列" }
 ];
 // 首页“练习册”模块：书架层固定展示四本（无需 tab）。
@@ -574,7 +574,7 @@ const homepagePaperItems = {
   t14: { id:"t14", authority:"district", examType:"midterm", sourceVerified:true, scopeVerified:true, districtCode:"110105", publishedAt:"2026-08-06" },
   t25: { id:"t25", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"110105", publishedAt:"2026-08-07" },
   t59: { id:"t59", authority:"local", examType:"monthly", sourceVerified:true, districtCode:"110105", publishedAt:"2026-08-13" },
-  t62: { id:"t62", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-12", uploader:{ name:"八十中教研组", tone:"amber" } },
+  t62: { id:"t62", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, districtCode:"110105", publishedAt:"2026-08-12", uploader:{ name:"八十中教研组", tone:"amber" } },
   t63: { id:"t63", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, peerMatched:true, publishedAt:"2026-08-09", uploader:{ name:"经纶教研组", tone:"blue" } },
   t64: { id:"t64", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"110105", publishedAt:"2026-08-08" },
   t65: { id:"t65", authority:"group", examType:"midterm", sourceVerified:true, scopeVerified:true, publishedAt:"2026-08-10", uploader:{ name:"北京中学教研组", tone:"violet" } },
@@ -607,8 +607,21 @@ const homepagePaperAuthorityLabels = {
   school: "名校",
   district: "区统考",
   districtPaper: "区级试卷",
-  group: "集团联考",
-  local: "本区试卷"
+  group: "集团校联考",
+  local: "集团校联考"
+};
+
+const homepagePaperDisplayTitles = {
+  t2: "朝阳区七上期末统考数学 · 2026年",
+  t59: "朝阳区七上10月月考数学 · 2026年",
+  t62: "北京八十中七上期中数学 · 2026年",
+  t67: "朝阳外国语七上期末数学 · 2026年",
+  t68: "日坛中学七上期中数学 · 2026年",
+  t71: "北京四中七上期中数学 · 2026年",
+  t72: "北京八中七上期末数学 · 2026年",
+  t73: "人大附中七上期中数学 · 2026年",
+  t74: "清华附中七上期末数学 · 2026年",
+  t76: "师大附中七上期末数学 · 2026年"
 };
 
 const homepagePaperSourceClasses = {
@@ -642,9 +655,9 @@ const paperAuthorityOptions = [
   { id:"school", label:"名校", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.famousSchoolVerified },
   { id:"strong", label:strongDistrictPolicy.label, match: topic => isStrongDistrictPaper(homepagePaperItems[topic.id]) },
   { id:"district", label:"区统考", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.authority === "district" },
-  { id:"group", label:"集团联考", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.authority === "group" },
+  { id:"group", label:"集团校联考", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.authority === "group" },
   { id:"peer", label:"同类校", match: topic => Boolean(homepagePaperItems[topic.id]?.peerMatched) },
-  { id:"local", label:"本区试卷", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.authority === "local" }
+  { id:"local", label:"集团校联考", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.authority === "local" }
 ];
 
 const homepageSyncItems = {
@@ -765,27 +778,29 @@ function homepagePaperCard(item, options = {}) {
   if (!topic) return "";
   const presentation = getHomepagePaperPresentation(item);
   const districtFact = getHomepagePaperDistrictFact(item, topic);
+  const unifyTags = options.lane === "recommend" || options.lane === "download";
   const facts = [
     ...(districtFact ? [districtFact] : []),
-    ...(options.lane === "download" ? [] : [{ ...presentation }]),
-    ...getHomepagePaperTypeFacts(item)
-  ];
+    ...(unifyTags || options.lane !== "download" ? [{ ...presentation }] : []),
+    ...(unifyTags ? [] : getHomepagePaperTypeFacts(item))
+  ].slice(0, unifyTags ? 2 : undefined);
   const filters = getHomepagePaperFilters(item);
   const typeIds = getHomepagePaperTypeIds(item);
   const publishedText = item.publishedAt ? item.publishedAt.replaceAll("-", "/") : "";
   const uploader = options.lane === "famous" ? getHomepagePaperUploader(item, topic) : null;
   const rank = Number(options.rank) || 0;
+  const displayTitle = options.title || (unifyTags && homepagePaperDisplayTitles[item.id]) || topic.title;
   return `
     <button class="home-paper-card${rank ? " is-ranked" : ""}" type="button" data-topic="${topic.id}" data-context="paper" data-featured-paper-card data-paper-filters="${filters.join(" ")}" data-paper-types="${typeIds.join(" ")}">
       ${rank ? `<span class="home-paper-rank${rank <= 3 ? " is-top" : ""}">${String(rank).padStart(2, "0")}</span>` : ""}
       <span class="home-paper-copy">
-        <span class="home-featured-resource-title"><b>${topic.title}</b></span>
+        <span class="home-featured-resource-title"><b>${displayTitle}</b></span>
         <span class="home-paper-meta-row">
           <span class="home-paper-facts">${facts.map(fact => `<em class="${fact.className}">${fact.label}</em>`).join("")}</span>
           <small>
             ${uploader ? `<span class="home-paper-uploader"><span class="teacher-avatar ${uploader.tone}">${uploader.initial}</span>${uploader.name}</span>` : ""}
             ${options.lane === "hot" ? `<span><i class="ri-user-line"></i>${topic.usage.toLocaleString()} 人使用</span>` : ""}
-            ${options.lane === "download" ? `<span><i class="ri-download-2-line"></i>${topic.usage.toLocaleString()}</span>` : ""}
+            ${options.lane === "download" ? `<span><i class="ri-user-line"></i>${topic.usage.toLocaleString()} 人使用</span>` : ""}
             ${options.lane === "download" ? "" : publishedText ? `<span class="home-paper-published"><i class="ri-time-line"></i>${publishedText}</span>` : ""}
           </small>
         </span>
@@ -824,7 +839,7 @@ function homepagePaperLane(mode, title, papers) {
 function homepageFeaturedPickCard(pick) {
   if (pick.kind === "paper") {
     const item = homepagePaperItems[pick.id];
-    return item ? homepagePaperCard(item, { lane: "recommend" }) : "";
+    return item ? homepagePaperCard(item, { lane: "recommend", title: pick.title }) : "";
   }
   const topic = byId[pick.id];
   if (!topic) return "";
@@ -833,18 +848,15 @@ function homepageFeaturedPickCard(pick) {
     workbook: { label: "同步练习", className: "is-kind-workbook", context: "series" },
     special: { label: "专题", className: "is-kind-special", context: "special" }
   }[pick.kind] || { label: "精选", className: "", context: "paper" };
-  const publishedText = (pick.publishedAt || "").replaceAll("-", "/");
-  const facts = [
-    `<em class="${kindMeta.className}">${kindMeta.label}</em>`,
-    `<em>${topic.questions}题 · ${topic.minutes}分钟 · ${topic.difficulty}</em>`
-  ].join("");
+  const displayTitle = pick.title || topic.title;
+  const extra = `${topic.questions}题 · ${topic.minutes}分钟 · ${topic.difficulty}`;
   return `
     <button class="home-paper-card" type="button" data-topic="${topic.id}" data-context="${kindMeta.context}">
       <span class="home-paper-copy">
-        <span class="home-featured-resource-title"><b>${topic.title}</b></span>
+        <span class="home-featured-resource-title"><b>${displayTitle}</b></span>
         <span class="home-paper-meta-row">
-          <span class="home-paper-facts">${facts}</span>
-          <small>${publishedText ? `<span class="home-paper-published"><i class="ri-time-line"></i>${publishedText}</span>` : ""}</small>
+          <span class="home-paper-facts"><em class="${kindMeta.className}">${kindMeta.label}</em></span>
+          <small><span>${extra}</span></small>
         </span>
       </span>
     </button>`;
@@ -855,11 +867,11 @@ function homepageFeaturedPanel() {
     { kind: "paper", id: "t59" },
     { kind: "paper", id: "t73" },
     { kind: "paper", id: "t71" },
-    { kind: "compilation", id: "t54", publishedAt: "2026-08-11" },
+    { kind: "compilation", id: "t54", title: "朝阳区七上期中真题汇编：有理数高频题 · 23-26年" },
     { kind: "paper", id: "t62" },
-    { kind: "workbook", id: "t40", publishedAt: "2026-08-12" },
+    { kind: "workbook", id: "t40" },
     { kind: "paper", id: "t2" },
-    { kind: "special", id: "t1", publishedAt: "2026-08-09" },
+    { kind: "special", id: "t1" },
     { kind: "paper", id: "t74" },
     { kind: "paper", id: "t72" }
   ];
@@ -878,7 +890,7 @@ function homepageFeaturedPanel() {
               </header>
               <div class="home-recommend-grid">${featuredPicks.map(homepageFeaturedPickCard).join("")}</div>
             </section>
-            ${homepagePaperLane("download", "老师都在用", famousPapers)}
+            ${homepagePaperLane("download", "使用排行榜", famousPapers)}
           </div>
         </section>
         ${homepageAlbumResourceSection(true)}
@@ -978,10 +990,10 @@ function homepageSpecialResourceSection() {
 
 function renderWorkbookShelfCards(albumIds = homepageWorkbookShelfIds) {
   const albumPresentation = {
-    duowei: { tone:"indigo", spine:"同步", kind:"教材同步目录", scene:"课时练 + 单元检测" },
-    quanpin: { tone:"rose", spine:"同步", kind:"教材同步目录", scene:"分层巩固 + 单元练习" },
-    yuanchuang: { tone:"violet", spine:"同步", kind:"教材同步目录", scene:"课堂同步训练 + 题型梯度" },
-    tiyou: { tone:"slate", spine:"综合", kind:"独立目录", scene:"阶段复习 + 能力培优" },
+    duowei: { tone:"indigo", spine:"综合", kind:"综合练习", scene:"课时练 + 单元检测" },
+    quanpin: { tone:"rose", spine:"同步", kind:"同步练习", scene:"分层巩固 + 单元练习" },
+    yuanchuang: { tone:"violet", spine:"同步", kind:"同步练习", scene:"课堂同步训练 + 题型梯度" },
+    tiyou: { tone:"slate", spine:"综合", kind:"综合练习", scene:"阶段复习 + 能力培优" },
     yicuo: { tone:"rose", spine:"综合", kind:"独立目录", scene:"错因拆解与变式" }
   };
 

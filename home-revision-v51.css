@@ -891,7 +891,7 @@ body.index-page.is-home-view .home-paper-columns .home-paper-lane-empty {
   font-size: 11px;
 }
 
-/* 精选试卷 + 老师都在用 ------------------------------------------- */
+/* 精选试卷 + 使用排行榜 ------------------------------------------- */
 body.index-page.is-home-view .home-paper-recommend-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -1065,7 +1065,9 @@ body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-do
 }
 
 body.index-page.is-home-view .home-recommend-module .home-paper-facts em,
-body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em {
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em[class],
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em,
+body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em[class] {
   padding: 2px 6px;
   color: #5f6a82;
   font-size: 12px;
@@ -1074,24 +1076,6 @@ body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-do
   border: 0;
   border-radius: 4px;
   background: #f4f6fa;
-}
-
-body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-xicheng,
-body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em.is-xicheng {
-  color: #6a4fb3;
-  background: #f3f0fb;
-}
-
-body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-haidian,
-body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em.is-haidian {
-  color: #2f6aa8;
-  background: #eef5fb;
-}
-
-body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-chaoyang,
-body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts em.is-chaoyang {
-  color: #2d7a58;
-  background: #eef7f2;
 }
 
 body.index-page.is-home-view .home-recommend-module .home-paper-meta-row > small,
@@ -1685,19 +1669,11 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-sync > heade
   }
 }
 
-body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-kind-compilation {
-  color: #2d7a58;
-  background: #eef7f2;
-}
-
-body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-kind-workbook {
-  color: #445cbd;
-  background: #eef1fb;
-}
-
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-kind-compilation,
+body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-kind-workbook,
 body.index-page.is-home-view .home-recommend-module .home-paper-facts em.is-kind-special {
-  color: #6a4fb3;
-  background: #f3f0fb;
+  color: #5f6a82;
+  background: #f4f6fa;
 }
 
 body.index-page.is-album-view .album-shelf-heading {
