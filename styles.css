@@ -6870,8 +6870,12 @@ body.index-page.is-home-view .home-featured-learning .home-compact-resource {
   }
 }
 
-/* 嵌入 AI 工作台「首页」页签时：隐藏顶栏导航，保留底部 AI */
-body.is-embedded .discovery.site-header,
+/* 工作台固定首页保留顶栏；分类/章节 Tab 已由外层导航承载，不再重复显示内层顶栏。 */
+body.index-page.is-embedded:not(.is-home-view) .discovery.site-header,
+body.school-library-page.is-embedded .discovery.site-header {
+  display: none !important;
+}
+
 body.is-embedded .bank-stats-card,
 body.is-embedded .bank-stats-bar {
   display: none !important;
@@ -6879,13 +6883,32 @@ body.is-embedded .bank-stats-bar {
 body.is-embedded .practice-split { grid-template-columns: repeat(2, minmax(0,1fr)); }
 body.is-embedded .practice-right-col .practice-compile { grid-column:2; }
 
-body.is-embedded .ai-dock-shell {
-  display: block !important;
+/* 工作台已有独立 AI 助手入口，内嵌首页不再重复显示底部 AI 输入框。 */
+body.index-page.is-embedded.is-home-view.has-ai-dock .ai-dock-shell {
+  display: none !important;
+}
+
+/* 工作台内嵌首页只承载内容，左侧组题画布由外层工作台统一提供。 */
+body.index-page.is-embedded > .ai-workspace,
+body.index-page.is-embedded > .ai-workspace.selected-panel-collapsed,
+body.school-library-page.is-embedded > .ai-workspace,
+body.school-library-page.is-embedded > .ai-workspace.selected-panel-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+body.index-page.is-embedded > .ai-workspace > .ai-selected-panel,
+body.school-library-page.is-embedded > .ai-workspace > .ai-selected-panel {
+  display: none !important;
 }
 
 body.is-embedded .page {
   padding-top: 12px;
-  padding-bottom: 116px;
+  padding-bottom: 24px;
+}
+
+body.index-page.is-embedded.is-home-view.has-ai-dock .page {
+  padding-bottom: 24px;
 }
 
 /* ========== Homepage v3: one-screen modules + bottom AI ========== */

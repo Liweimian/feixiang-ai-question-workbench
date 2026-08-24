@@ -44,6 +44,26 @@
     try { localStorage.setItem(STORAGE_KEY, json); } catch {}
   }
 
+  function registerDownload(resource, format = "Word") {
+    if (!resource?.tab) return;
+    const resourceKey = `resource:${resource.id}`;
+    const record = {
+      id: `download:${resourceKey}:${format.toLowerCase()}`,
+      resourceKey,
+      title: resource.title || "未命名题单",
+      questionCount: Number(resource.questionCount || 0),
+      format,
+      downloadedAt: new Date().toISOString(),
+      tab: JSON.parse(JSON.stringify(resource.tab))
+    };
+    const workspace = readWorkspace();
+    workspace.downloadRecords = [
+      record,
+      ...(Array.isArray(workspace.downloadRecords) ? workspace.downloadRecords : []).filter(item => item.id !== record.id)
+    ].slice(0, 30);
+    saveWorkspace(workspace);
+  }
+
   function readFolders() {
     const folders = parseJson(localStorage.getItem(FOLDER_KEY), []);
     return Array.isArray(folders) ? folders : [];
@@ -210,7 +230,11 @@
     const row = event.target.closest("[data-resource-id]");
     if (!action || !row) return;
     if (action === "open") openResource(row.dataset.resourceId);
-    if (action === "download") showToast("正在生成题单下载文件…");
+    if (action === "download") {
+      const resource = (readWorkspace().myQuestionLists || []).find(item => item.id === row.dataset.resourceId);
+      registerDownload(resource);
+      showToast("正在生成题单下载文件…");
+    }
     if (action === "more") showToast("更多管理功能即将开放");
   });
 

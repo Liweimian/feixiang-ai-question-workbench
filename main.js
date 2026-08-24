@@ -74,7 +74,9 @@ const topics = [
   { id:"t73", title:"2025-2026学年中国人民大学附属中学七年级（上）期中数学试卷", focus:"海淀区人大附中七年级上学期期中数学试卷", reason:"海淀名校", questions:24, minutes:90, difficulty:"较难", source:"人大附中公开试卷", usage:2148, tag:"paper", tone:"lilac" },
   { id:"t74", title:"2025-2026学年清华大学附属中学七年级（上）期末数学试卷", focus:"海淀区清华附中七年级上学期期末数学试卷", reason:"海淀名校", questions:25, minutes:90, difficulty:"较难", source:"清华附中公开试卷", usage:1986, tag:"paper", tone:"mist" },
   { id:"t75", title:"2025-2026学年北京大学附属中学七年级（上）月考数学试卷", focus:"海淀区北大附中七年级上学期月考数学试卷", reason:"海淀名校", questions:20, minutes:60, difficulty:"中等", source:"北大附中公开试卷", usage:1764, tag:"paper", tone:"cream" },
-  { id:"t76", title:"2025-2026学年北京师范大学附属中学七年级（上）期末数学试卷", focus:"西城区师大附中七年级上学期期末数学试卷", reason:"西城名校", questions:24, minutes:90, difficulty:"中等", source:"北师大附中公开试卷", usage:1812, tag:"paper", tone:"sage" }
+  { id:"t76", title:"2025-2026学年北京师范大学附属中学七年级（上）期末数学试卷", focus:"西城区师大附中七年级上学期期末数学试卷", reason:"西城名校", questions:24, minutes:90, difficulty:"中等", source:"北师大附中公开试卷", usage:1812, tag:"paper", tone:"sage" },
+  { id:"t77", title:"2025-2026学年北京市十一学校七年级（上）期中数学试卷", focus:"海淀区北京十一学校七年级上学期期中数学试卷", reason:"海淀名校", questions:24, minutes:90, difficulty:"较难", source:"北京十一学校公开试卷", usage:1748, tag:"paper", tone:"cream" },
+  { id:"t78", title:"2025-2026学年北京市第二中学七年级（上）期中数学试卷", focus:"东城区北京二中七年级上学期期中数学试卷", reason:"东城名校", questions:23, minutes:90, difficulty:"中等", source:"北京二中公开试卷", usage:1692, tag:"paper", tone:"lilac" }
 ];
 const workbookAlbums = [
   { id: "duowei", name: "朝阳新目标检测", subtitle: "课时练 + 单元检测", source: "多维导学案" },
@@ -83,6 +85,25 @@ const workbookAlbums = [
   { id: "tiyou", name: "真题圈北京版", subtitle: "阶段复习 + 能力培优", source: "常用提优训练系列" },
   { id: "yicuo", name: "易错方法系列", subtitle: "错因拆解与变式", source: "易错方法系列" }
 ];
+
+function workbookWorkspaceBrowseKey(albumId) {
+  return `workbook:${encodeURIComponent(String(albumId || ""))}`;
+}
+
+function openWorkbookWorkspace(album) {
+  if (!album) return;
+  const query = new URLSearchParams({
+    context: "series",
+    workspaceView: "browse",
+    browse: workbookWorkspaceBrowseKey(album.id),
+    view: "catalog",
+    albumId: album.id,
+    query: "",
+    keepAlbumState: "true"
+  });
+  location.href = `./detail-ai.html?${query.toString()}`;
+}
+
 // 首页“练习册”模块：书架层固定展示四本（无需 tab）。
 const homepageWorkbookShelfIds = ["duowei", "quanpin", "yuanchuang", "tiyou"];
 const albumFilterState = { view: "album", albumId: "", nodeId: "ch1-1-m1", openNodes: ["ch1", "ch1-1", "ch1-2", "ch1-2-1"], origin: "all", textbook: "all", year: "all", query: "" };
@@ -232,8 +253,14 @@ function matchesWorkbookType(topic, type) {
   return option?.match?.(topic) ?? true;
 }
 
-// 首页与试卷详情改为独立页面浏览，不再以 iframe 嵌入工作台
-const isEmbedded = false;
+// 首页可嵌入详情工作台；嵌入时把分类和资源导航交给外层页签处理。
+const isEmbedded = (() => {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+})();
 
 function requestParentOpenTopic(topicId, context, query, extra = {}) {
   window.parent.postMessage({
@@ -249,6 +276,10 @@ function requestParentOpenTopic(topicId, context, query, extra = {}) {
 
 function requestParentOpenFilter(filter, extra = {}) {
   window.parent.postMessage({ type: "aiq-open-filter", filter, ...extra }, "*");
+}
+
+function requestParentOpenAi(prompt = "") {
+  window.parent.postMessage({ type: "aiq-open-ai", prompt: String(prompt || "") }, "*");
 }
 
 window.addEventListener("message", event => {
@@ -589,7 +620,9 @@ const homepagePaperItems = {
   t73: { id:"t73", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, districtCode:"110108", publishedAt:"2026-08-13", uploader:{ name:"人大附中教研组", tone:"violet" } },
   t74: { id:"t74", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, districtCode:"110108", publishedAt:"2026-08-10", uploader:{ name:"清华附中教研组", tone:"rose" } },
   t75: { id:"t75", authority:"school", examType:"monthly", sourceVerified:true, famousSchoolVerified:true, districtCode:"110108", publishedAt:"2026-08-06", uploader:{ name:"北大附中教研组", tone:"amber" } },
-  t76: { id:"t76", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, districtCode:"110102", publishedAt:"2026-08-09", uploader:{ name:"师大附中教研组", tone:"blue" } }
+  t76: { id:"t76", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, districtCode:"110102", publishedAt:"2026-08-09", uploader:{ name:"师大附中教研组", tone:"blue" } },
+  t77: { id:"t77", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, districtCode:"110108", publishedAt:"2026-08-07", uploader:{ name:"十一学校教研组", tone:"amber" } },
+  t78: { id:"t78", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, districtCode:"110101", publishedAt:"2026-08-05", uploader:{ name:"北京二中教研组", tone:"violet" } }
 };
 
 // DEMO 运营白名单：正式环境按城市、学年和租户配置，不从标题或使用量推断。
@@ -612,16 +645,40 @@ const homepagePaperAuthorityLabels = {
 };
 
 const homepagePaperDisplayTitles = {
-  t2: "朝阳区七上期末统考数学 · 2026年",
-  t59: "朝阳区七上10月月考数学 · 2026年",
-  t62: "北京八十中七上期中数学 · 2026年",
-  t67: "朝阳外国语七上期末数学 · 2026年",
-  t68: "日坛中学七上期中数学 · 2026年",
-  t71: "北京四中七上期中数学 · 2026年",
-  t72: "北京八中七上期末数学 · 2026年",
-  t73: "人大附中七上期中数学 · 2026年",
-  t74: "清华附中七上期末数学 · 2026年",
-  t76: "师大附中七上期末数学 · 2026年"
+  t2: "朝阳区 · 期末统考卷",
+  t14: "朝阳区 · 期中统考卷",
+  t25: "朝阳区 · 期末统考卷",
+  t59: "朝阳区 · 10月月考卷",
+  t62: "北京八十中 · 期中卷",
+  t63: "陈经纶中学 · 期中卷",
+  t64: "朝阳区 · 期末质量监测卷",
+  t65: "北京中学教育集团 · 期中联考卷",
+  t67: "朝阳外国语 · 期末卷",
+  t68: "日坛中学 · 期中卷",
+  t69: "北京十七中 · 期末卷",
+  t70: "八十中分校 · 月考卷",
+  t71: "北京四中 · 期中卷",
+  t72: "北京八中 · 期末卷",
+  t73: "人大附中 · 期中卷",
+  t74: "清华附中 · 期末卷",
+  t75: "北大附中 · 月考卷",
+  t76: "师大附中 · 期末卷",
+  t77: "十一学校 · 期中卷",
+  t78: "北京二中 · 期中卷"
+};
+
+const homepagePaperDisplayFacts = {
+  t2: [{ label:"区级统考", className:"is-district" }, { label:"统考原卷", className:"is-original" }],
+  t62: [{ label:"朝阳名校", className:"is-school" }, { label:"校考原卷", className:"is-original" }],
+  t63: [{ label:"朝阳名校", className:"is-school" }, { label:"校考原卷", className:"is-original" }],
+  t64: [{ label:"区级监测", className:"is-district" }, { label:"监测原卷", className:"is-original" }],
+  t65: [{ label:"朝阳集团校", className:"is-group" }, { label:"联考原卷", className:"is-original" }],
+  t71: [{ label:"西城名校", className:"is-school" }, { label:"校考原卷", className:"is-original" }],
+  t73: [{ label:"海淀名校", className:"is-school" }, { label:"校考原卷", className:"is-original" }],
+  t74: [{ label:"海淀名校", className:"is-school" }, { label:"校考原卷", className:"is-original" }],
+  t76: [{ label:"西城名校", className:"is-school" }, { label:"校考原卷", className:"is-original" }],
+  t77: [{ label:"海淀名校", className:"is-school" }, { label:"校考原卷", className:"is-original" }],
+  t78: [{ label:"东城名校", className:"is-school" }, { label:"校考原卷", className:"is-original" }]
 };
 
 const homepagePaperSourceClasses = {
@@ -706,14 +763,10 @@ const homepageFeaturedData = {
   famous: {
     description: "优先展示已核验的名校与集团校试卷",
     papers: [
-      homepagePaperItems.t73,
-      homepagePaperItems.t74,
-      homepagePaperItems.t71,
-      homepagePaperItems.t62,
       homepagePaperItems.t76,
-      homepagePaperItems.t72,
-      homepagePaperItems.t67,
-      homepagePaperItems.t68
+      homepagePaperItems.t77,
+      homepagePaperItems.t78,
+      homepagePaperItems.t63
     ]
   }
 };
@@ -751,6 +804,9 @@ function getHomepagePaperTypeFacts(item) {
 
 function getHomepagePaperDistrictFact(item, topic) {
   const text = `${topic?.title || ""} ${topic?.source || ""} ${topic?.reason || ""}`;
+  if (item?.districtCode === "110101" || /东城|第二中学|北京二中/.test(text)) {
+    return { label:"东城", className:"is-dongcheng" };
+  }
   if (item?.districtCode === "110102" || /西城|第四中学|第八中学|师大附中|北京师范大学附属/.test(text)) {
     return { label:"西城", className:"is-xicheng" };
   }
@@ -779,11 +835,18 @@ function homepagePaperCard(item, options = {}) {
   const presentation = getHomepagePaperPresentation(item);
   const districtFact = getHomepagePaperDistrictFact(item, topic);
   const unifyTags = options.lane === "recommend" || options.lane === "download";
-  const facts = [
-    ...(districtFact ? [districtFact] : []),
-    ...(unifyTags || options.lane !== "download" ? [{ ...presentation }] : []),
-    ...(unifyTags ? [] : getHomepagePaperTypeFacts(item))
-  ].slice(0, unifyTags ? 2 : undefined);
+  const curatedFacts = Array.isArray(options.facts) && options.facts.length
+    ? options.facts
+    : unifyTags
+      ? homepagePaperDisplayFacts[item.id]
+      : null;
+  const facts = curatedFacts?.length
+    ? curatedFacts.slice(0, 2)
+    : [
+      ...(districtFact ? [districtFact] : []),
+      ...(unifyTags || options.lane !== "download" ? [{ ...presentation }] : []),
+      ...(unifyTags ? [] : getHomepagePaperTypeFacts(item))
+    ].slice(0, unifyTags ? 2 : undefined);
   const filters = getHomepagePaperFilters(item);
   const typeIds = getHomepagePaperTypeIds(item);
   const publishedText = item.publishedAt ? item.publishedAt.replaceAll("-", "/") : "";
@@ -839,7 +902,7 @@ function homepagePaperLane(mode, title, papers) {
 function homepageFeaturedPickCard(pick) {
   if (pick.kind === "paper") {
     const item = homepagePaperItems[pick.id];
-    return item ? homepagePaperCard(item, { lane: "recommend", title: pick.title }) : "";
+    return item ? homepagePaperCard(item, { lane: "recommend", title: pick.title, facts: pick.tags }) : "";
   }
   const topic = byId[pick.id];
   if (!topic) return "";
@@ -849,13 +912,14 @@ function homepageFeaturedPickCard(pick) {
     special: { label: "专题", className: "is-kind-special", context: "special" }
   }[pick.kind] || { label: "精选", className: "", context: "paper" };
   const displayTitle = pick.title || topic.title;
+  const displayFacts = Array.isArray(pick.tags) && pick.tags.length ? pick.tags : [kindMeta];
   const extra = `${topic.questions}题 · ${topic.minutes}分钟 · ${topic.difficulty}`;
   return `
     <button class="home-paper-card" type="button" data-topic="${topic.id}" data-context="${kindMeta.context}">
       <span class="home-paper-copy">
         <span class="home-featured-resource-title"><b>${displayTitle}</b></span>
         <span class="home-paper-meta-row">
-          <span class="home-paper-facts"><em class="${kindMeta.className}">${kindMeta.label}</em></span>
+          <span class="home-paper-facts">${displayFacts.slice(0, 2).map(fact => `<em class="${fact.className || ""}">${fact.label}</em>`).join("")}</span>
           <small><span>${extra}</span></small>
         </span>
       </span>
@@ -864,16 +928,16 @@ function homepageFeaturedPickCard(pick) {
 
 function homepageFeaturedPanel() {
   const featuredPicks = [
-    { kind: "paper", id: "t59" },
+    { kind: "paper", id: "t65" },
     { kind: "paper", id: "t73" },
     { kind: "paper", id: "t71" },
-    { kind: "compilation", id: "t54", title: "朝阳区七上期中真题汇编：有理数高频题 · 23-26年" },
-    { kind: "paper", id: "t62" },
-    { kind: "workbook", id: "t40" },
-    { kind: "paper", id: "t2" },
-    { kind: "special", id: "t1" },
+    { kind: "compilation", id: "t54", title: "朝阳区 · 近3年期中卷汇编", tags: [{ label:"多卷汇编", className:"is-kind-compilation" }, { label:"高频考点", className:"is-popular" }] },
+    { kind: "workbook", id: "t40", title: "有理数核心概念 · 课时过关", tags: [{ label:"同步练习", className:"is-kind-workbook" }, { label:"基础巩固", className:"is-fit" }] },
     { kind: "paper", id: "t74" },
-    { kind: "paper", id: "t72" }
+    { kind: "paper", id: "t2" },
+    { kind: "special", id: "t1", title: "有理数符号运算 · 易错二练", tags: [{ label:"专题练习", className:"is-kind-special" }, { label:"易错巩固", className:"is-fit" }] },
+    { kind: "paper", id: "t62" },
+    { kind: "paper", id: "t64" }
   ];
   const famousPapers = [...homepageFeaturedData.famous.papers]
     .sort((a, b) => (byId[b.id]?.usage || 0) - (byId[a.id]?.usage || 0));
@@ -890,7 +954,7 @@ function homepageFeaturedPanel() {
               </header>
               <div class="home-recommend-grid">${featuredPicks.map(homepageFeaturedPickCard).join("")}</div>
             </section>
-            ${homepagePaperLane("download", "老师使用排行", famousPapers)}
+            ${homepagePaperLane("download", "教师热用榜", famousPapers)}
           </div>
         </section>
         ${homepageAlbumResourceSection(true)}
@@ -1955,7 +2019,7 @@ function albumCard(album) {
   const displayItems = items.slice(0, 4);
   return `
     <article class="series-library-card album-card" data-album="${album.id}">
-      <button class="series-library-heading" type="button" data-album-open="${album.source}">
+      <button class="series-library-heading" type="button" data-album-open="${album.id}">
         <span class="series-spine">${album.name.slice(0, 1)}</span>
         <span><small>练习册</small><b>${album.name}</b><em>${items.length} 份题单 · ${album.subtitle}</em></span>
         <i class="ri-arrow-right-s-line"></i>
@@ -2271,22 +2335,33 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-album-series]").forEach(button => button.addEventListener("click", () => applyAlbumView({ query: button.dataset.albumSeries || "" })));
   root.querySelectorAll("[data-album-search]").forEach(input => input.addEventListener("input", () => applyAlbumView({ query: input.value })));
   root.querySelectorAll("[data-album-open]").forEach(button => button.addEventListener("click", () => {
+    const album = workbookAlbums.find(item => item.id === button.dataset.albumOpen || item.source === button.dataset.albumOpen) || workbookAlbums[0];
     if (isEmbedded) {
-      requestParentOpenFilter("workbook", { view: "catalog", albumId: button.dataset.albumOpen, keepAlbumState: true });
+      requestParentOpenFilter("workbook", { view: "catalog", albumId: album.id, keepAlbumState: true });
       return;
     }
-    openWorkbookAlbum(button.dataset.albumOpen);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    openWorkbookWorkspace(album);
   }));
   root.querySelectorAll("[data-album-jump]").forEach(button => button.addEventListener("click", () => {
+    const album = workbookAlbums.find(item => item.id === button.dataset.albumJump || item.source === button.dataset.albumJump);
     if (isEmbedded) {
-      requestParentOpenFilter("workbook", { view:"catalog", query:button.dataset.albumJump, keepAlbumState:true });
+      if (album) requestParentOpenFilter("workbook", { view:"catalog", albumId:album.id, keepAlbumState:true });
+      else requestParentOpenFilter("workbook", { view:"catalog", query:button.dataset.albumJump, keepAlbumState:true });
       return;
     }
-    openWorkbookAlbum(button.dataset.albumJump);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (album) openWorkbookWorkspace(album);
+    else {
+      openWorkbookAlbum(button.dataset.albumJump);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }));
-  root.querySelectorAll("[data-album-back]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "album", query: "" })));
+  root.querySelectorAll("[data-album-back]").forEach(button => button.addEventListener("click", () => {
+    if (isEmbedded) {
+      requestParentOpenFilter("workbook", { view:"album", albumId:"", query:"", keepAlbumState:false });
+      return;
+    }
+    applyAlbumView({ view: "album", query: "" });
+  }));
   root.querySelectorAll("[data-workbook-toggle]").forEach(button => button.addEventListener("click", event => {
     event.stopPropagation();
     applyAlbumView({ toggleNode: button.dataset.workbookToggle });
@@ -2454,11 +2529,6 @@ function openTopic(id, options = {}) {
 }
 
 function openDetailPage(url) {
-  const opened = window.open(url, "_blank");
-  if (opened) {
-    opened.opener = null;
-    return;
-  }
   location.href = url;
 }
 
@@ -2496,6 +2566,10 @@ function openAi(prompt = "") {
     document.querySelector("#aiQuickInput")?.focus();
     return;
   }
+  if (isEmbedded) {
+    requestParentOpenAi(value);
+    return;
+  }
   location.href = `./detail-ai.html?mode=compose&prompt=${encodeURIComponent(value)}&context=paper`;
 }
 
@@ -2526,6 +2600,18 @@ renderBankStats();
 if (isEmbedded) {
   document.body.classList.add("is-embedded");
   document.addEventListener("click", event => {
+    const workspaceNavLink = event.target.closest(".site-header a[href]");
+    if (workspaceNavLink) {
+      const url = new URL(workspaceNavLink.getAttribute("href"), location.href);
+      const path = url.pathname.replace(/\/+$/, "");
+      if (path.endsWith("/index.html") || path.endsWith("/school.html")) {
+        event.preventDefault();
+        const filter = path.endsWith("/school.html") ? "school" : (url.searchParams.get("filter") || "all");
+        requestParentOpenFilter(filter);
+        return;
+      }
+    }
+
     const link = event.target.closest('a[href*="detail-ai.html"]');
     if (!link) return;
     event.preventDefault();
@@ -2536,11 +2622,11 @@ if (isEmbedded) {
 
 const initParams = new URLSearchParams(location.search);
 const initFilter = initParams.get("filter");
-const initOrigin = initParams.get("origin");
+const initFilterOptions = Object.fromEntries([...initParams.entries()].filter(([key]) => !["filter", "embed", "v"].includes(key)));
 const supportedInitFilters = new Set(["chapter", "paper", "special", "workbook", "compilation"]);
 if (initFilter && supportedInitFilters.has(initFilter)) {
-  prepareFilterOpen(initFilter, initOrigin ? { origin: initOrigin } : {});
-  setMainFilter(initFilter, initOrigin ? { origin: initOrigin } : {});
+  prepareFilterOpen(initFilter, initFilterOptions);
+  setMainFilter(initFilter, initFilterOptions);
 } else {
   render();
 }
@@ -2555,8 +2641,19 @@ window.addEventListener("scroll", () => {
   }
 }, { passive: true });
 
-document.querySelector("#filterChips").addEventListener("click", event => { const button = event.target.closest("[data-filter]"); if (button) setMainFilter(button.dataset.filter); });
-document.querySelector("#resetFilter").addEventListener("click", () => setMainFilter("all"));
+document.querySelector("#filterChips").addEventListener("click", event => {
+  const button = event.target.closest("[data-filter]");
+  if (!button) return;
+  if (isEmbedded) {
+    requestParentOpenFilter(button.dataset.filter);
+    return;
+  }
+  setMainFilter(button.dataset.filter);
+});
+document.querySelector("#resetFilter").addEventListener("click", () => {
+  if (isEmbedded) requestParentOpenFilter("all");
+  else setMainFilter("all");
+});
 
 function bindAiForm(formSelector, inputSelector, addSelector, voiceSelector) {
   const form = document.querySelector(formSelector);

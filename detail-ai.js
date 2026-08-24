@@ -103,15 +103,35 @@ const rightPanelSectionState = {
 };
 
 const MAX_OPEN_TABS = 6;
-const HOME_FRAME_SRC = "./index.html?embed=1&v=20260811aibar";
+const HOME_FRAME_SRC = "./index.html?embed=1&v=20260824workspacetabs32";
+const SCHOOL_FRAME_SRC = "./school.html?embed=1&v=20260824workspacetabs32";
 const QUESTION_DRAG_MIME = "application/x-aiq-questions";
 const CANVAS_DRAG_MIME = "application/x-aiq-canvas";
 const BROWSE_FILTER_META = {
   chapter: { filter: "chapter", label: "同步练习", icon: "ri-book-open-line" },
   special: { filter: "special", label: "专题", icon: "ri-focus-3-line" },
   paper: { filter: "paper", label: "试卷", icon: "ri-file-list-3-line" },
-  workbook: { filter: "workbook", label: "练习册", icon: "ri-book-shelf-line" }
+  workbook: {
+    filter: "workbook",
+    label: "练习册",
+    icon: "ri-book-shelf-line",
+    options: { view: "album", albumId: "", query: "", keepAlbumState: false }
+  },
+  compilation: { filter: "compilation", label: "真题汇编", icon: "ri-book-marked-line" },
+  school: { filter: "school", label: "章节/知识点选题", icon: "ri-node-tree", frameSrc: SCHOOL_FRAME_SRC }
 };
+const WORKBOOK_BROWSE_KEY_PREFIX = "workbook:";
+const WORKBOOK_ALBUM_TAB_LABELS = {
+  duowei: "朝阳新目标检测",
+  quanpin: "西城学习探究诊断",
+  yuanchuang: "海淀名师伴你学",
+  tiyou: "真题圈北京版",
+  yicuo: "易错方法系列"
+};
+const BROWSE_OPTION_KEYS = [
+  "origin", "examType", "year", "grade", "authority", "source", "sort", "query",
+  "view", "albumId", "textbook", "keepAlbumState", "category", "difficulty", "signal"
+];
 const mobileLayoutQuery = window.matchMedia("(max-width: 980px)");
 const expandedAnalysisIds = new Set();
 const selectedExpandedAnalysisKeys = new Set();
@@ -128,9 +148,11 @@ let selectedPreviewTypeFilter = null;
 let selectedPanelEnlarged = false;
 let selectedShowAnswers = false;
 let aiAssistantOpen = false;
+let aiAssistantTabOpen = false;
 let aiAssistantMessages = [];
 let aiAssistantAttachment = null;
 let aiAssistantTyping = false;
+let courseCenterQuery = "";
 
 const paperQuestions = {
   t2: [
@@ -162,11 +184,14 @@ const params = new URLSearchParams(location.search);
 const contextName = params.get("context") || "paper";
 const isComposeMode = params.get("mode") === "compose";
 const isRecordMode = params.get("mode") === "record";
+const requestedWorkspaceView = String(params.get("workspaceView") || "");
+const requestedBrowseFilter = String(params.get("browse") || "");
 const composePrompt = String(params.get("prompt") || "").trim();
 const recordFileName = String(params.get("fileName") || "待录入试卷.pdf").trim();
 const isWorkbook = contextName === "series";
 const isCanvasShell = Boolean(document.querySelector("#aiSelectedPanel")) && !document.querySelector("#questionCardBoard");
 const isHomeShell = isCanvasShell;
+const isEmbeddedCanvasShell = isCanvasShell && document.body.classList.contains("is-embedded");
 const initialTopicId = params.get("topic") || (isWorkbook ? "t9" : "t2");
 // 试卷 / 专项 / 同步等共用同一工作台，避免从首页点不同类型资源时 tab 互相隔离
 const STORAGE_KEY = "feixiang-ai-workspace-v5";
@@ -241,6 +266,7 @@ const workbookDirectory = {
 };
 
 let workspace = loadWorkspace();
+aiAssistantTabOpen = Boolean(workspace.courseCenterTabOpen);
 let applyingRemoteWorkspace = false;
 let canvasSyncChannel = null;
 let tabCounter = workspace.tabs.reduce((max, tab) => {
@@ -269,7 +295,18 @@ function tabContextLabel(tab) {
   return "试卷";
 }
 
+function isUserEditableTab(tab) {
+  return Boolean(tab
+    && !tab.fromQuestionId
+    && (tab.kind === "editor" || tab.isQuestionList || tab.myResourceId));
+}
+
+function isTabTitleEditable(tab) {
+  return Boolean(isUserEditableTab(tab) && tab.kind !== "editor");
+}
+
 function tabDocIcon(tab) {
+  if (isUserEditableTab(tab)) return "ri-edit-box-line";
   if (tabIsWorkbook(tab)) return "ri-book-open-line";
   if (tabIsSpecial(tab)) return "ri-focus-3-line";
   if ((tab?.context || "") === "chapter") return "ri-book-open-line";
@@ -309,6 +346,10 @@ function defaultWorkspace() {
     paperEditSession: null,
     canvasManuallyCollapsed: false,
     myQuestionLists: [],
+    favoriteResources: [],
+    downloadRecords: [],
+    courseCenterTabOpen: false,
+    courseCenterView: "resources",
     paperSaveSignatures: {}
   };
 }
@@ -320,11 +361,31 @@ function parseWorkspaceRaw(saved) {
     if (!parsed || typeof parsed !== "object") return null;
     delete parsed.aiPanelHidden;
     if (Array.isArray(parsed.tabs)) {
-      parsed.tabs = parsed.tabs.map(tab => ({
-        ...tab,
-        context: tab.context || contextName,
-        topicId: tab.fromQuestionId ? tab.topicId : getBaseTopicId(tab.topicId)
-      }));
+      parsed.tabs = parsed.tabs.map(tab => {
+        const normalized = {
+          ...tab,
+          context: tab.context || contextName,
+          topicId: tab.fromQuestionId ? tab.topicId : getBaseTopicId(tab.topicId)
+        };
+        return normalized;
+      });
+      parsed.tabs.forEach(tab => {
+        if (tab.kind !== "editor" || !tab.editorDraft) return;
+        const sourceTab = parsed.tabs.find(item => item.id === tab.sourceTabId);
+        if (!String(tab.editorDraft.sourceTitle || "").trim()) {
+          tab.editorDraft.sourceTitle = String(sourceTab?.title || tab.editorDraft.title || "").trim();
+        }
+        const normalizedDraftTitle = stripEditorTitlePrefix(tab.editorDraft.title);
+        const normalizedSourceTitle = stripEditorTitlePrefix(tab.editorDraft.sourceTitle);
+        if (typeof tab.editorDraft.titleCustomized !== "boolean") {
+          tab.editorDraft.titleCustomized = tab.editorSource === "whole-paper"
+            ? Boolean(normalizedDraftTitle && normalizedSourceTitle && normalizedDraftTitle !== normalizedSourceTitle)
+            : false;
+        }
+        tab.editorDraft.title = normalizedDraftTitle
+          || (tab.editorSource === "whole-paper" ? normalizedSourceTitle : "");
+        syncEditorTabTitle(tab);
+      });
     }
     return {
       ...defaultWorkspace(),
@@ -334,6 +395,12 @@ function parseWorkspaceRaw(saved) {
       globalSelectedQuestions: Array.isArray(parsed.globalSelectedQuestions) ? parsed.globalSelectedQuestions : [],
       favoriteQuestions: Array.isArray(parsed.favoriteQuestions) ? parsed.favoriteQuestions : [],
       myQuestionLists: Array.isArray(parsed.myQuestionLists) ? parsed.myQuestionLists : [],
+      favoriteResources: Array.isArray(parsed.favoriteResources) ? parsed.favoriteResources : [],
+      downloadRecords: Array.isArray(parsed.downloadRecords) ? parsed.downloadRecords : [],
+      courseCenterTabOpen: Boolean(parsed.courseCenterTabOpen),
+      courseCenterView: ["resources", "favorites", "downloads"].includes(parsed.courseCenterView)
+        ? parsed.courseCenterView
+        : "resources",
       canvasScores: parsed.canvasScores && typeof parsed.canvasScores === "object" ? parsed.canvasScores : {},
       paperEditSession: parsed.paperEditSession && typeof parsed.paperEditSession === "object"
         ? parsed.paperEditSession
@@ -349,6 +416,18 @@ function parseWorkspaceRaw(saved) {
 
 function canvasQuestionCount(ws) {
   return Array.isArray(ws?.globalSelectedQuestions) ? ws.globalSelectedQuestions.length : 0;
+}
+
+function mergeWorkspaceRecords(first = [], second = [], timeKey = "updatedAt") {
+  const records = new Map();
+  [...first, ...second].forEach(record => {
+    if (!record?.id) return;
+    const current = records.get(record.id);
+    if (!current || String(record[timeKey] || "") >= String(current[timeKey] || "")) {
+      records.set(record.id, record);
+    }
+  });
+  return [...records.values()].sort((a, b) => String(b[timeKey] || "").localeCompare(String(a[timeKey] || "")));
 }
 
 function mergeWorkspaces(localWs, sessionWs) {
@@ -375,6 +454,18 @@ function mergeWorkspaces(localWs, sessionWs) {
     favoriteQuestions: favoriteSource.favoriteQuestions,
     canvasManuallyCollapsed: Boolean(localWs.canvasManuallyCollapsed || sessionWs.canvasManuallyCollapsed),
     myQuestionLists: [...resourceMap.values()].sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))),
+    favoriteResources: mergeWorkspaceRecords(
+      sessionWs.favoriteResources,
+      localWs.favoriteResources,
+      "favoritedAt"
+    ),
+    downloadRecords: mergeWorkspaceRecords(
+      sessionWs.downloadRecords,
+      localWs.downloadRecords,
+      "downloadedAt"
+    ),
+    courseCenterTabOpen: Boolean(localWs.courseCenterTabOpen || sessionWs.courseCenterTabOpen),
+    courseCenterView: localWs.courseCenterView || sessionWs.courseCenterView || "resources",
     paperSaveSignatures: {
       ...(sessionWs.paperSaveSignatures || {}),
       ...(localWs.paperSaveSignatures || {})
@@ -509,6 +600,29 @@ function registerMyQuestionList(tab) {
   return resource;
 }
 
+function syncMyQuestionListResourceTitle(tab) {
+  if (!tab?.myResourceId) return;
+  const resource = (workspace.myQuestionLists || []).find(item => item.id === tab.myResourceId);
+  if (!resource) return;
+  const title = String(tab.title || "未命名题单").trim() || "未命名题单";
+  const shortTitle = shortenTabTitle(title);
+  resource.title = title;
+  resource.updatedAt = new Date().toISOString();
+  resource.tab = {
+    ...(resource.tab || cloneWorkspaceValue(tab)),
+    title,
+    shortTitle,
+    customTitle: true,
+    meta: {
+      ...(resource.tab?.meta || tab.meta || {}),
+      title,
+      shortTitle
+    }
+  };
+  renderMyResources();
+  renderCourseCenter();
+}
+
 function openMyQuestionList(resourceId) {
   const resource = (workspace.myQuestionLists || []).find(item => item.id === resourceId);
   if (!resource?.tab) return;
@@ -583,6 +697,278 @@ function toggleMyResources() {
   else closeMyResources();
 }
 
+function visibleTabQuestions(tab) {
+  if (!tab) return [];
+  return (tab.questions || [])
+    .filter(question => !(tab.removedQuestionIds || []).includes(question.id))
+    .map(question => resolveTabQuestion(tab, question));
+}
+
+function courseResourceKey(tab) {
+  if (!tab) return "";
+  if (tab.myResourceId) return `resource:${tab.myResourceId}`;
+  const topicId = getBaseTopicId(tab.topicId);
+  const lessonKey = String(tab.lessonKey || tab.title || "").trim();
+  return `${tab.context || contextName}:${topicId}:${lessonKey}`;
+}
+
+function snapshotCourseTab(tab) {
+  if (!tab) return null;
+  const snapshot = cloneWorkspaceValue(tab);
+  snapshot.questions = visibleTabQuestions(tab);
+  snapshot.removedQuestionIds = [];
+  snapshot.modifiedQuestions = {};
+  snapshot.selectedQuestionIds = [];
+  return snapshot;
+}
+
+function ensureFavoriteResources() {
+  if (!Array.isArray(workspace.favoriteResources)) workspace.favoriteResources = [];
+  return workspace.favoriteResources;
+}
+
+function ensureDownloadRecords() {
+  if (!Array.isArray(workspace.downloadRecords)) workspace.downloadRecords = [];
+  return workspace.downloadRecords;
+}
+
+function isTabFavorited(tab) {
+  const key = courseResourceKey(tab);
+  return Boolean(key && ensureFavoriteResources().some(record => record.resourceKey === key));
+}
+
+function toggleTabFavorite(tab) {
+  if (!tab) return false;
+  const resourceKey = courseResourceKey(tab);
+  if (!resourceKey) return false;
+  const records = ensureFavoriteResources();
+  const index = records.findIndex(record => record.resourceKey === resourceKey);
+  if (index >= 0) {
+    records.splice(index, 1);
+    workspace.paperFavorited = false;
+    saveWorkspace();
+    return false;
+  }
+  records.unshift({
+    id: `favorite:${resourceKey}`,
+    resourceKey,
+    title: String(tab.title || "未命名资源"),
+    questionCount: visibleTabQuestions(tab).length,
+    favoritedAt: new Date().toISOString(),
+    tab: snapshotCourseTab(tab)
+  });
+  workspace.paperFavorited = true;
+  saveWorkspace();
+  return true;
+}
+
+function registerDownload(tab, format = "Word") {
+  if (!tab) return null;
+  const resourceKey = courseResourceKey(tab);
+  if (!resourceKey) return null;
+  const record = {
+    id: `download:${resourceKey}:${String(format).toLowerCase()}`,
+    resourceKey,
+    title: String(tab.title || "未命名资源"),
+    questionCount: visibleTabQuestions(tab).length,
+    format,
+    downloadedAt: new Date().toISOString(),
+    tab: snapshotCourseTab(tab)
+  };
+  workspace.downloadRecords = [
+    record,
+    ...ensureDownloadRecords().filter(item => item.id !== record.id)
+  ].slice(0, 30);
+  saveWorkspace();
+  return record;
+}
+
+function findFavoriteQuestionEntry(selectionKey) {
+  const selected = (workspace.globalSelectedQuestions || []).find(item => item.selectionKey === selectionKey);
+  if (selected?.question) return cloneWorkspaceValue(selected);
+  const candidates = [
+    ...(workspace.tabs || []),
+    ...(workspace.myQuestionLists || []).map(resource => resource.tab).filter(Boolean)
+  ];
+  for (const tab of candidates) {
+    const question = (tab.questions || []).find(item => getQuestionSelectionKey(tab.topicId, item.id) === selectionKey);
+    if (question) return buildGlobalSelectedEntry(tab, question);
+  }
+  return null;
+}
+
+function courseCenterItems(view) {
+  if (view === "resources") {
+    return (workspace.myQuestionLists || []).map(resource => {
+      const questions = visibleTabQuestions(resource.tab);
+      return {
+        id: resource.id,
+        source: "resource",
+        kind: "resource",
+        title: resource.title || "未命名题单",
+        questionCount: questions.length || Number(resource.questionCount || 0),
+        minutes: questions.reduce((sum, question) => sum + canvasQuestionMinutes(question), 0),
+        createdAt: resource.createdAt || resource.updatedAt,
+        tab: resource.tab
+      };
+    });
+  }
+  if (view === "downloads") {
+    return ensureDownloadRecords().map(record => ({
+      ...record,
+      source: "download",
+      kind: "resource",
+      time: record.downloadedAt,
+      note: `${record.format || "文件"} · 最近下载`
+    }));
+  }
+  const resourceFavorites = ensureFavoriteResources().map(record => ({
+    ...record,
+    source: "favorite",
+    kind: "resource",
+    time: record.favoritedAt,
+    note: "收藏的资源"
+  }));
+  const questionFavorites = ensureFavoriteQuestions().flatMap(selectionKey => {
+    const entry = findFavoriteQuestionEntry(selectionKey);
+    if (!entry?.question) return [];
+    return [{
+      id: `favorite-question:${selectionKey}`,
+      source: "favorite-question",
+      kind: "question",
+      selectionKey,
+      title: entry.question.stem || `第 ${entry.question.num || ""} 题`,
+      questionCount: 1,
+      time: "",
+      note: `${entry.sourceTitle || "收藏题目"} · ${entry.question.knowledge || entry.question.type || "题目"}`,
+      entry
+    }];
+  });
+  return [...resourceFavorites, ...questionFavorites];
+}
+
+function courseCenterEmptyHtml(view) {
+  const copy = view === "favorites"
+    ? { icon: "ri-star-line", title: "还没有可用的收藏", note: "在试卷或题目中点击收藏后，会显示在这里。" }
+    : view === "downloads"
+      ? { icon: "ri-download-cloud-2-line", title: "还没有下载记录", note: "下载过的题单和试卷会显示在这里。" }
+      : { icon: "ri-folder-open-line", title: "还没有我的资源", note: "完成组题或保存编辑副本后，会显示在这里。" };
+  return `<div class="course-center-empty"><i class="${copy.icon}"></i><strong>${copy.title}</strong><span>${copy.note}</span></div>`;
+}
+
+function courseCenterItemHtml(item) {
+  const selected = item.kind === "question"
+    ? getGlobalSelectedQuestions().some(entry => entry.selectionKey === item.selectionKey)
+    : false;
+  const icon = item.kind === "question" ? "ri-question-line" : item.source === "download" ? "ri-download-cloud-2-line" : item.source === "favorite" ? "ri-star-line" : "ri-file-list-3-line";
+  const time = item.time ? formatResourceTime(item.time) : "";
+  const resourceMeta = item.source === "resource"
+    ? `<p class="course-center-resource-meta">
+        <span title="用时" aria-label="用时 ${Number(item.minutes || 0)} 分钟"><i class="ri-time-line" aria-hidden="true"></i>${Number(item.minutes || 0)} 分钟</span>
+        <span title="题量" aria-label="题量 ${Number(item.questionCount || 0)} 题"><i class="ri-file-list-3-line" aria-hidden="true"></i>${Number(item.questionCount || 0)} 题</span>
+        ${item.createdAt ? `<span title="创建日期" aria-label="创建日期 ${escapeHtml(formatResourceTime(item.createdAt))}"><i class="ri-calendar-line" aria-hidden="true"></i>${escapeHtml(formatResourceTime(item.createdAt))}</span>` : ""}
+      </p>`
+    : `<p>${escapeHtml(`${item.note || "题单"}${item.questionCount ? ` · ${item.questionCount} 题` : ""}${time ? ` · ${time}` : ""}`)}</p>`;
+  return `<article class="course-center-card" data-course-source="${escapeHtml(item.source)}" data-course-id="${escapeHtml(item.id)}">
+    <span class="course-center-card-icon"><i class="${icon}"></i></span>
+    <div class="course-center-card-copy">
+      <strong>${escapeHtml(item.title)}</strong>
+      ${resourceMeta}
+    </div>
+    <div class="course-center-card-actions">
+      ${item.kind === "resource" ? `<button type="button" data-course-action="open">查看</button>` : ""}
+      <button type="button" class="is-primary ${selected ? "is-selected" : ""}" data-course-action="add">
+        <i class="${selected ? "ri-check-line" : "ri-add-line"}"></i>${selected ? "已加入" : item.kind === "resource" ? "整份加入画布" : "加入画布"}
+      </button>
+    </div>
+  </article>`;
+}
+
+function renderCourseCenter() {
+  const list = document.querySelector("#courseCenterList");
+  if (!list) return;
+  const view = ["resources", "favorites", "downloads"].includes(workspace.courseCenterView)
+    ? workspace.courseCenterView
+    : "resources";
+  const allItems = courseCenterItems(view);
+  const query = courseCenterQuery.trim().toLowerCase();
+  const items = allItems.filter(item => !query || `${item.title} ${item.note || ""}`.toLowerCase().includes(query));
+  const counts = {
+    resources: courseCenterItems("resources").length,
+    favorites: courseCenterItems("favorites").length,
+    downloads: courseCenterItems("downloads").length
+  };
+  document.querySelector("#courseResourceCount") && (document.querySelector("#courseResourceCount").textContent = String(counts.resources));
+  document.querySelector("#courseFavoriteCount") && (document.querySelector("#courseFavoriteCount").textContent = String(counts.favorites));
+  document.querySelector("#courseDownloadCount") && (document.querySelector("#courseDownloadCount").textContent = String(counts.downloads));
+  document.querySelectorAll("[data-course-view]").forEach(button => {
+    button.classList.toggle("is-active", button.dataset.courseView === view);
+  });
+  list.innerHTML = items.length ? items.map(courseCenterItemHtml).join("") : courseCenterEmptyHtml(view);
+}
+
+function resolveCourseCenterItem(source, id) {
+  return courseCenterItems(source === "resource" ? "resources" : source === "download" ? "downloads" : "favorites")
+    .find(item => item.source === source && item.id === id);
+}
+
+function openCourseCenterResource(item) {
+  if (!item?.tab) return;
+  if (item.source === "resource") {
+    openMyQuestionList(item.id);
+    return;
+  }
+  const sourceKey = item.resourceKey || courseResourceKey(item.tab);
+  let tab = workspace.tabs.find(candidate => candidate.courseSourceKey === sourceKey || courseResourceKey(candidate) === sourceKey);
+  if (!tab) {
+    tabCounter += 1;
+    tab = {
+      ...cloneWorkspaceValue(item.tab),
+      id: `tab-${tabCounter}`,
+      courseSourceKey: sourceKey,
+      selectedQuestionIds: []
+    };
+    workspace.tabs.push(tab);
+  }
+  workspace.activeTabId = tab.id;
+  workspace.homeActive = false;
+  workspace.activeBrowseFilter = null;
+  saveWorkspace();
+  location.href = `./detail-ai.html?tabId=${encodeURIComponent(tab.id)}&context=${encodeURIComponent(tab.context || contextName)}`;
+}
+
+function addCourseCenterItemToCanvas(item) {
+  if (!item) return;
+  if (item.kind === "question") {
+    const added = toggleExternalCanvasQuestion(cloneWorkspaceValue(item.entry));
+    showToast(added ? "已加入组题画布" : "已从组题画布移除");
+    renderCourseCenter();
+    return;
+  }
+  const tab = item.tab;
+  if (!tab) return;
+  ensureGlobalSelected();
+  const wasEmpty = getGlobalSelectedQuestions().length === 0;
+  let added = 0;
+  (tab.questions || []).forEach(question => {
+    if ((tab.removedQuestionIds || []).includes(question.id)) return;
+    const entry = buildGlobalSelectedEntry(tab, question);
+    if (workspace.globalSelectedQuestions.some(current => current.selectionKey === entry.selectionKey)) return;
+    workspace.globalSelectedQuestions.push(entry);
+    added += 1;
+  });
+  if (!added) {
+    showToast("这份内容已在组题画布中");
+    return;
+  }
+  if (!workspace.canvasTitle) workspace.canvasTitle = formatQuestionListTitle();
+  saveWorkspace();
+  maybeOpenCanvasOnFirstAdd(wasEmpty);
+  renderSelectedContext();
+  renderCourseCenter();
+  showToast(`已将 ${added} 道题加入组题画布`);
+}
+
 function getCanvasSyncSnapshot() {
   return {
     globalSelectedQuestions: Array.isArray(workspace.globalSelectedQuestions) ? workspace.globalSelectedQuestions : [],
@@ -607,7 +993,7 @@ function applyRemoteCanvasState(parsed) {
   workspace.canvasTitle = parsed.canvasTitle || "";
   workspace.canvasManuallyCollapsed = Boolean(parsed.canvasManuallyCollapsed);
   if (Array.isArray(parsed.favoriteQuestions)) workspace.favoriteQuestions = parsed.favoriteQuestions;
-  rightPanelSectionState.selectedCollapsed = shouldCanvasStartCollapsed();
+  rightPanelSectionState.selectedCollapsed = getActiveEditorTab() ? false : shouldCanvasStartCollapsed();
   applySelectedPanelState();
   renderQuestionCards();
   window.dispatchEvent(new CustomEvent("aiq-canvas-change"));
@@ -668,39 +1054,53 @@ function ensureGlobalSelected() {
 }
 
 function getGlobalSelectedQuestions() {
-  if (isWholePaperEditActive()) return workspace.paperEditSession.questions;
+  const draft = getActiveEditorDraft();
+  if (draft) return draft.questions;
   ensureGlobalSelected();
   return workspace.globalSelectedQuestions;
 }
 
+function getActiveEditorTab() {
+  const tab = getActiveTab();
+  return tab?.kind === "editor" && tab.editorDraft ? tab : null;
+}
+
+function getActiveEditorDraft() {
+  const tab = getActiveEditorTab();
+  if (!tab) return null;
+  tab.editorDraft.questions = Array.isArray(tab.editorDraft.questions) ? tab.editorDraft.questions : [];
+  tab.editorDraft.scores = tab.editorDraft.scores && typeof tab.editorDraft.scores === "object" ? tab.editorDraft.scores : {};
+  return tab.editorDraft;
+}
+
 function isWholePaperEditActive() {
-  return params.get("canvas") === "edit"
-    && workspace.paperEditSession
-    && Array.isArray(workspace.paperEditSession.questions);
+  return Boolean(getActiveEditorDraft());
 }
 
 function setActiveSelectedQuestions(items) {
-  if (isWholePaperEditActive()) {
-    workspace.paperEditSession.questions = items;
-    workspace.paperEditSession.saved = false;
+  const draft = getActiveEditorDraft();
+  if (draft) {
+    draft.questions = items;
+    draft.dirty = true;
+    draft.saved = false;
   }
   else workspace.globalSelectedQuestions = items;
 }
 
 function markWholePaperEditDirty() {
-  if (!isWholePaperEditActive()) return;
-  workspace.paperEditSession.saved = false;
-  const button = document.querySelector("#createQuestionList");
-  if (button) {
-    button.disabled = getGlobalSelectedQuestions().length === 0;
-    button.classList.remove("is-saved");
-  }
+  const draft = getActiveEditorDraft();
+  if (!draft) return;
+  draft.dirty = true;
+  draft.saved = false;
+  renderSelectedFooter(getGlobalSelectedQuestions().length);
+  renderTabs();
 }
 
 function getActiveCanvasScores() {
-  if (isWholePaperEditActive()) {
-    workspace.paperEditSession.scores = workspace.paperEditSession.scores || {};
-    return workspace.paperEditSession.scores;
+  const draft = getActiveEditorDraft();
+  if (draft) {
+    draft.scores = draft.scores || {};
+    return draft.scores;
   }
   workspace.canvasScores = workspace.canvasScores || {};
   return workspace.canvasScores;
@@ -730,6 +1130,7 @@ function toggleQuestionFavorite(qId, topicId) {
   else list.push(key);
   saveWorkspace();
   renderQuestionCards();
+  renderCourseCenter();
   return index < 0;
 }
 
@@ -1012,23 +1413,54 @@ function isUserCanvasTitle(title) {
     && !isAutoCanvasTitle(text));
 }
 
+function stripEditorTitlePrefix(title) {
+  return String(title || "")
+    .trim()
+    .replace(/^编辑\s*[：:·]\s*/, "")
+    .trim();
+}
+
+function getEditorDisplayTitle(tab = getActiveEditorTab()) {
+  if (tab?.kind !== "editor" || !tab.editorDraft) return "";
+  const draftTitle = stripEditorTitlePrefix(tab.editorDraft.title);
+  const sourceTitle = stripEditorTitlePrefix(tab.editorDraft.sourceTitle);
+  const baseTitle = tab.editorSource === "canvas" && (!draftTitle || isAutoCanvasTitle(draftTitle))
+    ? NEW_CANVAS_DISPLAY_TITLE
+    : draftTitle || sourceTitle || "未命名题单";
+  return tab.editorDraft.titleCustomized
+    ? baseTitle
+    : editorTabLabel("编辑", baseTitle);
+}
+
 function getCanvasListTitle() {
-  const title = String(isWholePaperEditActive() ? workspace.paperEditSession.title : workspace.canvasTitle || "").trim();
+  const editorTitle = getEditorDisplayTitle();
+  if (editorTitle) return editorTitle;
+  const title = String(workspace.canvasTitle ?? "").trim();
   if (isUserCanvasTitle(title)) return title;
   return formatQuestionListTitle();
 }
 
 function getCanvasDisplayTitle() {
-  const title = String(isWholePaperEditActive() ? workspace.paperEditSession.title : workspace.canvasTitle || "").trim();
-  if (isWholePaperEditActive() && workspace.paperEditSession?.saved && title) return title;
+  const draft = getActiveEditorDraft();
+  const editorTitle = getEditorDisplayTitle();
+  if (draft && editorTitle) return editorTitle;
+  const title = String(workspace.canvasTitle ?? "").trim();
   return isUserCanvasTitle(title) ? title : NEW_CANVAS_DISPLAY_TITLE;
 }
 
 function setCanvasListTitle(next) {
   const title = String(next || "").trim();
+  const currentDisplayTitle = getCanvasDisplayTitle();
+  if (title === currentDisplayTitle) return currentDisplayTitle;
   const value = !title || title === NEW_CANVAS_DISPLAY_TITLE || title === LEGACY_CANVAS_DISPLAY_TITLE ? "" : title;
-  if (isWholePaperEditActive()) {
-    workspace.paperEditSession.title = value;
+  const draft = getActiveEditorDraft();
+  if (draft) {
+    const editorTab = getActiveEditorTab();
+    const sourceTitle = String(draft.sourceTitle || "").trim();
+    const renamedTitle = stripEditorTitlePrefix(value);
+    draft.title = renamedTitle || (editorTab?.editorSource === "whole-paper" ? sourceTitle : "");
+    draft.titleCustomized = Boolean(renamedTitle);
+    syncEditorTabTitle(editorTab);
     markWholePaperEditDirty();
   }
   else workspace.canvasTitle = value;
@@ -1069,16 +1501,23 @@ function bindCanvasTitleEditor(node) {
 function ensureInitialTab() {
   if (isComposeMode) {
     ensureComposeTab();
+    workspace.homeActive = false;
+    workspace.activeBrowseFilter = null;
+    saveWorkspace();
     return;
   }
   if (isRecordMode) {
     ensureRecordTab();
+    workspace.homeActive = false;
+    workspace.activeBrowseFilter = null;
+    saveWorkspace();
     return;
   }
   const baseId = getBaseTopicId(initialTopicId);
   const urlTitle = String(params.get("title") || "").trim();
   const urlLessonKey = String(params.get("lessonKey") || urlTitle || "").trim();
-  let mainTab = workspace.tabs.find(tab =>
+  const shellOnlyEntry = Boolean(requestedWorkspaceView && !params.get("topic") && !params.get("tabId"));
+  let mainTab = shellOnlyEntry ? null : workspace.tabs.find(tab =>
     getBaseTopicId(tab.topicId) === baseId
     && !tab.fromQuestionId
     && !tab.isQuestionList
@@ -1086,7 +1525,7 @@ function ensureInitialTab() {
   );
 
   const freshCatalogEntry = Boolean(params.get("topic") && !params.get("tabId"));
-  if (!mainTab) {
+  if (!shellOnlyEntry && !mainTab) {
     mainTab = createTab(initialTopicId, contextName, {
       title: urlTitle || undefined,
       shortTitle: params.get("shortTitle") || urlTitle || undefined,
@@ -1099,7 +1538,7 @@ function ensureInitialTab() {
       usage: params.get("usage") || undefined
     });
     workspace.tabs.push(mainTab);
-  } else if (freshCatalogEntry) {
+  } else if (!shellOnlyEntry && freshCatalogEntry) {
     mainTab.customTitle = false;
     mainTab.removedQuestionIds = [];
     mainTab.modifiedQuestions = {};
@@ -1114,7 +1553,7 @@ function ensureInitialTab() {
         shortTitle: mainTab.shortTitle
       };
     }
-  } else if (!hasSingleChoiceSection(mainTab)) {
+  } else if (!shellOnlyEntry && mainTab?.kind !== "editor" && !hasSingleChoiceSection(mainTab)) {
     refreshMainTabFromSource(mainTab);
   }
 
@@ -1122,18 +1561,38 @@ function ensureInitialTab() {
   workspace.activeBrowseFilter = null;
   if (params.get("tabId")) {
     const urlTab = workspace.tabs.find(tab => tab.id === params.get("tabId"));
-    workspace.activeTabId = urlTab?.id || mainTab.id;
+    workspace.activeTabId = urlTab?.id || mainTab?.id || workspace.activeTabId || null;
   } else if (params.get("topic") || !workspace.activeTabId || !workspace.tabs.some(tab => tab.id === workspace.activeTabId)) {
-    workspace.activeTabId = mainTab.id;
+    workspace.activeTabId = mainTab?.id || null;
   }
 
   workspace.tabs = workspace.tabs.filter(tab => {
+    if (tab.composeSession || tab.recordSession) return true;
     if (tab.isQuestionList || tab.fromQuestionId) {
       if (tab.myResourceId) return true;
       return workspace.tabs.some(parent => parent.id === tab.fromTabId);
     }
     return true;
   });
+
+  if (requestedWorkspaceView === "home") {
+    workspace.homeActive = true;
+    workspace.activeBrowseFilter = null;
+  } else if (requestedWorkspaceView === "browse" && getBrowseMeta(requestedBrowseFilter)) {
+    ensureBrowseTabs();
+    if (!workspace.browseTabs.includes(requestedBrowseFilter)) workspace.browseTabs.push(requestedBrowseFilter);
+    workspace.homeActive = false;
+    workspace.activeBrowseFilter = requestedBrowseFilter;
+    pendingBrowseOptions = normalizeBrowseOptions(
+      browseOptionsForKey(requestedBrowseFilter, browseOptionsFromParams())
+    );
+  } else if (requestedWorkspaceView === "course") {
+    aiAssistantTabOpen = true;
+    aiAssistantOpen = true;
+    workspace.courseCenterTabOpen = true;
+    workspace.homeActive = false;
+    workspace.activeBrowseFilter = null;
+  }
 
   saveWorkspace();
 }
@@ -1296,15 +1755,26 @@ function renderMeta(tab) {
     ? `${getTabBaseTitle(tab)} · 第 ${tab.questions[0]?.num || ""} 题`
     : tab.title;
   const titleNode = document.querySelector("#topicTitle");
+  const titleRow = titleNode?.closest(".paper-title-edit-row");
+  const editButton = document.querySelector("#editPaperTitle");
+  const titleEditable = isTabTitleEditable(tab);
   if (titleNode && document.activeElement !== titleNode) titleNode.textContent = displayTitle;
-  if (titleNode) titleNode.setAttribute("aria-label", tab.fromQuestionId ? "题目标题" : "试卷标题，可直接编辑");
+  if (titleNode) {
+    titleNode.contentEditable = titleEditable ? "true" : "false";
+    titleNode.setAttribute("aria-label", tab.fromQuestionId
+      ? "题目标题"
+      : titleEditable ? "个人题单标题，可直接编辑" : "试卷标题");
+  }
+  titleRow?.classList.toggle("is-editable", titleEditable);
+  titleRow?.classList.toggle("is-readonly", !titleEditable);
+  if (editButton) editButton.hidden = !titleEditable;
 
   const facts = document.querySelector("#paperMetaFacts");
   if (facts) {
     facts.innerHTML = buildPaperFacts(tab).map(text => `<span>${escapeHtml(text)}</span>`).join("");
   }
 
-  if (!isComposeMode) {
+  if (!isComposeMode && !isShellFrameActive() && !isAiAssistantViewActive()) {
     renderDetailBreadcrumb(tab, selectedPanelEnlarged ? getCanvasDisplayTitle() : displayTitle);
   }
 }
@@ -1317,7 +1787,7 @@ function renderDetailBreadcrumb(tab, displayTitle) {
     trail.innerHTML = `
       <a href="./index.html">首页</a>
       <i class="ri-arrow-right-s-line"></i>
-      <strong id="breadcrumbLeaf">编辑组题</strong>`;
+      <strong id="breadcrumbLeaf">编辑题单</strong>`;
     return;
   }
   if (tab.myResourceId || tab.isQuestionList) {
@@ -1343,6 +1813,11 @@ function bindPaperTitleEditor() {
   let titleBeforeEdit = "";
 
   const beginEdit = () => {
+    const tab = getActiveTab();
+    if (!isTabTitleEditable(tab)) {
+      renderMeta(tab);
+      return;
+    }
     titleBeforeEdit = titleNode.textContent.trim();
     titleNode.focus();
     const selection = window.getSelection();
@@ -1354,7 +1829,7 @@ function bindPaperTitleEditor() {
 
   const commitTitle = () => {
     const tab = getActiveTab();
-    if (!tab || tab.fromQuestionId) {
+    if (!isTabTitleEditable(tab)) {
       renderMeta(tab);
       return;
     }
@@ -1370,6 +1845,7 @@ function bindPaperTitleEditor() {
       title: nextTitle,
       shortTitle: shortenTabTitle(nextTitle)
     };
+    syncMyQuestionListResourceTitle(tab);
     saveWorkspace();
     renderMeta(tab);
     renderPaperActionButtons(tab);
@@ -1378,6 +1854,10 @@ function bindPaperTitleEditor() {
   };
 
   titleNode.addEventListener("focus", () => {
+    if (!isTabTitleEditable(getActiveTab())) {
+      titleNode.blur();
+      return;
+    }
     titleBeforeEdit = titleNode.textContent.trim();
     titleNode.closest(".paper-title-edit-row")?.classList.add("is-editing");
   });
@@ -1397,6 +1877,7 @@ function bindPaperTitleEditor() {
     }
   });
   titleNode.addEventListener("paste", event => {
+    if (!isTabTitleEditable(getActiveTab())) return;
     event.preventDefault();
     document.execCommand("insertText", false, event.clipboardData?.getData("text/plain") || "");
   });
@@ -1627,11 +2108,12 @@ function applyComposeMode() {
   const title = composePaperTitle(composePrompt);
   const trail = document.querySelector(".ai-detail-topbar .breadcrumb");
   if (trail) {
-    trail.innerHTML = `<a href="./index.html">首页</a><i class="ri-arrow-right-s-line"></i><span>AI助手</span><i class="ri-arrow-right-s-line"></i><strong>AI组题</strong>`;
+    trail.innerHTML = `<a href="./index.html">首页</a><i class="ri-arrow-right-s-line"></i><span>创作中心</span><i class="ri-arrow-right-s-line"></i><strong>AI组题</strong>`;
   }
   document.title = `${title} · AI组题`;
   renderComposeThread();
-  closeAiAssistant();
+  aiAssistantOpen = false;
+  syncAiAssistantChrome();
 }
 
 function recordSourceHtml() {
@@ -1684,10 +2166,11 @@ function applyRecordMode() {
   if (resultHead) resultHead.hidden = false;
   const trail = document.querySelector(".ai-detail-topbar .breadcrumb");
   if (trail) {
-    trail.innerHTML = `<a href="./index.html">首页</a><i class="ri-arrow-right-s-line"></i><span>AI助手</span><i class="ri-arrow-right-s-line"></i><strong>AI录题</strong>`;
+    trail.innerHTML = `<a href="./index.html">首页</a><i class="ri-arrow-right-s-line"></i><span>创作中心</span><i class="ri-arrow-right-s-line"></i><strong>AI录题</strong>`;
   }
   document.title = `${recordFileName} · AI录题`;
-  closeAiAssistant();
+  aiAssistantOpen = false;
+  syncAiAssistantChrome();
 }
 
 function showRecordResults() {
@@ -1771,6 +2254,7 @@ function bindComposeControls() {
     showToast("已进入编辑，题目可直接在试卷中选用到组题画布");
   });
   document.querySelector("#aiComposeDownload")?.addEventListener("click", () => {
+    registerDownload(getActiveTab());
     showToast("正在准备下载 Word");
   });
   document.querySelector("#aiComposeCloseDoc")?.addEventListener("click", () => {
@@ -1914,17 +2398,17 @@ function renderPaperActionButtons(tab) {
   if (saveButton) {
     saveButton.disabled = selectable.length === 0;
     saveButton.classList.remove("is-saved");
-    saveButton.title = tab.isQuestionList ? "完成当前题单的组题" : "将整套试卷带入高级编辑";
+    saveButton.title = tab.isQuestionList ? "完成当前题单的组题" : "创建可编辑副本，原卷不变";
     const icon = saveButton.querySelector("i");
     if (icon) icon.className = tab.isQuestionList ? "ri-checkbox-circle-line" : "ri-edit-box-line";
   }
   if (saveLabel) {
-    saveLabel.textContent = tab.isQuestionList ? "完成组题" : "整套编辑";
+    saveLabel.textContent = tab.isQuestionList ? "完成组题" : "编辑整卷";
   }
   if (copyNote) {
     copyNote.textContent = tab.isQuestionList
       ? "修改将保存到当前题单"
-      : `将整套 ${selectable.length} 题载入高级编辑，可调整题序、分数和卷参`;
+      : `复制整套 ${selectable.length} 题并在新 Tab 中编辑，原卷不变`;
   }
 }
 
@@ -1937,7 +2421,9 @@ function renderQuestionCards() {
   const tab = getActiveTab();
   if (!tab) return;
   syncTabSelectedQuestionIds(tab);
-  if (!isComposeMode && !isRecordMode) document.title = `${tab.title} · AI 试卷工作台`;
+  if (!isComposeMode && !isRecordMode && !isShellFrameActive() && !isAiAssistantViewActive()) {
+    document.title = `${tab.title} · AI 试卷工作台`;
+  }
   renderMeta(tab);
   renderPaperActionButtons(tab);
 
@@ -1979,14 +2465,15 @@ function renderSelectedFooter(count) {
   const scoreBtn = document.querySelector("#scoreQuestionList");
   const extraBtns = document.querySelectorAll(".ai-canvas-wide-btn");
   const selected = getGlobalSelectedQuestions();
-  const paperEditSaved = Boolean(isWholePaperEditActive() && workspace.paperEditSession.saved);
+  const activeDraft = getActiveEditorDraft();
+  const paperEditSaved = Boolean(activeDraft?.saved && !activeDraft.dirty);
   if (button) {
     button.disabled = count === 0 || paperEditSaved;
     button.classList.toggle("is-saved", paperEditSaved);
   }
   if (label) label.textContent = "完成组题";
   if (button) {
-    button.title = "完成组题并存入我的-我的创建";
+    button.title = activeDraft ? "保存到我的资源" : "完成组题并存入我的-我的创建";
     const icon = button.querySelector("i");
     if (icon) icon.className = "ri-checkbox-circle-line";
   }
@@ -2037,7 +2524,7 @@ function renderSelectedFooter(count) {
 
 function syncSelectedPanelChrome() {
   const root = document.querySelector("#aiWorkspace");
-  const wholePaperEditor = isWholePaperEditActive();
+  const wholePaperEditor = !isCanvasShell && isWholePaperEditActive();
   root?.classList.toggle("selected-panel-enlarged", selectedPanelEnlarged);
   root?.classList.toggle("whole-paper-editor", wholePaperEditor);
   document.querySelector("#aiSelectedPanel")?.classList.toggle("is-enlarged", selectedPanelEnlarged);
@@ -2045,19 +2532,19 @@ function syncSelectedPanelChrome() {
   const answerBtn = document.querySelector("#toggleSelectedAnswers");
   const preview = document.querySelector("#aiSelectedPreview");
   if (enlargeBtn) {
-    enlargeBtn.textContent = "高级编辑";
+    enlargeBtn.textContent = "精编题单";
     enlargeBtn.hidden = selectedPanelEnlarged;
     enlargeBtn.setAttribute("aria-pressed", selectedPanelEnlarged ? "true" : "false");
-    enlargeBtn.title = "高级编辑组题画布";
+    enlargeBtn.title = "将当前画布复制为独立编辑草稿";
   }
   const compactCollapse = document.querySelector("#collapseSelectedPanel");
   const topbarCollapse = document.querySelector("#topbarCollapseCanvas");
   if (compactCollapse) compactCollapse.hidden = wholePaperEditor;
   if (topbarCollapse) topbarCollapse.hidden = true;
   const leaf = document.querySelector("#breadcrumbLeaf");
-  if (selectedPanelEnlarged && leaf) leaf.textContent = wholePaperEditor ? "编辑组题" : getCanvasDisplayTitle();
+  if (selectedPanelEnlarged && leaf) leaf.textContent = wholePaperEditor ? "编辑题单" : getCanvasDisplayTitle();
   const selectedPanel = document.querySelector("#aiSelectedPanel");
-  if (selectedPanel && wholePaperEditor) selectedPanel.setAttribute("aria-label", "编辑组题");
+  if (selectedPanel && wholePaperEditor) selectedPanel.setAttribute("aria-label", "编辑题单");
   if (answerBtn) {
     answerBtn.hidden = true;
   }
@@ -2460,22 +2947,105 @@ function renderCanvasInfo(item) {
   const wrap = document.querySelector("#aiCanvasInfo");
   if (!wrap) return;
   if (!item) {
-    wrap.innerHTML = `<p class="ai-canvas-info-empty">选用题目后，这里会显示答案、解析和知识点。</p>`;
+    wrap.innerHTML = isWholePaperEditActive()
+      ? `<p class="ai-canvas-info-empty">当前草稿还没有题目。</p>
+         <button type="button" class="ai-canvas-info-primary" data-editor-add-question><i class="ri-add-line"></i> 添加一道题</button>`
+      : `<p class="ai-canvas-info-empty">选用题目后，这里会显示答案、解析和知识点。</p>`;
     return;
   }
   const q = item.question;
   const meta = questionDefaults(q);
+  const displayType = q.type === "选择题" ? "单项选择题" : (q.type || "题目");
   wrap.innerHTML = `
-    <p class="ai-canvas-info-meta">初中 / 数学 / ${escapeHtml(q.type || "题目")} / ${escapeHtml(q.difficulty || "中等")} / ${meta.minutes} 分钟</p>
-    <p class="ai-canvas-info-meta">来源：${escapeHtml(getCanvasSourceLabel(item))}</p>
-    <p class="ai-canvas-info-label">知识点</p>
-    <p>${escapeHtml(q.knowledge || "未标注")}</p>
-    <p class="ai-canvas-info-label">核心素养</p>
-    <p>${escapeHtml(meta.competency)}</p>
-    <p class="ai-canvas-info-label">答案</p>
-    <p class="ai-canvas-info-answer">${escapeHtml(q.answer || "暂无")}</p>
-    <p class="ai-canvas-info-label">解析</p>
-    <p class="ai-canvas-info-analysis">${escapeHtml(q.analysis || "暂无")}</p>`;
+    <div class="ai-canvas-info-source">${escapeHtml(getCanvasSourceLabel(item))}</div>
+    <p class="ai-canvas-info-trail">初中 / 数学 / ${escapeHtml(displayType)} / ${escapeHtml(q.difficulty || "中等")} / ${meta.minutes} 分钟</p>
+    <div class="ai-canvas-info-fact"><i class="ri-book-2-line"></i><span>知识点：${escapeHtml(q.knowledge || "未标注")}</span></div>
+    <div class="ai-canvas-info-fact"><i class="ri-lightbulb-line"></i><span>核心素养：${escapeHtml(meta.competency)}</span></div>
+    <section class="ai-canvas-info-section">
+      <h4>答案</h4>
+      <p>${escapeHtml(q.answer || "暂无")}</p>
+    </section>
+    <section class="ai-canvas-info-section">
+      <h4>解析</h4>
+      <p>${escapeHtml(q.analysis || "暂无")}</p>
+    </section>`;
+}
+
+function editorQuestionBank() {
+  return Object.entries(paperQuestions).flatMap(([topicId, questions]) =>
+    questions.map(question => ({ topicId, question })));
+}
+
+function applyEditorQuestionForm(form, item, settings = {}) {
+  if (!form || !item?.question) return false;
+  const data = new FormData(form);
+  const stem = String(data.get("stem") || "").trim();
+  if (!stem && settings.requireStem) {
+    showToast("题干不能为空");
+    form.querySelector("[name='stem']")?.focus();
+    return false;
+  }
+  const options = String(data.get("options") || "")
+    .split(/\r?\n/)
+    .map(option => option.trim())
+    .filter(Boolean);
+  Object.assign(item.question, {
+    type: String(data.get("type") || "题目"),
+    difficulty: String(data.get("difficulty") || "中等"),
+    knowledge: String(data.get("knowledge") || "").trim(),
+    stem,
+    options,
+    answer: String(data.get("answer") || "").trim(),
+    analysis: String(data.get("analysis") || "").trim()
+  });
+  markWholePaperEditDirty();
+  saveWorkspace();
+  return true;
+}
+
+function replaceEditorQuestion(item) {
+  if (!item || !isWholePaperEditActive()) return;
+  const currentStems = new Set(getGlobalSelectedQuestions().map(entry => String(entry.question?.stem || "")));
+  const candidates = editorQuestionBank().filter(candidate =>
+    !currentStems.has(String(candidate.question.stem)) && candidate.question.type === item.question.type);
+  const fallback = editorQuestionBank().filter(candidate => !currentStems.has(String(candidate.question.stem)));
+  const picked = candidates[0] || fallback[0];
+  if (!picked) {
+    showToast("暂无可替换的题目");
+    return;
+  }
+  const stableId = String(item.question.id || `draft-${Date.now()}`);
+  item.topicId = picked.topicId;
+  item.sourceTitle = "智能题库推荐";
+  item.question = { ...cloneWorkspaceValue(picked.question), id: stableId, num: item.question.num };
+  markWholePaperEditDirty();
+  saveWorkspace();
+  renderSelectedContext();
+  showToast("已替换题目，原试卷不受影响");
+}
+
+function addEditorQuestion() {
+  const draft = getActiveEditorDraft();
+  if (!draft) return;
+  const usedStems = new Set(draft.questions.map(item => item.question?.stem));
+  const picked = editorQuestionBank().find(candidate => !usedStems.has(candidate.question.stem));
+  if (!picked) {
+    showToast("暂无更多可添加的题目");
+    return;
+  }
+  const id = `draft-${Date.now()}-${draft.questions.length + 1}`;
+  const question = { ...cloneWorkspaceValue(picked.question), id, num: draft.questions.length + 1 };
+  const entry = {
+    selectionKey: `editor::${getActiveEditorTab().id}::${id}`,
+    topicId: picked.topicId,
+    sourceTitle: "智能题库推荐",
+    question
+  };
+  draft.questions.push(entry);
+  canvasFocusKey = entry.selectionKey;
+  markWholePaperEditDirty();
+  saveWorkspace();
+  renderSelectedContext();
 }
 
 function bindCanvasStudioEvents() {
@@ -2549,6 +3119,29 @@ function bindCanvasStudioEvents() {
   });
 
   bindCanvasTitleEditor(document.querySelector("#canvasPaperTitle"));
+
+  studio.querySelectorAll("[data-editor-add-question]").forEach(button => {
+    button.addEventListener("click", addEditorQuestion);
+  });
+  const editorForm = studio.querySelector("[data-editor-question-form]");
+  if (editorForm) {
+    const item = getGlobalSelectedQuestions().find(entry => entry.selectionKey === editorForm.dataset.selectionKey);
+    editorForm.addEventListener("submit", event => {
+      event.preventDefault();
+      if (!applyEditorQuestionForm(editorForm, item, { requireStem: true })) return;
+      renderSelectedContext();
+      showToast("题目内容已保存到当前草稿");
+    });
+    let autoSaveTimer = 0;
+    editorForm.querySelectorAll("input, select, textarea").forEach(field => {
+      field.addEventListener("input", () => {
+        window.clearTimeout(autoSaveTimer);
+        autoSaveTimer = window.setTimeout(() => applyEditorQuestionForm(editorForm, item), 280);
+      });
+      field.addEventListener("change", () => applyEditorQuestionForm(editorForm, item));
+    });
+    editorForm.querySelector("[data-editor-replace-question]")?.addEventListener("click", () => replaceEditorQuestion(item));
+  }
 
   if (!studio.dataset.toolBound) {
     studio.dataset.toolBound = "1";
@@ -2683,7 +3276,7 @@ function saveScoreSettings() {
     if (!value) delete nextScores[key];
     else nextScores[key] = Number(value);
   });
-  if (isWholePaperEditActive()) workspace.paperEditSession.scores = nextScores;
+  if (isWholePaperEditActive()) getActiveEditorDraft().scores = nextScores;
   else workspace.canvasScores = nextScores;
   if (isWholePaperEditActive()) markWholePaperEditDirty();
   saveWorkspace();
@@ -2884,7 +3477,7 @@ function bindSelectedPanelControls() {
 
   document.querySelector("#enlargeSelectedPanel")?.addEventListener("click", event => {
     event.stopPropagation();
-    toggleSelectedPanelEnlarge();
+    openCanvasEditorTab();
   });
 
   document.querySelector("#topbarCollapseCanvas")?.addEventListener("click", event => {
@@ -2920,30 +3513,180 @@ function bindSelectedPanelControls() {
   applySelectedPanelState();
 }
 
+function editorTabLabel(prefix, title) {
+  const cleanPrefix = String(prefix || "编辑").trim() || "编辑";
+  const cleanTitle = stripEditorTitlePrefix(title);
+  return `${cleanPrefix}：${cleanTitle || "未命名题单"}`;
+}
+
+function syncEditorTabTitle(tab) {
+  if (tab?.kind !== "editor" || !tab.editorDraft) return "";
+  const label = getEditorDisplayTitle(tab);
+  tab.title = label;
+  tab.shortTitle = label;
+  tab.meta = {
+    ...(tab.meta || {}),
+    title: label,
+    shortTitle: label
+  };
+  return label;
+}
+
+function createEditorTab(options = {}) {
+  const sourceTab = options.sourceTab || getActiveTab();
+  const editorSource = options.editorSource || "canvas";
+  const existing = !options.forceNew && workspace.tabs.find(tab => tab.kind === "editor"
+    && !tab.isEditorCopy
+    && tab.editorSource === editorSource
+    && (editorSource === "canvas" || tab.sourceTabId === sourceTab?.id));
+  if (existing) {
+    activateEditorTab(existing, { message: editorSource === "canvas" ? "已切换到组题草稿" : "已切换到当前试卷的编辑副本" });
+    return existing;
+  }
+
+  const sourceItems = cloneWorkspaceValue(options.items || []);
+  if (!sourceItems.length) {
+    showToast(editorSource === "canvas" ? "请先在画布中选题" : "当前试卷没有可编辑的题目");
+    return null;
+  }
+  tabCounter += 1;
+  const draftTitle = String(options.title || sourceTab?.title || getCanvasListTitle()).trim() || formatQuestionListTitle();
+  const tab = {
+    id: `tab-${tabCounter}`,
+    kind: "editor",
+    editorSource,
+    sourceTabId: sourceTab?.id || null,
+    sourceTopicId: getBaseTopicId(sourceTab?.topicId || initialTopicId),
+    topicId: `editor-${Date.now()}-${tabCounter}`,
+    context: sourceTab?.context || contextName,
+    title: "",
+    shortTitle: "",
+    meta: {
+      ...(sourceTab?.meta || {}),
+      source: editorSource === "whole-paper" ? "整卷编辑草稿" : "组题画布草稿",
+      questionCount: sourceItems.length,
+      createdAt: new Date().toISOString()
+    },
+    selectedQuestionIds: [],
+    removedQuestionIds: [],
+    modifiedQuestions: {},
+    questions: sourceItems.map(item => cloneWorkspaceValue(item.question)),
+    editorDraft: {
+      title: draftTitle,
+      sourceTitle: String(sourceTab?.title || draftTitle).trim(),
+      titleCustomized: false,
+      questions: sourceItems,
+      scores: cloneWorkspaceValue(options.scores || {}),
+      paperSettings: {},
+      dirty: true,
+      saved: false,
+      savedResourceId: null,
+      savedAt: null
+    }
+  };
+  syncEditorTabTitle(tab);
+  const sourceIndex = sourceTab ? workspace.tabs.findIndex(item => item.id === sourceTab.id) : -1;
+  if (sourceIndex >= 0) workspace.tabs.splice(sourceIndex + 1, 0, tab);
+  else workspace.tabs.push(tab);
+  activateEditorTab(tab);
+  return tab;
+}
+
+function activateEditorTab(tab, options = {}) {
+  if (!tab?.editorDraft) return;
+  aiAssistantOpen = false;
+  pendingBrowseOptions = {};
+  workspace.homeActive = false;
+  workspace.activeBrowseFilter = null;
+  workspace.activeTabId = tab.id;
+  selectedPanelEnlarged = true;
+  rightPanelSectionState.selectedCollapsed = false;
+  if (!isComposeMode && !isRecordMode) history.replaceState(null, "", tabPageUrl(tab));
+  saveWorkspace();
+  renderAll();
+  applySelectedPanelState();
+  if (options.message) showToast(options.message);
+}
+
+function openWholePaperEditorTab() {
+  const sourceTab = getActiveTab();
+  if (!sourceTab || sourceTab.kind === "editor") return sourceTab;
+  const visibleQuestions = (sourceTab.questions || [])
+    .filter(question => !(sourceTab.removedQuestionIds || []).includes(question.id));
+  return createEditorTab({
+    editorSource: "whole-paper",
+    sourceTab,
+    title: String(sourceTab.title || "").trim() || formatQuestionListTitle(),
+    items: visibleQuestions.map(question => buildGlobalSelectedEntry(sourceTab, question)),
+    scores: {}
+  });
+}
+
+function openCanvasEditorTab() {
+  if (getActiveEditorTab()) return;
+  const items = cloneWorkspaceValue(getGlobalSelectedQuestions());
+  return createEditorTab({
+    editorSource: "canvas",
+    sourceTab: getActiveTab(),
+    title: getCanvasListTitle(),
+    displayTitle: getCanvasDisplayTitle(),
+    items,
+    scores: workspace.canvasScores || {}
+  });
+}
+
+function migrateLegacyEditorSession() {
+  const legacy = workspace.paperEditSession;
+  if (!legacy || !Array.isArray(legacy.questions) || !legacy.questions.length) return null;
+  const sourceTab = workspace.tabs.find(tab => tab.id === legacy.sourceTabId) || getActiveTab();
+  const tab = createEditorTab({
+    editorSource: legacy.origin === "whole-paper-edit" ? "whole-paper" : "canvas",
+    sourceTab,
+    title: legacy.title || sourceTab?.title || formatQuestionListTitle(),
+    items: legacy.questions,
+    scores: legacy.scores || {}
+  });
+  if (tab?.editorDraft) {
+    tab.editorDraft.savedResourceId = legacy.savedResourceId || null;
+    tab.editorDraft.saved = Boolean(legacy.saved);
+    tab.editorDraft.dirty = !legacy.saved;
+    tab.editorDraft.savedAt = legacy.savedAt || null;
+  }
+  workspace.paperEditSession = null;
+  saveWorkspace();
+  return tab;
+}
+
 function saveWholePaperEditAsQuestionList() {
-  const session = workspace.paperEditSession;
+  const editorTab = getActiveEditorTab();
+  const session = getActiveEditorDraft();
   const selectedItems = getGlobalSelectedQuestions();
-  if (!session || !selectedItems.length) {
+  if (!editorTab || !session || !selectedItems.length) {
     showToast("当前试卷没有可保存的题目");
     return;
   }
+  if (selectedItems.some(item => !String(item.question?.stem || "").trim())) {
+    showToast("请先补全题干再保存到我的资源");
+    return;
+  }
 
-  tabCounter += 1;
-  const sourceTab = workspace.tabs.find(tab => tab.id === session.sourceTabId) || getActiveTab();
-  const title = String(session.title || sourceTab?.title || "").trim() || formatQuestionListTitle();
+  const sourceTab = workspace.tabs.find(tab => tab.id === editorTab.sourceTabId) || null;
+  const title = getEditorDisplayTitle(editorTab)
+    || String(session.title || sourceTab?.title || "").trim()
+    || formatQuestionListTitle();
   const now = new Date();
   const pad = value => String(value).padStart(2, "0");
   const createdAt = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const questions = selectedItems.map((item, index) => ({
-    ...item.question,
-    id: `${item.question.id}-paper-edit-${tabCounter}-${index}`,
+    ...cloneWorkspaceValue(item.question),
+    id: String(item.question.id || `editor-question-${index + 1}`),
     num: index + 1,
     score: session.scores?.[item.selectionKey] ?? item.question.score
   }));
-  const newTab = {
-    id: `tab-${tabCounter}`,
-    topicId: `list-${Date.now()}`,
-    context: sourceTab?.context || contextName,
+  const resourceTab = {
+    id: `resource-tab-${editorTab.id}`,
+    topicId: `list-${editorTab.id}`,
+    context: editorTab.context || sourceTab?.context || contextName,
     title,
     shortTitle: shortenTabTitle(title),
     meta: {
@@ -2952,26 +3695,44 @@ function saveWholePaperEditAsQuestionList() {
       shortTitle: shortenTabTitle(title),
       source: "我的创建",
       questionCount: questions.length,
-      createdAt
+      createdAt: session.createdAt || createdAt
     },
     selectedQuestionIds: questions.map(question => question.id),
     removedQuestionIds: [],
     modifiedQuestions: {},
     questions,
     fromTabId: sourceTab?.id || null,
-    sourceTopicId: session.sourceTopicId,
+    sourceTopicId: editorTab.sourceTopicId,
     isQuestionList: true,
     myResourceId: session.savedResourceId || undefined
   };
 
-  const resource = registerMyQuestionList(newTab);
+  const resource = registerMyQuestionList(resourceTab);
   session.savedResourceId = resource?.id || session.savedResourceId;
   session.saved = true;
+  session.dirty = false;
+  session.createdAt = session.createdAt || new Date().toISOString();
   session.savedAt = new Date().toISOString();
-  restoreCanvasStateAfterPaperEdit(session);
+  editorTab.meta = {
+    ...(editorTab.meta || {}),
+    questionCount: questions.length,
+    savedAt: session.savedAt
+  };
+  syncEditorTabTitle(editorTab);
+  if (editorTab.editorSource === "canvas") {
+    workspace.globalSelectedQuestions = [];
+    workspace.canvasTitle = "";
+    workspace.canvasScores = {};
+    workspace.canvasManuallyCollapsed = true;
+    workspace.tabs.forEach(tab => {
+      if (tab.kind !== "editor") tab.selectedQuestionIds = [];
+    });
+  }
   saveWorkspace();
   renderSelectedFooter(selectedItems.length);
-  showToast("试卷已保存至「我的-我的创建」");
+  renderTabs();
+  renderCourseCenter();
+  showToast("已保存到我的资源");
 }
 
 function openSelectedAsQuestionList() {
@@ -3023,18 +3784,7 @@ function openSelectedAsQuestionList() {
     selectionKey: selectedItems.map(item => item.selectionKey).sort().join(",")
   };
 
-  const sourceTab = getActiveTab();
   const resource = registerMyQuestionList(newTab);
-  workspace.paperEditSession = {
-    sourceTabId: sourceTab?.id || null,
-    sourceTopicId: getBaseTopicId(sourceTab?.topicId || initialTopicId),
-    title,
-    questions: cloneWorkspaceValue(selectedItems),
-    scores: { ...(workspace.canvasScores || {}) },
-    savedResourceId: resource?.id || null,
-    saved: true,
-    savedAt: new Date().toISOString()
-  };
   workspace.globalSelectedQuestions = [];
   workspace.canvasTitle = "";
   workspace.canvasScores = {};
@@ -3043,22 +3793,19 @@ function openSelectedAsQuestionList() {
   rightPanelSectionState.selectedCollapsed = true;
   saveWorkspace();
   if (isMobileLayout()) setMobileDrawer("selected", false);
-  const editorParams = new URLSearchParams({
-    context: sourceTab?.context || newTab.context || contextName,
-    canvas: "edit"
-  });
-  if (sourceTab?.id) editorParams.set("tabId", sourceTab.id);
-  else editorParams.set("topic", getBaseTopicId(sourceTab?.topicId || initialTopicId));
-  const editorUrl = `./detail-ai.html?${editorParams.toString()}`;
   renderAll();
   applySelectedPanelState();
   renderSelectedContext();
-  showActionToast(`已保存到「我的-我的创建」：${title}`, "去查看", editorUrl);
+  showToast(`已保存到我的资源：${resource?.title || title}`);
 }
 
 function savePaperCopyAsQuestionList() {
   const tab = getActiveTab();
   if (!tab) return;
+  if (tab.kind === "editor") {
+    saveWholePaperEditAsQuestionList();
+    return;
+  }
   if (tab.isQuestionList) {
     registerMyQuestionList(tab);
     saveWorkspace();
@@ -3067,26 +3814,7 @@ function savePaperCopyAsQuestionList() {
     return;
   }
 
-  const visibleQuestions = (tab.questions || [])
-    .filter(q => !(tab.removedQuestionIds || []).includes(q.id));
-  if (!visibleQuestions.length) {
-    showToast("本卷没有可编辑的题目");
-    return;
-  }
-
-  workspace.paperEditSession = {
-    origin: "whole-paper-edit",
-    sourceTabId: tab.id,
-    sourceTopicId: getBaseTopicId(tab.topicId),
-    title: String(tab.title || "").trim() || formatQuestionListTitle(),
-    questions: visibleQuestions.map(q => buildGlobalSelectedEntry(tab, q)),
-    scores: {},
-    canvasSnapshot: captureCanvasStateForPaperEdit()
-  };
-  saveWorkspace();
-  const nextUrl = new URL(location.href);
-  nextUrl.searchParams.set("canvas", "edit");
-  location.href = nextUrl.toString();
+  openWholePaperEditorTab();
 }
 
 function animateSaveToMyResources() {
@@ -3329,24 +4057,49 @@ function fillAiAssistantPrompt(text) {
 function syncAiAssistantChrome() {
   const panel = document.querySelector("#aiAssistantPanel");
   const btn = document.querySelector("#docTabAiAssistant");
-  if (panel) panel.hidden = !aiAssistantOpen;
+  const active = isAiAssistantViewActive();
+  if (panel) panel.hidden = !active;
   if (btn) {
-    btn.classList.toggle("is-open", aiAssistantOpen);
-    btn.setAttribute("aria-expanded", aiAssistantOpen ? "true" : "false");
+    btn.classList.toggle("is-open", active);
+    btn.setAttribute("aria-expanded", active ? "true" : "false");
   }
 }
 
-function openAiAssistant() {
+function openAiAssistant(initialPrompt = "") {
+  if (isComposeMode || isRecordMode) {
+    aiAssistantTabOpen = true;
+    workspace.courseCenterTabOpen = true;
+    saveWorkspace();
+    navigateToWorkspaceView("course");
+    return;
+  }
   closeMyResources();
+  aiAssistantTabOpen = true;
   aiAssistantOpen = true;
-  syncAiAssistantChrome();
-  renderAiAssistantThread();
+  workspace.courseCenterTabOpen = true;
+  saveWorkspace();
+  renderAll();
+  renderCourseCenter();
+  if (initialPrompt) fillAiAssistantPrompt(initialPrompt);
   document.querySelector("#aiAssistantInput")?.focus();
 }
 
 function closeAiAssistant() {
+  const changed = aiAssistantTabOpen || aiAssistantOpen;
+  aiAssistantTabOpen = false;
   aiAssistantOpen = false;
+  workspace.courseCenterTabOpen = false;
+  if (!workspace.tabs.length) workspace.homeActive = true;
   syncAiAssistantChrome();
+  if (changed) {
+    saveWorkspace();
+    const activeTab = getActiveTab();
+    if (activeTab && requiresPageModeNavigation(activeTab)) {
+      openDetailPage(tabPageUrl(activeTab));
+      return;
+    }
+    renderAll();
+  }
 }
 
 function toggleAiAssistant() {
@@ -3488,6 +4241,33 @@ function bindAiAssistantControls() {
   document.querySelectorAll("[data-ai-fill]").forEach(node => {
     node.addEventListener("click", () => fillAiAssistantPrompt(node.dataset.aiFill));
   });
+  document.querySelector("[data-ai-upload]")?.addEventListener("click", () => {
+    document.querySelector("#aiAssistantFile")?.click();
+  });
+  document.querySelectorAll("[data-course-view]").forEach(button => {
+    button.addEventListener("click", () => {
+      workspace.courseCenterView = button.dataset.courseView;
+      courseCenterQuery = "";
+      const search = document.querySelector("#courseCenterSearch");
+      if (search) search.value = "";
+      saveWorkspace();
+      renderCourseCenter();
+    });
+  });
+  document.querySelector("#courseCenterSearch")?.addEventListener("input", event => {
+    courseCenterQuery = event.target.value || "";
+    renderCourseCenter();
+  });
+  document.querySelector("#courseCenterList")?.addEventListener("click", event => {
+    const actionButton = event.target.closest("[data-course-action]");
+    const card = event.target.closest("[data-course-source][data-course-id]");
+    if (!actionButton || !card) return;
+    const item = resolveCourseCenterItem(card.dataset.courseSource, card.dataset.courseId);
+    if (!item) return;
+    if (actionButton.dataset.courseAction === "open") openCourseCenterResource(item);
+    if (actionButton.dataset.courseAction === "add") addCourseCenterItemToCanvas(item);
+  });
+  renderCourseCenter();
 }
 
 function bindMyResourcesControls() {
@@ -4078,19 +4858,62 @@ function toggleShowAnswers() {
 }
 
 function isHomeViewActive() {
-  return false;
+  return Boolean(workspace.homeActive) && !aiAssistantOpen;
 }
 
 function isBrowseViewActive() {
-  return false;
+  return Boolean(workspace.activeBrowseFilter) && !workspace.homeActive && !aiAssistantOpen;
 }
 
 function isShellFrameActive() {
-  return false;
+  return isHomeViewActive() || isBrowseViewActive();
 }
 
-function getBrowseMeta(filter) {
-  return BROWSE_FILTER_META[filter] || null;
+function isAiAssistantViewActive() {
+  return aiAssistantTabOpen && aiAssistantOpen;
+}
+
+function decodeBrowseKeyPart(value) {
+  try {
+    return decodeURIComponent(String(value || ""));
+  } catch {
+    return String(value || "");
+  }
+}
+
+function workbookBrowseKey(albumId) {
+  return `${WORKBOOK_BROWSE_KEY_PREFIX}${encodeURIComponent(String(albumId || ""))}`;
+}
+
+function browseKeyFor(filter, options = {}) {
+  const baseFilter = String(filter || "");
+  const albumId = String(options.albumId || "");
+  if (baseFilter === "workbook" && WORKBOOK_ALBUM_TAB_LABELS[albumId]) {
+    return workbookBrowseKey(albumId);
+  }
+  return baseFilter;
+}
+
+function getBrowseMeta(browseKey) {
+  const key = String(browseKey || "");
+  if (key.startsWith(WORKBOOK_BROWSE_KEY_PREFIX)) {
+    const albumId = decodeBrowseKeyPart(key.slice(WORKBOOK_BROWSE_KEY_PREFIX.length));
+    const label = WORKBOOK_ALBUM_TAB_LABELS[albumId];
+    if (!label) return null;
+    return {
+      ...BROWSE_FILTER_META.workbook,
+      label,
+      browseKey: key,
+      options: { view: "catalog", albumId, query: "", keepAlbumState: true }
+    };
+  }
+  const meta = BROWSE_FILTER_META[key];
+  return meta ? { ...meta, browseKey: key, options: { ...(meta.options || {}) } } : null;
+}
+
+function browseOptionsForKey(browseKey, overrides = {}) {
+  const meta = getBrowseMeta(browseKey);
+  return { ...(meta?.options || {}), ...overrides };
 }
 
 function ensureBrowseTabs() {
@@ -4101,32 +4924,114 @@ function ensureBrowseTabs() {
   }
 }
 
-let pendingBrowseOrigin = "";
+let pendingBrowseOptions = {};
+
+function normalizeBrowseOptions(options = {}) {
+  return Object.fromEntries(BROWSE_OPTION_KEYS.flatMap(key => {
+    const value = options[key];
+    if (value === undefined || value === null) return [];
+    if (key === "keepAlbumState") return [[key, value === true || value === "true"]];
+    return [[key, String(value)]];
+  }));
+}
+
+function browseOptionsFromParams(searchParams = params) {
+  return normalizeBrowseOptions(Object.fromEntries(BROWSE_OPTION_KEYS.flatMap(key => {
+    if (!searchParams.has(key)) return [];
+    return [[key, searchParams.get(key)]];
+  })));
+}
+
+function applyBrowseOptionsToUrl(url, options = {}) {
+  Object.entries(normalizeBrowseOptions(options)).forEach(([key, value]) => {
+    url.searchParams.set(key, String(value));
+  });
+}
 
 function syncHomeFrameFilter(filter, options = {}) {
   const frame = document.querySelector("#homeFrame");
-  if (!frame?.contentWindow || frame.dataset.loaded !== "1") return;
-  const payload = { type: "aiq-set-filter", filter: filter || "all" };
-  const origin = options.origin || pendingBrowseOrigin || frame.dataset.origin || "";
-  if (origin) payload.origin = origin;
-  frame.dataset.origin = origin;
-  if (!origin) delete frame.dataset.origin;
-  pendingBrowseOrigin = "";
+  if (!frame?.contentWindow || frame.dataset.loaded !== "1" || frame.dataset.ready !== "1") return;
+  if (frame.dataset.shell !== "index") {
+    pendingBrowseOptions = {};
+    return;
+  }
+  const payload = {
+    type: "aiq-set-filter",
+    filter: filter || "all",
+    ...normalizeBrowseOptions(Object.keys(options).length ? options : pendingBrowseOptions)
+  };
+  pendingBrowseOptions = {};
   frame.contentWindow.postMessage(payload, "*");
+}
+
+function renderWorkspaceBreadcrumb(contextLabel, leafLabel) {
+  const trail = document.querySelector(".ai-detail-topbar .breadcrumb");
+  if (!trail) return;
+  trail.innerHTML = `
+    <span id="breadcrumbContext">${escapeHtml(contextLabel)}</span>
+    <i class="ri-arrow-right-s-line"></i>
+    <strong id="breadcrumbLeaf">${escapeHtml(leafLabel)}</strong>`;
 }
 
 // 首页 / 分类浏览共用 iframe；分类 tab 紧挨在「首页」后
 function applyHomeView() {
+  ensureBrowseTabs();
   const root = document.querySelector("#aiWorkspace");
   const homeView = document.querySelector("#homeView");
-  root?.classList.remove("home-view");
-  if (homeView) homeView.hidden = true;
+  const frame = document.querySelector("#homeFrame");
+  const shellActive = isShellFrameActive();
+  const assistantActive = isAiAssistantViewActive();
+  const activeBrowseKey = isBrowseViewActive() ? workspace.activeBrowseFilter : null;
+  const browseMeta = activeBrowseKey ? getBrowseMeta(activeBrowseKey) : null;
+  const browseFilter = browseMeta?.filter || activeBrowseKey;
+  const browseOptions = browseOptionsForKey(activeBrowseKey, pendingBrowseOptions);
+  const desiredFrameSrc = browseMeta?.frameSrc || HOME_FRAME_SRC;
+  const desiredFrameShell = browseMeta?.frameSrc ? activeBrowseKey : "index";
+
+  root?.classList.toggle("home-view", shellActive);
+  root?.classList.toggle("ai-assistant-view", assistantActive);
+  if (homeView) homeView.hidden = !shellActive;
+  if (shellActive && frame && (frame.dataset.loaded !== "1" || frame.dataset.shell !== desiredFrameShell)) {
+    const srcFilter = browseFilter || "all";
+    const url = new URL(desiredFrameSrc, location.href);
+    if (desiredFrameShell === "index" && srcFilter !== "all") url.searchParams.set("filter", srcFilter);
+    if (desiredFrameShell === "index") applyBrowseOptionsToUrl(url, browseOptions);
+    frame.src = `${url.pathname}${url.search}`;
+    frame.dataset.loaded = "1";
+    frame.dataset.ready = "0";
+    frame.dataset.filter = srcFilter;
+    frame.dataset.browseKey = activeBrowseKey || "home";
+    frame.dataset.shell = desiredFrameShell;
+    pendingBrowseOptions = {};
+  } else if (shellActive && frame?.dataset.loaded === "1") {
+    const nextFilter = browseFilter || "all";
+    const nextBrowseKey = activeBrowseKey || "home";
+    if (frame.dataset.filter !== nextFilter || frame.dataset.browseKey !== nextBrowseKey || Object.keys(pendingBrowseOptions).length) {
+      frame.dataset.filter = nextFilter;
+      frame.dataset.browseKey = nextBrowseKey;
+      syncHomeFrameFilter(nextFilter, browseOptions);
+    }
+  }
+  if (shellActive) {
+    renderWorkspaceBreadcrumb("题库", browseMeta?.label || "首页");
+    document.title = `${browseMeta?.label || "题库首页"} · AI 试卷工作台`;
+  } else if (assistantActive) {
+    renderWorkspaceBreadcrumb("工作台", "创作中心");
+    document.title = "创作中心 · AI 试卷工作台";
+  }
+  syncAiAssistantChrome();
   applyResponsiveChrome();
 }
 
 function setHomeView(active) {
   const next = Boolean(active);
+  if (next && (isComposeMode || isRecordMode)) {
+    navigateToWorkspaceView("home");
+    return;
+  }
   if (next) {
+    aiAssistantOpen = false;
+    pendingBrowseOptions = {};
     workspace.homeActive = true;
     workspace.activeBrowseFilter = null;
   } else if (workspace.homeActive) {
@@ -4141,13 +5046,20 @@ function setHomeView(active) {
 }
 
 function openBrowseTab(filter, options = {}) {
-  const meta = getBrowseMeta(filter);
+  const browseKey = browseKeyFor(filter, options);
+  const meta = getBrowseMeta(browseKey);
   if (!meta) return;
+  const browseOptions = browseOptionsForKey(browseKey, options);
+  if (isComposeMode || isRecordMode) {
+    navigateToWorkspaceView("browse", browseKey, browseOptions);
+    return;
+  }
   ensureBrowseTabs();
-  if (!workspace.browseTabs.includes(filter)) workspace.browseTabs.push(filter);
+  if (!workspace.browseTabs.includes(browseKey)) workspace.browseTabs.push(browseKey);
+  aiAssistantOpen = false;
   workspace.homeActive = false;
-  workspace.activeBrowseFilter = filter;
-  pendingBrowseOrigin = options.origin || "";
+  workspace.activeBrowseFilter = browseKey;
+  pendingBrowseOptions = normalizeBrowseOptions(browseOptions);
   saveWorkspace();
   renderAll();
   showToast(`已打开「${meta.label}」`);
@@ -4157,6 +5069,7 @@ function closeBrowseTab(filter) {
   ensureBrowseTabs();
   workspace.browseTabs = workspace.browseTabs.filter(item => item !== filter);
   if (workspace.activeBrowseFilter === filter) {
+    pendingBrowseOptions = {};
     workspace.activeBrowseFilter = null;
     workspace.homeActive = true;
   }
@@ -4165,9 +5078,17 @@ function closeBrowseTab(filter) {
 }
 
 function setBrowseView(filter) {
-  if (!getBrowseMeta(filter)) return;
+  const meta = getBrowseMeta(filter);
+  if (!meta) return;
+  const browseOptions = browseOptionsForKey(filter);
+  if (isComposeMode || isRecordMode) {
+    navigateToWorkspaceView("browse", filter, browseOptions);
+    return;
+  }
   ensureBrowseTabs();
   if (!workspace.browseTabs.includes(filter)) workspace.browseTabs.push(filter);
+  aiAssistantOpen = false;
+  pendingBrowseOptions = normalizeBrowseOptions(browseOptions);
   workspace.homeActive = false;
   workspace.activeBrowseFilter = filter;
   saveWorkspace();
@@ -4175,14 +5096,46 @@ function setBrowseView(filter) {
 }
 
 function bindHomeFrameBridge() {
+  const homeFrame = document.querySelector("#homeFrame");
+  homeFrame?.addEventListener("load", () => {
+    homeFrame.dataset.ready = "1";
+    if (!isShellFrameActive()) return;
+    const browseKey = isBrowseViewActive() ? workspace.activeBrowseFilter : null;
+    const meta = browseKey ? getBrowseMeta(browseKey) : null;
+    const filter = meta?.filter || browseKey || "all";
+    homeFrame.dataset.filter = filter;
+    homeFrame.dataset.browseKey = browseKey || "home";
+    syncHomeFrameFilter(filter, browseOptionsForKey(browseKey, pendingBrowseOptions));
+  });
+
   window.addEventListener("message", event => {
     const frame = document.querySelector("#homeFrame");
     if (!frame || event.source !== frame.contentWindow) return;
     const data = event.data;
     if (!data || typeof data !== "object") return;
 
+    if (data.type === "aiq-open-ai") {
+      openAiAssistant(String(data.prompt || ""));
+      return;
+    }
+
     if (data.type === "aiq-open-filter") {
-      openBrowseTab(String(data.filter || ""), { origin: data.origin || "" });
+      const filter = String(data.filter || "");
+      if (filter === "all") setHomeView(true);
+      else openBrowseTab(filter, data);
+      return;
+    }
+
+    if (data.type === "aiq-toggle-external-question") {
+      const item = data.item;
+      const selectionKey = String(item?.selectionKey || "");
+      if (!selectionKey.startsWith("school::") || !item?.question) return;
+      const added = toggleExternalCanvasQuestion(item);
+      frame.contentWindow?.postMessage({
+        type: "aiq-external-question-result",
+        selectionKey,
+        added
+      }, "*");
       return;
     }
 
@@ -4212,9 +5165,104 @@ function bindHomeFrameBridge() {
   });
 }
 
+function revealActiveDocTab(bar) {
+  requestAnimationFrame(() => {
+    const scroller = bar?.querySelector(".doc-tabs-scroll");
+    const activeTab = scroller?.querySelector(".doc-tab.active");
+    if (!scroller || !activeTab) return;
+    const scrollerRect = scroller.getBoundingClientRect();
+    const activeRect = activeTab.getBoundingClientRect();
+    let delta = 0;
+    if (activeRect.left < scrollerRect.left + 8) {
+      delta = activeRect.left - scrollerRect.left - 8;
+    } else if (activeRect.right > scrollerRect.right - 8) {
+      delta = activeRect.right - scrollerRect.right + 8;
+    }
+    if (!delta) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scroller.scrollTo({
+      left: scroller.scrollLeft + delta,
+      behavior: reduceMotion ? "auto" : "smooth"
+    });
+  });
+}
+
 function renderTabs() {
   const bar = document.querySelector("#docTabs");
-  if (bar) bar.hidden = true;
+  if (!bar) return;
+  bar.hidden = false;
+  ensureBrowseTabs();
+  const homeActive = isHomeViewActive();
+  const browseActive = isBrowseViewActive();
+  const assistantActive = isAiAssistantViewActive();
+  const activeBrowse = workspace.activeBrowseFilter;
+  bar.innerHTML = `
+    <div class="doc-tabs-scroll">
+      <button class="doc-tab doc-tab-home ${homeActive ? "active" : ""}" type="button" data-home-tab aria-label="题库首页">
+        <i class="ri-home-4-line doc-tab-icon" aria-hidden="true"></i>
+        <span class="doc-tab-label">首页</span>
+      </button>
+      ${workspace.browseTabs.map(filter => {
+        const meta = getBrowseMeta(filter);
+        if (!meta) return "";
+        return `
+        <button class="doc-tab doc-tab-browse ${browseActive && activeBrowse === filter ? "active" : ""}" type="button" data-browse-filter="${filter}">
+          <i class="${meta.icon} doc-tab-icon" aria-hidden="true"></i>
+          <span class="doc-tab-label">${escapeHtml(meta.label)}</span>
+          <span class="doc-tab-close" role="button" tabindex="0" data-close-browse="${filter}" aria-label="关闭 ${escapeHtml(meta.label)}"><i class="ri-close-line"></i></span>
+        </button>`;
+      }).join("")}
+      ${workspace.tabs.map(tab => `
+        <button class="doc-tab ${tab.kind === "editor" ? "doc-tab-editor" : ""} ${isUserEditableTab(tab) ? "doc-tab-editable" : "doc-tab-readonly"} ${!homeActive && !browseActive && !assistantActive && tab.id === workspace.activeTabId ? "active" : ""}" type="button" data-tab-id="${tab.id}" title="${escapeHtml(tab.title || tab.shortTitle)}${isUserEditableTab(tab) ? "（可编辑）" : "（只读）"}">
+          <i class="${tabDocIcon(tab)} doc-tab-icon" aria-hidden="true"></i>
+          <span class="doc-tab-label">${escapeHtml(tab.shortTitle)}</span>
+          ${tab.kind === "editor" && tab.editorDraft?.dirty ? `<span class="doc-tab-dirty" aria-label="有未保存修改" title="有未保存修改"></span>` : ""}
+          <span class="doc-tab-close" role="button" tabindex="0" data-close-tab="${tab.id}" aria-label="关闭 ${escapeHtml(tab.shortTitle)}"><i class="ri-close-line"></i></span>
+        </button>`).join("")}
+      ${aiAssistantTabOpen ? `
+        <button class="doc-tab doc-tab-assistant ${assistantActive ? "active" : ""}" type="button" data-ai-assistant-tab>
+          <i class="ri-apps-2-line doc-tab-icon" aria-hidden="true"></i>
+          <span class="doc-tab-label">创作中心</span>
+          <span class="doc-tab-close" role="button" tabindex="0" data-close-ai-assistant aria-label="关闭创作中心"><i class="ri-close-line"></i></span>
+        </button>` : ""}
+    </div>
+    <button class="doc-tab-add" type="button" id="docTabAdd" aria-label="打开新试卷"><i class="ri-add-line"></i></button>`;
+
+  bar.querySelector("[data-home-tab]")?.addEventListener("click", () => setHomeView(true));
+  bar.querySelectorAll("[data-browse-filter]").forEach(button => {
+    button.addEventListener("click", event => {
+      if (event.target.closest("[data-close-browse]")) return;
+      setBrowseView(button.dataset.browseFilter);
+    });
+  });
+  bar.querySelectorAll("[data-close-browse]").forEach(button => {
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      closeBrowseTab(button.dataset.closeBrowse);
+    });
+  });
+  bar.querySelectorAll("[data-tab-id]").forEach(button => {
+    button.addEventListener("click", event => {
+      if (event.target.closest("[data-close-tab]")) return;
+      switchTab(button.dataset.tabId);
+    });
+  });
+  bar.querySelectorAll("[data-close-tab]").forEach(button => {
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      closeTab(button.dataset.closeTab);
+    });
+  });
+  bar.querySelector("[data-ai-assistant-tab]")?.addEventListener("click", event => {
+    if (event.target.closest("[data-close-ai-assistant]")) return;
+    openAiAssistant();
+  });
+  bar.querySelector("[data-close-ai-assistant]")?.addEventListener("click", event => {
+    event.stopPropagation();
+    closeAiAssistant();
+  });
+  bar.querySelector("#docTabAdd")?.addEventListener("click", openPaperPicker);
+  revealActiveDocTab(bar);
 }
 
 function buildDetailPageUrl(topicId, options = {}) {
@@ -4236,27 +5284,97 @@ function buildDetailPageUrl(topicId, options = {}) {
 }
 
 function openDetailPage(url) {
-  const opened = window.open(url, "_blank");
-  if (opened) {
-    opened.opener = null;
-    return;
-  }
   location.href = url;
+}
+
+function tabPageUrl(tab) {
+  if (tab?.composeSession) {
+    return `./detail-ai.html?mode=compose&prompt=${encodeURIComponent(tab.meta?.aiPrompt || tab.title || "AI 组卷")}&context=paper`;
+  }
+  if (tab?.recordSession) {
+    return `./detail-ai.html?mode=record&fileName=${encodeURIComponent(tab.recordFileName || tab.title || "待录入试卷.pdf")}&context=paper`;
+  }
+  if (tab?.isQuestionList) {
+    return `./detail-ai.html?tabId=${encodeURIComponent(tab.id)}&context=${encodeURIComponent(tab.context || contextName)}`;
+  }
+  return buildDetailPageUrl(tab.topicId, {
+    tabId: tab.id,
+    context: tab.context,
+    title: tab.title,
+    shortTitle: tab.shortTitle,
+    lessonKey: tab.lessonKey
+  });
+}
+
+function requiresPageModeNavigation(tab) {
+  if (!tab) return false;
+  if (tab.composeSession) {
+    return !isComposeMode || String(tab.meta?.aiPrompt || "") !== composePrompt;
+  }
+  if (tab.recordSession) {
+    return !isRecordMode || String(tab.recordFileName || "") !== recordFileName;
+  }
+  return isComposeMode || isRecordMode;
+}
+
+function workspaceViewPageUrl(view, filter = "", options = {}) {
+  const current = getActiveTab();
+  const normalTab = current && !current.composeSession && !current.recordSession
+    ? current
+    : workspace.tabs.find(tab => !tab.composeSession && !tab.recordSession);
+  const url = new URL(normalTab ? tabPageUrl(normalTab) : "./detail-ai.html?context=paper", location.href);
+  url.searchParams.delete("mode");
+  url.searchParams.delete("prompt");
+  url.searchParams.delete("fileName");
+  url.searchParams.set("workspaceView", view);
+  if (view === "browse" && filter) url.searchParams.set("browse", filter);
+  else url.searchParams.delete("browse");
+  applyBrowseOptionsToUrl(url, options);
+  return `${url.pathname}${url.search}`;
+}
+
+function navigateToWorkspaceView(view, filter = "", options = {}) {
+  aiAssistantOpen = false;
+  if (view === "home") {
+    pendingBrowseOptions = {};
+    workspace.homeActive = true;
+    workspace.activeBrowseFilter = null;
+  } else if (view === "course") {
+    aiAssistantTabOpen = true;
+    workspace.courseCenterTabOpen = true;
+    workspace.homeActive = false;
+    workspace.activeBrowseFilter = null;
+  } else {
+    ensureBrowseTabs();
+    if (getBrowseMeta(filter) && !workspace.browseTabs.includes(filter)) workspace.browseTabs.push(filter);
+    workspace.homeActive = false;
+    workspace.activeBrowseFilter = getBrowseMeta(filter) ? filter : null;
+    pendingBrowseOptions = normalizeBrowseOptions(options);
+  }
+  saveWorkspace();
+  openDetailPage(workspaceViewPageUrl(view, filter, options));
 }
 
 function switchTab(tabId) {
   const tab = workspace.tabs.find(item => item.id === tabId);
   if (!tab) return;
-  if (tab.isQuestionList) {
-    openDetailPage(`./detail-ai.html?tabId=${encodeURIComponent(tab.id)}&context=${encodeURIComponent(tab.context || contextName)}`);
+  if (workspace.activeTabId === tabId && !isHomeViewActive() && !isBrowseViewActive() && !isAiAssistantViewActive()) return;
+  aiAssistantOpen = false;
+  pendingBrowseOptions = {};
+  workspace.homeActive = false;
+  workspace.activeBrowseFilter = null;
+  workspace.activeTabId = tabId;
+  selectedPanelEnlarged = tab.kind === "editor";
+  if (selectedPanelEnlarged) rightPanelSectionState.selectedCollapsed = false;
+  saveWorkspace();
+  if (requiresPageModeNavigation(tab)) {
+    openDetailPage(tabPageUrl(tab));
     return;
   }
-  openDetailPage(buildDetailPageUrl(tab.topicId, {
-    context: tab.context,
-    title: tab.title,
-    shortTitle: tab.shortTitle,
-    lessonKey: tab.lessonKey
-  }));
+  history.replaceState(null, "", tabPageUrl(tab));
+  syncPageChromeForTab(tab);
+  renderAll();
+  applySelectedPanelState();
 }
 
 function syncPageChromeForTab(tab) {
@@ -4266,33 +5384,71 @@ function syncPageChromeForTab(tab) {
 }
 
 function closeTab(tabId) {
-  if (workspace.tabs.length === 1) return showToast("至少保留一个试卷标签页");
   const index = workspace.tabs.findIndex(tab => tab.id === tabId);
+  if (index < 0) return;
+  const closingTab = workspace.tabs[index];
+  if (closingTab.kind === "editor" && closingTab.editorDraft?.dirty
+    && !window.confirm("该编辑草稿有尚未保存到我的资源的修改，确认放弃并关闭？")) return;
+  if ((isComposeMode || isRecordMode) && workspace.tabs.length === 1) {
+    showToast("当前 AI 任务完成后可返回首页");
+    return;
+  }
+  const wasActive = workspace.activeTabId === tabId;
+  const wasViewActive = wasActive && !isHomeViewActive() && !isBrowseViewActive() && !isAiAssistantViewActive();
   workspace.tabs.splice(index, 1);
-  if (workspace.activeTabId === tabId) workspace.activeTabId = workspace.tabs[Math.max(0, index - 1)].id;
+  if (wasActive) {
+    const nextTab = workspace.tabs[Math.max(0, index - 1)] || workspace.tabs[0] || null;
+    workspace.activeTabId = nextTab?.id || null;
+    if (!nextTab && !isAiAssistantViewActive()) workspace.homeActive = true;
+  }
+  const nextActiveTab = getActiveTab();
+  if (wasActive) {
+    selectedPanelEnlarged = nextActiveTab?.kind === "editor";
+    if (selectedPanelEnlarged) rightPanelSectionState.selectedCollapsed = false;
+  }
   saveWorkspace();
+  if (wasViewActive && nextActiveTab && requiresPageModeNavigation(nextActiveTab)) {
+    openDetailPage(tabPageUrl(nextActiveTab));
+    return;
+  }
   renderAll();
+  applySelectedPanelState();
 }
 
 function openTab(topicId, options = {}) {
   const baseId = getBaseTopicId(topicId);
   const tabContext = options.context || contextName;
-  const currentTopic = getBaseTopicId(params.get("topic") || "");
-  if (!isHomeShell && !params.get("tabId") && currentTopic === baseId && contextName === tabContext) {
-    return getActiveTab();
+  const lessonKey = options.lessonKey || options.title || "";
+  const existing = workspace.tabs.find(tab =>
+    tab.kind !== "editor"
+    &&
+    getBaseTopicId(tab.topicId) === baseId
+    && !tab.fromQuestionId
+    && !tab.isQuestionList
+    && (tab.context || contextName) === tabContext
+    && (!lessonKey || tab.lessonKey === lessonKey || tab.title === lessonKey)
+  );
+  if (existing) {
+    switchTab(existing.id);
+    showToast(`已切换到「${existing.shortTitle || existing.title}」`);
+    return existing;
   }
-  openDetailPage(buildDetailPageUrl(baseId, {
-    context: tabContext,
-    title: options.title,
-    shortTitle: options.shortTitle,
-    lessonKey: options.lessonKey,
-    source: options.source,
-    difficulty: options.difficulty,
-    reason: options.reason,
-    focus: options.focus,
-    questionCount: options.questionCount,
-    usage: options.usage
-  }));
+  const tab = createTab(baseId, tabContext, options);
+  workspace.tabs.push(tab);
+  workspace.activeTabId = tab.id;
+  workspace.homeActive = false;
+  workspace.activeBrowseFilter = null;
+  aiAssistantOpen = false;
+  pendingBrowseOptions = {};
+  pruneOverflowTabs();
+  saveWorkspace();
+  if (isComposeMode || isRecordMode) openDetailPage(tabPageUrl(tab));
+  else {
+    history.replaceState(null, "", tabPageUrl(tab));
+    renderAll();
+  }
+  showToast(`已打开「${tab.shortTitle || tab.title}」`);
+  return tab;
 }
 
 // 标签页无限增长会让标题被挤成一串省略号，超出上限时回收最早打开且未激活的一个
@@ -4300,6 +5456,7 @@ function pruneOverflowTabs() {
   while (workspace.tabs.length > MAX_OPEN_TABS) {
     const index = workspace.tabs.findIndex(tab =>
       tab.id !== workspace.activeTabId
+      && tab.kind !== "editor"
       && !tab.isQuestionList
       && !tab.fromQuestionId
       && !workspace.tabs.some(child => child.fromTabId === tab.id)
@@ -4310,14 +5467,16 @@ function pruneOverflowTabs() {
 }
 
 function openPaperPicker() {
-  const currentId = getBaseTopicId(getActiveTab()?.topicId);
-  if (isWorkbook) {
+  const activeTab = getActiveTab();
+  const currentId = getBaseTopicId(activeTab?.topicId);
+  const activeContext = activeTab?.context || contextName;
+  if (tabIsWorkbook(activeTab)) {
     const nextId = ["t9", "t7", "t19"].find(id => id !== currentId) || "t9";
-    openTab(nextId);
+    openTab(nextId, { context: "series" });
     return;
   }
   const nextId = ["t14", "t25", "t2"].find(id => id !== currentId) || "t14";
-  openTab(nextId);
+  openTab(nextId, { context: activeContext });
 }
 
 function deleteQuestionById(qId) {
@@ -4444,10 +5603,13 @@ function renderAll() {
   renderQuestionCards();
   renderTabs();
   renderMyResources();
+  renderCourseCenter();
   const favBtn = document.querySelector("#favoritePaper");
-  if (favBtn && workspace.paperFavorited) {
-    favBtn.classList.add("saved");
-    favBtn.innerHTML = favoriteResourceLabel(true);
+  if (favBtn) {
+    const saved = isTabFavorited(getActiveTab());
+    workspace.paperFavorited = saved;
+    favBtn.classList.toggle("saved", saved);
+    favBtn.innerHTML = favoriteResourceLabel(saved);
   }
   syncPageChromeForTab(getActiveTab());
   const ansBtn = document.querySelector("#toggleShowAnswer");
@@ -4504,20 +5666,22 @@ function bindEvents() {
   document.querySelector("#toggleShowAnswer")?.addEventListener("click", toggleShowAnswers);
 
   document.querySelector("#favoritePaper")?.addEventListener("click", event => {
-    workspace.paperFavorited = !workspace.paperFavorited;
-    saveWorkspace();
+    const saved = toggleTabFavorite(getActiveTab());
     const btn = event.currentTarget;
-    btn.classList.toggle("saved", workspace.paperFavorited);
-    btn.innerHTML = workspace.paperFavorited
+    btn.classList.toggle("saved", saved);
+    btn.innerHTML = saved
       ? favoriteResourceLabel(true)
       : favoriteResourceLabel(false);
-    showToast(workspace.paperFavorited ? "已收藏" : "已取消收藏");
+    renderCourseCenter();
+    showToast(saved ? "已收藏，可在创作中心查看" : "已取消收藏");
   });
 
   document.querySelectorAll("[data-action]").forEach(button => {
     button.addEventListener("click", () => {
       const action = button.dataset.action;
       if (action === "download") {
+        registerDownload(getActiveTab());
+        renderCourseCenter();
         showToast("正在生成可打印文件…");
       }
     });
@@ -4563,16 +5727,21 @@ if (isHomeShell) {
   bindSelectedPanelControls();
   bindAiCreateControls();
   renderSelectedContext();
-  bindCanvasSync();
+  if (!isEmbeddedCanvasShell) bindCanvasSync();
 } else {
   applyPageMode();
   ensureInitialTab();
+  if (!isComposeMode && !isRecordMode) migrateLegacyEditorSession();
+  if (getActiveEditorTab()) {
+    selectedPanelEnlarged = true;
+    rightPanelSectionState.selectedCollapsed = false;
+  }
   if (isRecordMode) applyRecordMode();
+  bindHomeFrameBridge();
   renderAll();
   bindEvents();
   bindPaperTitleEditor();
   bindSelectedPanelControls();
-  if (params.get("canvas") === "edit") setSelectedPanelEnlarged(true);
   bindAiAssistantControls();
   bindMyResourcesControls();
   bindComposeControls();

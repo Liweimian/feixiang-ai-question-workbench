@@ -1,3 +1,25 @@
+const isSchoolEmbedded = (() => {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+})();
+
+if (isSchoolEmbedded) {
+  document.body.classList.add("is-embedded");
+  document.querySelector(".school-header")?.addEventListener("click", event => {
+    const link = event.target.closest("a[href]");
+    if (!link) return;
+    const url = new URL(link.getAttribute("href"), location.href);
+    const path = url.pathname.replace(/\/+$/, "");
+    if (!path.endsWith("/index.html") && !path.endsWith("/school.html")) return;
+    event.preventDefault();
+    const filter = path.endsWith("/school.html") ? "school" : (url.searchParams.get("filter") || "all");
+    window.parent.postMessage({ type: "aiq-open-filter", filter }, "*");
+  });
+}
+
 const chapters = [
   { id: "ch1", title: "第一章 有理数", count: 8, children: ["1.1 正数和负数", "1.2 有理数及其大小比较"] },
   { id: "ch2", title: "第二章 有理数的运算", count: 7, children: ["2.1 有理数的加减法", "2.2 有理数的乘除法"] },
@@ -60,6 +82,7 @@ let activeNav = "all";
 let sortMode = "recommended";
 const selectedQuestions = new Set();
 const savedQuestions = new Set();
+const SCHOOL_WORKSPACE_KEY = "feixiang-ai-workspace-v5";
 
 const bankNav = document.querySelector("#bankNav");
 const questionList = document.querySelector("#questionList");
@@ -99,6 +122,7 @@ function schoolSelectionKey(id) {
 }
 
 function isQuestionSelected(id) {
+  if (isSchoolEmbedded) return selectedQuestions.has(id);
   return window.AiqCanvas?.has(schoolSelectionKey(id)) || selectedQuestions.has(id);
 }
 
@@ -130,6 +154,39 @@ function syncSelectedFromCanvas() {
   selectedQuestions.clear();
   (window.AiqCanvas?.keys?.() || []).forEach(key => {
     if (String(key).startsWith("school::")) selectedQuestions.add(String(key).slice(8));
+  });
+}
+
+function syncEmbeddedSelectedQuestions(rawWorkspace) {
+  if (!isSchoolEmbedded || !rawWorkspace) return;
+  try {
+    const parsed = typeof rawWorkspace === "string" ? JSON.parse(rawWorkspace) : rawWorkspace;
+    selectedQuestions.clear();
+    (parsed.globalSelectedQuestions || []).forEach(item => {
+      const key = String(item?.selectionKey || "");
+      if (key.startsWith("school::")) selectedQuestions.add(key.slice(8));
+    });
+  } catch {}
+}
+
+if (isSchoolEmbedded) {
+  try {
+    syncEmbeddedSelectedQuestions(localStorage.getItem(SCHOOL_WORKSPACE_KEY));
+  } catch {}
+  window.addEventListener("storage", event => {
+    if (event.key !== SCHOOL_WORKSPACE_KEY || !event.newValue) return;
+    syncEmbeddedSelectedQuestions(event.newValue);
+    renderQuestions();
+  });
+  window.addEventListener("message", event => {
+    const data = event.data;
+    if (event.source !== window.parent || data?.type !== "aiq-external-question-result") return;
+    const key = String(data.selectionKey || "");
+    if (!key.startsWith("school::")) return;
+    const id = key.slice(8);
+    if (data.added) selectedQuestions.add(id);
+    else selectedQuestions.delete(id);
+    renderQuestions();
   });
 }
 
@@ -176,7 +233,7 @@ function renderQuestions() {
 }
 
 function renderBasket() {
-  syncSelectedFromCanvas();
+  if (!isSchoolEmbedded) syncSelectedFromCanvas();
 }
 
 function renderAll() {
@@ -230,7 +287,15 @@ questionList.addEventListener("click", event => {
   const question = questions.find(item => item.id === id);
   const action = button.dataset.questionAction;
   if (action === "select") {
-    if (window.AiqCanvas?.toggleQuestion) {
+    if (isSchoolEmbedded) {
+      const added = !selectedQuestions.has(id);
+      if (added) selectedQuestions.add(id);
+      else selectedQuestions.delete(id);
+      window.parent.postMessage({
+        type: "aiq-toggle-external-question",
+        item: toCanvasQuestion(question)
+      }, "*");
+    } else if (window.AiqCanvas?.toggleQuestion) {
       const added = window.AiqCanvas.toggleQuestion(toCanvasQuestion(question));
       if (added) selectedQuestions.add(id);
       else selectedQuestions.delete(id);
@@ -267,6 +332,8 @@ function syncWhenCanvasReady() {
   syncSelectedFromCanvas();
   renderQuestions();
 }
-if (window.AiqCanvas) syncWhenCanvasReady();
-window.addEventListener("aiq-canvas-ready", syncWhenCanvasReady);
-window.addEventListener("aiq-canvas-change", syncWhenCanvasReady);
+if (!isSchoolEmbedded) {
+  if (window.AiqCanvas) syncWhenCanvasReady();
+  window.addEventListener("aiq-canvas-ready", syncWhenCanvasReady);
+  window.addEventListener("aiq-canvas-change", syncWhenCanvasReady);
+}
