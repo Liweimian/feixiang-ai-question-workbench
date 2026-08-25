@@ -852,7 +852,10 @@ function homepagePaperCard(item, options = {}) {
   const publishedText = item.publishedAt ? item.publishedAt.replaceAll("-", "/") : "";
   const uploader = options.lane === "famous" ? getHomepagePaperUploader(item, topic) : null;
   const rank = Number(options.rank) || 0;
-  const displayTitle = options.title || (unifyTags && homepagePaperDisplayTitles[item.id]) || topic.title;
+  const baseDisplayTitle = options.title || (unifyTags && homepagePaperDisplayTitles[item.id]) || topic.title;
+  const displayTitle = unifyTags && /卷$/.test(baseDisplayTitle) && !/汇编$/.test(baseDisplayTitle)
+    ? `${baseDisplayTitle} · 2026-2027学年`
+    : baseDisplayTitle;
   return `
     <button class="home-paper-card${rank ? " is-ranked" : ""}" type="button" data-topic="${topic.id}" data-context="paper" data-featured-paper-card data-paper-filters="${filters.join(" ")}" data-paper-types="${typeIds.join(" ")}">
       ${rank ? `<span class="home-paper-rank${rank <= 3 ? " is-top" : ""}">${String(rank).padStart(2, "0")}</span>` : ""}

@@ -103,8 +103,8 @@ const rightPanelSectionState = {
 };
 
 const MAX_OPEN_TABS = 6;
-const HOME_FRAME_SRC = "./index.html?embed=1&v=20260824workspacetabs32";
-const SCHOOL_FRAME_SRC = "./school.html?embed=1&v=20260824workspacetabs32";
+const HOME_FRAME_SRC = "./index.html?embed=1&v=20260825workspacetabs33";
+const SCHOOL_FRAME_SRC = "./school.html?embed=1&v=20260825workspacetabs33";
 const QUESTION_DRAG_MIME = "application/x-aiq-questions";
 const CANVAS_DRAG_MIME = "application/x-aiq-canvas";
 const BROWSE_FILTER_META = {
