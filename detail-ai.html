@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
     <link rel="stylesheet" href="./detail.css" />
-  <link rel="stylesheet" href="./detail-ai.css?v=20260826workspacetabs113" />
+  <link rel="stylesheet" href="./detail-ai.css?v=20260826workspacetabs118" />
     <link rel="stylesheet" href="./theme-workspace-v50.css?v=20260821workspace4" />
     <style id="ai-panel-legacy-toggle-hide">
       #aiPanelExpand.legacy-hidden,
@@ -310,12 +310,21 @@
                       </div>
                     </div>
                     <div class="paper-meta-action-stack">
-                      <div class="paper-meta-inline-actions">
-                        <button type="button" class="paper-action-ghost" data-action="download"><i class="ri-download-2-line"></i><span>下载</span></button>
-                        <button type="button" class="paper-action-ghost" id="toggleShowAnswer"><i class="ri-eye-line"></i><span>显示答案</span></button>
-                        <button type="button" class="paper-action-secondary" id="savePaperCopy"><i class="ri-file-copy-2-line"></i><span id="savePaperCopyLabel">复制并编辑</span></button>
-                        <button type="button" class="paper-action-secondary" id="batchAddAllQuestions" title="将当前整卷题目加入正在组题，自动去重"><i class="ri-layout-left-line"></i><span>整卷加入组题</span></button>
-                      </div>
+              <div class="paper-meta-inline-actions">
+                <button type="button" class="paper-action-ghost" id="toggleShowAnswer"><i class="ri-eye-line"></i><span>显示答案</span></button>
+                <div class="paper-action-more">
+                  <button type="button" class="paper-action-secondary paper-action-use" id="paperMoreActions" aria-haspopup="menu" aria-expanded="false" aria-controls="paperMoreMenu">
+                    <i class="ri-file-list-3-line"></i><span>使用整卷</span><i class="ri-arrow-down-s-line paper-action-chevron"></i>
+                  </button>
+                  <div class="paper-action-menu" id="paperMoreMenu" role="menu" hidden>
+                    <button type="button" id="batchAddAllQuestions" role="menuitem" title="将当前整卷题目加入当前题单，自动去重"><i class="ri-layout-left-line"></i><span>整套加入当前题单</span></button>
+                    <button type="button" id="savePaperCopy" role="menuitem"><i class="ri-file-copy-2-line"></i><span id="savePaperCopyLabel">复制为新题单并编辑</span></button>
+                    <div class="paper-action-menu-divider" role="separator"></div>
+                    <button type="button" id="favoritePaper" role="menuitem"><i class="ri-star-line"></i><span id="favoritePaperLabel">收藏整卷</span></button>
+                    <button type="button" data-action="download" role="menuitem"><i class="ri-download-2-line"></i><span>下载试卷</span></button>
+                  </div>
+                </div>
+              </div>
                     </div>
                   </section>
                   <h1 class="ai-compose-paper-title" id="aiComposePaperTitle" hidden>北京市朝阳区七年级上学期数学期末试卷</h1>
@@ -452,6 +461,6 @@
     </aside>
 
     <div id="toast" class="toast" role="status"></div>
-  <script src="./detail-ai.js?v=20260826workspacetabs114"></script>
+  <script src="./detail-ai.js?v=20260826workspacetabs118"></script>
   </body>
 </html>

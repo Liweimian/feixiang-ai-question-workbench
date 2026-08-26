@@ -2711,11 +2711,17 @@ function questionCardHtml(q, tab) {
       <div class="q-card-bar">
         <span class="q-knowledge-foot">知识点：${escapeHtml(modified?.knowledge || q.knowledge)} / 核心素养：${escapeHtml(meta.competency)}</span>
         <div class="q-card-actions">
-          <button type="button" class="q-action-ghost" data-card-action="fix" data-q="${q.id}"><i class="ri-error-warning-line"></i><span>纠错</span></button>
-          <button type="button" class="q-action-ghost ${favorited ? "saved" : ""}" data-card-action="favorite" data-q="${q.id}"><i class="${favorited ? "ri-star-fill" : "ri-star-line"}"></i><span>${favorited ? "已收藏" : "收藏"}</span></button>
-          <button type="button" class="q-action-ghost" data-card-action="similar" data-q="${q.id}"><i class="ri-stack-line"></i><span>相似题</span></button>
+          <details class="q-more-actions">
+            <summary class="q-action-ghost" title="更多操作"><i class="ri-more-2-fill"></i><span>更多</span><i class="ri-arrow-down-s-line"></i></summary>
+            <div class="q-more-menu">
+              <button type="button" data-card-action="similar" data-q="${q.id}"><i class="ri-stack-line"></i><span>相似题</span></button>
+              <button type="button" data-card-action="adapt" data-q="${q.id}"><i class="ri-sparkling-2-line"></i><span>AI改编</span></button>
+              <button type="button" class="${favorited ? "saved" : ""}" data-card-action="favorite" data-q="${q.id}"><i class="${favorited ? "ri-star-fill" : "ri-star-line"}"></i><span>${favorited ? "已收藏" : "收藏"}</span></button>
+              <button type="button" data-card-action="fix" data-q="${q.id}"><i class="ri-error-warning-line"></i><span>纠错</span></button>
+            </div>
+          </details>
           <button type="button" class="q-action-ghost ${answerOpen ? "active" : ""}" data-card-action="analysis" data-q="${q.id}" aria-pressed="${answerOpen}">
-            <i class="ri-file-text-line"></i><span>${answerOpen ? "收起解析" : "解析"}</span>
+            <i class="ri-file-text-line"></i><span>${answerOpen ? "收起答案" : "答案"}</span>
           </button>
           ${selected
     ? `<button type="button" class="q-remove-btn" data-card-action="select" data-q="${q.id}" title="取消选用"><i class="ri-check-line"></i><span>取消选用</span></button>`
@@ -2734,14 +2740,18 @@ function renderPaperActionButtons(tab) {
   const selectable = getSelectableQuestions(tab);
   const selectedCount = selectable.filter(q => isQuestionGloballySelected(tab.topicId, q.id)).length;
   const missingCount = Math.max(0, selectable.length - selectedCount);
+  const destinationTab = getQuestionDestinationEditorTab() || getActiveEditorTab();
+  const destinationTitle = stripEditorTitlePrefix(getEditorDisplayTitle(destinationTab))
+    || stripEditorTitlePrefix(getCanvasDisplayTitle())
+    || "当前题单";
   if (batchButton) {
     batchButton.disabled = selectable.length === 0 || missingCount === 0;
     batchButton.innerHTML = missingCount === 0
-      ? `<i class="ri-checkbox-circle-fill"></i><span>已加入组题</span>`
-      : `<i class="ri-layout-left-line"></i><span>整卷加入组题</span>`;
+      ? `<i class="ri-checkbox-circle-fill"></i><span>已整套加入当前题单</span>`
+      : `<i class="ri-layout-left-line"></i><span>整套加入当前题单</span>`;
     batchButton.title = missingCount === 0
-      ? "当前本卷已全部选用"
-      : "将当前本卷加入本次组题";
+      ? `当前整卷已加入「${destinationTitle}」`
+      : `将当前整卷加入「${destinationTitle}」，自动去重`;
   }
   const isEditableQuestionList = Boolean(tab.isQuestionList && !tab.aiGenerated);
   if (saveButton) {
@@ -2752,7 +2762,7 @@ function renderPaperActionButtons(tab) {
     if (icon) icon.className = isEditableQuestionList ? "ri-save-3-line" : "ri-file-copy-2-line";
   }
   if (saveLabel) {
-    saveLabel.textContent = isEditableQuestionList ? "保存" : "复制并编辑";
+    saveLabel.textContent = isEditableQuestionList ? "保存当前题单" : "复制为新题单并编辑";
   }
   if (copyNote) {
     copyNote.textContent = isEditableQuestionList
@@ -3050,17 +3060,17 @@ function selectedPreviewEnlargedHtml(item, index) {
       <div class="q-card-bar">
         <span class="q-knowledge-foot">知识点：${escapeHtml(q.knowledge || "未标注")} / 核心素养：${escapeHtml(meta.competency)}</span>
         <div class="q-card-actions">
+          <details class="q-more-actions">
+            <summary class="q-action-ghost" title="更多操作"><i class="ri-more-2-fill"></i><span>更多</span><i class="ri-arrow-down-s-line"></i></summary>
+            <div class="q-more-menu">
+              <button type="button" data-selected-action="similar" data-q="${escapeHtml(q.id)}"><i class="ri-stack-line"></i><span>相似题</span></button>
+              <button type="button" data-selected-action="adapt" data-q="${escapeHtml(q.id)}"><i class="ri-sparkling-2-line"></i><span>AI改编</span></button>
+              <button type="button" class="${favorited ? "saved" : ""}" data-selected-action="favorite" data-selection-key="${item.selectionKey}" data-topic-id="${escapeHtml(item.topicId)}" data-q="${escapeHtml(q.id)}"><i class="${favorited ? "ri-star-fill" : "ri-star-line"}"></i><span>${favorited ? "已收藏" : "收藏"}</span></button>
+              <button type="button" data-selected-action="fix" data-q="${escapeHtml(q.id)}"><i class="ri-error-warning-line"></i><span>纠错</span></button>
+            </div>
+          </details>
           <button type="button" class="q-action-ghost ${answerOpen ? "active" : ""}" data-selected-action="analysis" data-selection-key="${item.selectionKey}" aria-pressed="${answerOpen}">
-            <i class="ri-file-text-line"></i><span>${answerOpen ? "收起解析" : "解析"}</span>
-          </button>
-          <button type="button" class="q-action-ghost ${favorited ? "saved" : ""}" data-selected-action="favorite" data-selection-key="${item.selectionKey}" data-topic-id="${escapeHtml(item.topicId)}" data-q="${escapeHtml(q.id)}">
-            <i class="${favorited ? "ri-star-fill" : "ri-star-line"}"></i><span>${favorited ? "已收藏" : "收藏"}</span>
-          </button>
-          <button type="button" class="q-action-ghost" data-selected-action="similar" data-q="${escapeHtml(q.id)}">
-            <i class="ri-stack-line"></i><span>相似题</span>
-          </button>
-          <button type="button" class="q-action-ghost" data-selected-action="fix" data-q="${escapeHtml(q.id)}">
-            <i class="ri-error-warning-line"></i><span>纠错</span>
+            <i class="ri-file-text-line"></i><span>${answerOpen ? "收起答案" : "答案"}</span>
           </button>
           <button type="button" class="q-remove-btn" data-selected-action="remove" data-selection-key="${item.selectionKey}" title="移出已选题目">
             <i class="ri-close-line"></i><span>移出</span>
@@ -3271,6 +3281,7 @@ function bindSelectedPreviewEvents() {
   preview.querySelectorAll("[data-selected-action]").forEach(button => {
     button.addEventListener("click", event => {
       event.stopPropagation();
+      button.closest("details")?.removeAttribute("open");
       const action = button.dataset.selectedAction;
       const selectionKey = button.dataset.selectionKey;
       const topicId = button.dataset.topicId;
@@ -3311,6 +3322,7 @@ function bindSelectedPreviewEvents() {
         return;
       }
       if (action === "similar") showToast(`正在查找第 ${q?.num || ""} 题的相似题…`);
+      if (action === "adapt") showToast(`正在生成第 ${q?.num || ""} 题的 AI 改编题…`);
       if (action === "fix") showToast(`已记录第 ${q?.num || ""} 题的纠错反馈，教研会尽快核对`);
     });
   });
@@ -4326,6 +4338,9 @@ function activateEditorTab(tab, options = {}) {
     renderQuestionCards();
     renderCourseCenter();
   }
+  // 左侧题单切换后，整卷操作必须按“当前题单”重新计算，
+  // 不能沿用上一个题单的已加入/禁用状态。
+  renderPaperActionButtons(getActiveTab());
   applySelectedPanelState();
   if (options.message) showToast(options.message);
 }
@@ -4413,6 +4428,7 @@ function activateDefaultQuestionDraft(options = {}) {
     renderQuestionCards();
     renderCourseCenter();
   }
+  renderPaperActionButtons(getActiveTab());
   applySelectedPanelState();
 }
 
@@ -6455,6 +6471,7 @@ function bindQuestionCardEvents() {
         showToast(added ? `已收藏第 ${q?.num} 题` : `已取消收藏第 ${q?.num} 题`);
       }
       if (action === "similar") showToast(`正在查找第 ${q?.num} 题的相似题…`);
+      if (action === "adapt") showToast(`正在生成第 ${q?.num} 题的 AI 改编题…`);
       if (action === "paper-copy-remove") togglePaperCopyQuestion(qId);
       if (action === "select") toggleQuestionSelection(qId, undefined, { sourceEl: button.closest(".question-item") || button });
       if (action === "add-selected") addQuestionToSelected(qId, { sourceEl: button.closest(".question-item") || button });
