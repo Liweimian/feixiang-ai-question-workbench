@@ -177,6 +177,7 @@ let aiAssistantAttachment = null;
 let aiAssistantTyping = false;
 let courseCenterQuery = "";
 let courseCenterPage = 1;
+let pendingQuestionDraftCloseId = null;
 let aiGroupHistoryExpanded = false;
 let tabAddMenuOpen = false;
 
@@ -369,6 +370,9 @@ function defaultWorkspace() {
     favoriteQuestions: [],
     canvasTitle: "",
     canvasScores: {},
+    canvasResourceId: null,
+    canvasSavedSignature: "",
+    canvasDraftClosed: false,
     paperEditSession: null,
     canvasManuallyCollapsed: false,
     myQuestionLists: [],
@@ -2745,11 +2749,6 @@ function renderSelectedFooter(count) {
     btn.hidden = btn.dataset.canvasAction === "assign" ? false : !selectedPanelEnlarged;
   });
   if (scoreBtn) scoreBtn.hidden = true;
-  const clearBtn = document.querySelector("#clearSelectedQuestions");
-  if (clearBtn) {
-    clearBtn.disabled = count === 0;
-    clearBtn.hidden = true;
-  }
 }
 
 function syncSelectedPanelChrome() {
@@ -3619,29 +3618,118 @@ function questionDraftTabLabel(tab) {
   return stripEditorTitlePrefix(getEditorDisplayTitle(tab)) || NEW_CANVAS_DISPLAY_TITLE;
 }
 
-function closeQuestionDraft(tabId) {
+function defaultQuestionDraftSignature() {
+  return JSON.stringify({
+    title: String(workspace.canvasTitle || "").trim(),
+    questions: (workspace.globalSelectedQuestions || []).map(item => item.question || item),
+    scores: workspace.canvasScores || {}
+  });
+}
+
+function isDefaultQuestionDraftSaved() {
+  return Boolean(workspace.canvasResourceId)
+    && workspace.canvasSavedSignature === defaultQuestionDraftSignature();
+}
+
+function resetDefaultQuestionDraft(options = {}) {
+  workspace.globalSelectedQuestions = [];
+  workspace.canvasTitle = "";
+  workspace.canvasScores = {};
+  workspace.canvasResourceId = null;
+  workspace.canvasSavedSignature = "";
+  workspace.canvasDraftClosed = Boolean(options.closed);
+  workspace.tabs.forEach(tab => { tab.selectedQuestionIds = []; });
+  selectedPreviewTypeFilter = null;
+  canvasFocusKey = null;
+}
+
+function openQuestionDraftCloseModal(tabId, title) {
+  pendingQuestionDraftCloseId = tabId;
+  const modal = document.querySelector("#questionDraftCloseModal");
+  const name = document.querySelector("#questionDraftCloseName");
+  if (name) name.textContent = title || "未命名题单";
+  if (modal) modal.hidden = false;
+  window.setTimeout(() => document.querySelector("#confirmQuestionDraftClose")?.focus(), 0);
+}
+
+function closeQuestionDraftCloseModal() {
+  pendingQuestionDraftCloseId = null;
+  const modal = document.querySelector("#questionDraftCloseModal");
+  if (modal) modal.hidden = true;
+}
+
+function confirmQuestionDraftClose() {
+  const tabId = pendingQuestionDraftCloseId;
+  if (!tabId) return;
+  closeQuestionDraftCloseModal();
+  closeQuestionDraft(tabId, { force: true });
+}
+
+function closeQuestionDraft(tabId, options = {}) {
+  if (tabId === "default") {
+    const hasQuestions = (workspace.globalSelectedQuestions || []).length > 0;
+    if (!options.force && hasQuestions && !isDefaultQuestionDraftSaved()) {
+      openQuestionDraftCloseModal("default", questionDraftTabLabel());
+      return;
+    }
+    const drafts = (workspace.tabs || []).filter(tab => tab.kind === "editor" && tab.editorDraft);
+    resetDefaultQuestionDraft({ closed: drafts.length > 0 });
+    if (drafts.length) {
+      workspace.activeQuestionDraftTabId = drafts[0].id;
+      workspace.addQuestionTargetTabId = drafts[0].id;
+    } else {
+      workspace.activeQuestionDraftTabId = null;
+      workspace.addQuestionTargetTabId = null;
+      workspace.canvasDraftClosed = false;
+    }
+    saveWorkspace();
+    renderAll();
+    applySelectedPanelState();
+    return;
+  }
   const index = workspace.tabs.findIndex(tab => tab.id === tabId && tab.kind === "editor");
   if (index < 0) return;
   const tab = workspace.tabs[index];
-  if (tab.editorDraft?.dirty && !window.confirm("该题单有尚未保存的修改，确认关闭？")) return;
+  const hasQuestions = (tab.editorDraft?.questions || []).length > 0;
+  if (!options.force && hasQuestions && tab.editorDraft?.dirty) {
+    openQuestionDraftCloseModal(tabId, questionDraftTabLabel(tab));
+    return;
+  }
+  const wasActive = workspace.activeQuestionDraftTabId === tabId;
   workspace.tabs.splice(index, 1);
-  if (workspace.activeQuestionDraftTabId === tabId) workspace.activeQuestionDraftTabId = null;
+  const remainingDrafts = (workspace.tabs || []).filter(item => item.kind === "editor" && item.editorDraft);
+  if (wasActive) {
+    const nextDraft = remainingDrafts[Math.min(index, remainingDrafts.length - 1)] || null;
+    workspace.activeQuestionDraftTabId = nextDraft?.id || null;
+    workspace.addQuestionTargetTabId = nextDraft?.id || null;
+  }
   workspace.addQuestionTargetTabId = workspace.addQuestionTargetTabId === tabId ? null : workspace.addQuestionTargetTabId;
+  if (!remainingDrafts.length && workspace.canvasDraftClosed) {
+    resetDefaultQuestionDraft({ closed: false });
+    workspace.activeQuestionDraftTabId = null;
+    workspace.addQuestionTargetTabId = null;
+  }
   saveWorkspace();
   renderAll();
+  applySelectedPanelState();
 }
 
 function renderQuestionDraftTabs() {
   const bar = document.querySelector("#questionDraftTabs");
   if (!bar) return;
   const drafts = (workspace.tabs || []).filter(tab => tab.kind === "editor" && tab.editorDraft);
-  const defaultActive = !workspace.activeQuestionDraftTabId;
+  if (!drafts.length && workspace.canvasDraftClosed) workspace.canvasDraftClosed = false;
+  const showDefault = !workspace.canvasDraftClosed;
+  const defaultActive = showDefault && !workspace.activeQuestionDraftTabId;
+  const defaultSaved = isDefaultQuestionDraftSaved();
   bar.innerHTML = `
     <div class="question-draft-tabs-scroll">
-      <button type="button" class="question-draft-tab ${defaultActive ? "active" : ""}" data-question-draft-default title="${escapeHtml(questionDraftTabLabel())}">
+      ${showDefault ? `<button type="button" class="question-draft-tab ${defaultActive ? "active" : ""}" data-question-draft-default title="${escapeHtml(questionDraftTabLabel())}">
         <i class="ri-file-edit-line"></i><span>${escapeHtml(questionDraftTabLabel())}</span>
+        ${defaultSaved ? `<i class="ri-check-line question-draft-saved" aria-label="已保存"></i>` : `<em aria-label="未保存"></em>`}
         ${workspace.globalSelectedQuestions?.length ? `<b>${workspace.globalSelectedQuestions.length}</b>` : ""}
-      </button>
+        <i class="ri-close-line question-draft-close" data-close-question-draft="default" aria-label="关闭题单"></i>
+      </button>` : ""}
       ${drafts.map(tab => `
         <button type="button" class="question-draft-tab ${workspace.activeQuestionDraftTabId === tab.id ? "active" : ""}" data-question-draft-id="${tab.id}" title="${escapeHtml(questionDraftTabLabel(tab))}">
           <i class="ri-file-edit-line"></i><span>${escapeHtml(questionDraftTabLabel(tab))}</span>
@@ -4071,6 +4159,7 @@ function openCanvasEditorTab() {
 }
 
 function activateDefaultQuestionDraft(options = {}) {
+  workspace.canvasDraftClosed = false;
   workspace.activeQuestionDraftTabId = null;
   workspace.addQuestionTargetTabId = null;
   if (options.expand) selectedPanelEnlarged = true;
@@ -4106,7 +4195,8 @@ function createBlankQuestionDraft() {
     items: [],
     scores: {},
     allowEmpty: true,
-    expand: true,
+    expand: false,
+    preserveRight: true,
     forceNew: true
   });
 }
@@ -4257,50 +4347,26 @@ function openSelectedAsQuestionList() {
     questions,
     fromTabId: getActiveTab()?.id || null,
     isQuestionList: true,
+    myResourceId: workspace.canvasResourceId || undefined,
     selectionKey: selectedItems.map(item => item.selectionKey).sort().join(",")
   };
 
   const resource = registerMyQuestionList(newTab);
-  const clearedSnapshot = {
-    questions: cloneWorkspaceValue(workspace.globalSelectedQuestions || []),
-    title: workspace.canvasTitle || "",
-    scores: cloneWorkspaceValue(workspace.canvasScores || {}),
-    manuallyCollapsed: Boolean(workspace.canvasManuallyCollapsed)
-  };
-  workspace.globalSelectedQuestions = [];
-  workspace.canvasTitle = "";
-  workspace.canvasScores = {};
-  workspace.tabs.forEach(tab => { tab.selectedQuestionIds = []; });
+  workspace.canvasResourceId = resource?.id || workspace.canvasResourceId;
+  workspace.canvasSavedSignature = defaultQuestionDraftSignature();
   workspace.addQuestionPickingActive = false;
   workspace.addQuestionTargetTabId = null;
-  setCanvasManuallyCollapsed(true);
-  rightPanelSectionState.selectedCollapsed = true;
   saveWorkspace();
-  if (isMobileLayout()) setMobileDrawer("selected", false);
   renderAll();
   applySelectedPanelState();
   renderSelectedContext();
-  showActionButtonsToast("已保存到我的资源，并清空本次组题", [
+  showActionButtonsToast("已保存到我的资源", [
     {
       label: "查看资源",
       onClick: () => {
         workspace.courseCenterView = "resources";
         courseCenterQuery = "";
         openAiAssistant();
-      }
-    },
-    {
-      label: "撤销清空",
-      onClick: () => {
-        workspace.globalSelectedQuestions = cloneWorkspaceValue(clearedSnapshot.questions);
-        workspace.canvasTitle = clearedSnapshot.title;
-        workspace.canvasScores = cloneWorkspaceValue(clearedSnapshot.scores);
-        workspace.canvasManuallyCollapsed = clearedSnapshot.manuallyCollapsed;
-        rightPanelSectionState.selectedCollapsed = false;
-        saveWorkspace();
-        applySelectedPanelState();
-        renderAll();
-        showToast(`已恢复本次组题，${resource?.title || title}仍保存在我的资源`);
       }
     }
   ]);
@@ -6131,41 +6197,6 @@ function insertQuestionAfter(qId) {
   showToast(`已在第 ${ref.num} 题后新增加题`);
 }
 
-function clearSelectedQuestionsState(options = {}) {
-  const { collapsePanel = true } = options;
-  workspace.globalSelectedQuestions = [];
-  workspace.canvasTitle = "";
-  selectedPreviewTypeFilter = null;
-  canvasFocusKey = null;
-  clearDragPicks();
-  workspace.tabs.forEach(tab => {
-    tab.selectedQuestionIds = [];
-  });
-  if (selectedPanelEnlarged) setSelectedPanelEnlarged(false);
-  if (collapsePanel) {
-    collapseSelectedPanel({ manual: false });
-  }
-}
-
-function openClearCanvasModal() {
-  if (!getGlobalSelectedQuestions().length) return;
-  const modal = document.querySelector("#clearCanvasModal");
-  if (modal) modal.hidden = false;
-}
-
-function closeClearCanvasModal() {
-  const modal = document.querySelector("#clearCanvasModal");
-  if (modal) modal.hidden = true;
-}
-
-function clearAllSelectedQuestions() {
-  closeClearCanvasModal();
-  clearSelectedQuestionsState();
-  saveWorkspace();
-  renderQuestionCards();
-  showToast("已清空本次组题");
-}
-
 function toggleQuestionAnalysis(qId) {
   if (expandedAnalysisIds.has(qId)) expandedAnalysisIds.delete(qId);
   else expandedAnalysisIds.add(qId);
@@ -6232,34 +6263,6 @@ function renderAll() {
 }
 
 function bindEvents() {
-  document.querySelector("#questionDraftTabs")?.addEventListener("click", event => {
-    const closeDraft = event.target.closest("[data-close-question-draft]");
-    if (closeDraft) {
-      event.preventDefault();
-      event.stopPropagation();
-      closeQuestionDraft(closeDraft.dataset.closeQuestionDraft);
-      return;
-    }
-    if (event.target.closest("[data-new-question-draft]")) {
-      event.preventDefault();
-      event.stopPropagation();
-      createBlankQuestionDraft();
-      return;
-    }
-    if (event.target.closest("[data-question-draft-default]")) {
-      event.preventDefault();
-      event.stopPropagation();
-      activateDefaultQuestionDraft({ expand: selectedPanelEnlarged });
-      return;
-    }
-    const draftButton = event.target.closest("[data-question-draft-id]");
-    if (draftButton) {
-      event.preventDefault();
-      event.stopPropagation();
-      const tab = workspace.tabs.find(item => item.id === draftButton.dataset.questionDraftId);
-      if (tab) activateEditorTab(tab, { expand: selectedPanelEnlarged });
-    }
-  });
   document.addEventListener("click", event => {
     const closeDraft = event.target.closest("[data-close-question-draft]");
     if (closeDraft) {
@@ -6313,15 +6316,10 @@ function bindEvents() {
     node.addEventListener("click", closeScoreSettingsModal);
   });
   document.querySelector("#saveScoreSettings")?.addEventListener("click", saveScoreSettings);
-
-  document.querySelector("#clearSelectedQuestions")?.addEventListener("click", event => {
-    event.stopPropagation();
-    openClearCanvasModal();
+  document.querySelectorAll("[data-question-draft-close-modal]").forEach(node => {
+    node.addEventListener("click", closeQuestionDraftCloseModal);
   });
-  document.querySelectorAll("[data-clear-canvas-close]").forEach(node => {
-    node.addEventListener("click", closeClearCanvasModal);
-  });
-  document.querySelector("#confirmClearCanvas")?.addEventListener("click", clearAllSelectedQuestions);
+  document.querySelector("#confirmQuestionDraftClose")?.addEventListener("click", confirmQuestionDraftClose);
 
   document.querySelector("#batchAddAllQuestions")?.addEventListener("click", batchAddAllQuestionsToSelected);
 
@@ -6377,7 +6375,7 @@ function bindEvents() {
       setTabAddMenuOpen(false);
       clearDragPicks();
       closeAiCreateModal();
-      closeClearCanvasModal();
+      closeQuestionDraftCloseModal();
       closePrintPreview();
       closeScoreSettingsModal();
       closeAiAssistant();
