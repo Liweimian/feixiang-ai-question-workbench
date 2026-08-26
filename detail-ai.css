@@ -220,6 +220,59 @@
   margin-left: auto;
 }
 
+.workspace-divider-controls {
+  position: fixed;
+  left: var(--selected-panel-width);
+  top: 46%;
+  z-index: 42;
+  width: 26px;
+  display: grid;
+  grid-template-rows: repeat(2, 30px);
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  border: 1px solid #d9e0ef;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 4px 14px rgba(39, 55, 113, .14);
+  transition: left .24s ease, right .24s ease, transform .24s ease;
+}
+
+.workspace-divider-controls > button {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  color: #6072cc;
+  background: transparent;
+  cursor: pointer;
+}
+
+.workspace-divider-controls > button + button {
+  border-top: 1px solid #e7eaf3;
+}
+
+.workspace-divider-controls > button:hover {
+  color: #fff;
+  background: #6377e8;
+}
+
+.workspace-divider-controls i {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.ai-workspace.selected-panel-collapsed .workspace-divider-controls {
+  left: 64px;
+}
+
+.ai-workspace.browse-panel-collapsed .workspace-divider-controls {
+  right: 64px;
+  left: auto;
+  transform: translate(50%, -50%);
+}
+
 .ai-workspace.whole-paper-editor.selected-panel-enlarged .ai-detail-topbar .back-home,
 .ai-workspace.whole-paper-editor.selected-panel-enlarged #topbarCollapseCanvas,
 .ai-workspace.whole-paper-editor.selected-panel-enlarged #collapseBrowsePanel {
@@ -2613,13 +2666,13 @@ body.is-question-dragging .question-item {
 
 .question-item.selected {
   background: #e7f5ee;
-  box-shadow: inset 4px 0 0 var(--green-800), 0 0 0 1.5px rgba(47, 113, 87, .28);
+  box-shadow: 0 0 0 1.5px rgba(47, 113, 87, .28);
 }
 
 .question-item.selected:hover,
 .question-item.selected:focus-within {
   background: #e2f3ea;
-  box-shadow: 0 4px 18px rgba(45, 106, 79, .12), inset 4px 0 0 var(--green-800), 0 0 0 1.5px rgba(47, 113, 87, .32);
+  box-shadow: 0 4px 18px rgba(45, 106, 79, .12), 0 0 0 1.5px rgba(47, 113, 87, .32);
 }
 
 .question-item.selected:not(.is-skipped) .q-stem {
@@ -4143,6 +4196,10 @@ body.ai-detail-page .doc-tab.doc-tab-editable i.doc-tab-icon {
     display: none !important;
   }
 
+  .workspace-divider-controls {
+    display: none !important;
+  }
+
   .ai-bottom-bar {
     max-height: none;
   }
@@ -4324,16 +4381,6 @@ body.ai-detail-page .doc-tab.doc-tab-editable i.doc-tab-icon {
 .q-stem .q-num-mark:hover {
   border-color: var(--green-800);
   background: #edf5f0;
-}
-
-.question-item.selected .q-num-mark {
-  color: #fff;
-  border-color: var(--green-800);
-  background: var(--green-800);
-}
-
-.question-item.selected .q-num-mark i {
-  font-size: 14px;
 }
 
 .q-stem-text {

@@ -2577,12 +2577,12 @@ function questionCardHtml(q, tab) {
       data-q="${q.id}" data-topic-id="${escapeHtml(getBaseTopicId(tab.topicId))}" tabindex="0" aria-label="第 ${q.num} 题" draggable="${skipped ? "false" : "true"}" title="点「选用」可用于跨资源组题">
       <div class="q-card-top">
         <div class="q-badges">${badges}</div>
-        <p class="q-trail">初中 / 数学 / ${escapeHtml(type)} / ${escapeHtml(difficulty)} / ${meta.minutes} 分钟</p>
+        <p class="q-trail">${escapeHtml(type)} / ${escapeHtml(difficulty)} / ${meta.minutes} 分钟</p>
       </div>
       <div class="q-body">
         <p class="q-stem">
           <button type="button" class="q-num-mark" data-card-action="select" data-q="${q.id}" aria-pressed="${selected}" title="${selectLabel}">
-            ${selected ? '<i class="ri-check-line"></i>' : `${q.num}`}
+            ${q.num}
           </button>
           <span class="q-stem-text">${escapeHtml(stem)}</span>
         </p>
@@ -2673,9 +2673,6 @@ function renderQuestionCards() {
           <div class="question-section-head-main">
             <i class="ri-draggable question-section-drag" aria-hidden="true"></i>
             <h3>${escapeHtml(section)}</h3>
-          </div>
-          <div class="question-section-head-actions">
-            <span>${selectable.length} 题</span>
           </div>
         </header>
         <div class="paper-sheet">
@@ -2907,7 +2904,7 @@ function selectedPreviewEnlargedHtml(item, index) {
       aria-label="已选第 ${displayNum} 题">
       <div class="q-card-top">
         <div class="q-badges">${badges}</div>
-        <p class="q-trail">初中 / 数学 / ${escapeHtml(q.type)} / ${escapeHtml(q.difficulty || "中等")} / ${meta.minutes} 分钟</p>
+        <p class="q-trail">${escapeHtml(q.type)} / ${escapeHtml(q.difficulty || "中等")} / ${meta.minutes} 分钟</p>
       </div>
       <div class="q-body">
         <p class="q-stem"><b>${displayNum}.</b> ${escapeHtml(q.stem)}</p>
@@ -3894,6 +3891,22 @@ function applySelectedPanelState() {
   if (browseRail) browseRail.hidden = !rightPanelSectionState.browseCollapsed;
   const browseCollapse = document.querySelector("#collapseBrowsePanel");
   if (browseCollapse) browseCollapse.hidden = rightPanelSectionState.browseCollapsed || selectedPanelEnlarged;
+  const selectedDividerButton = document.querySelector("#dividerToggleSelected");
+  const browseDividerButton = document.querySelector("#dividerToggleBrowse");
+  if (selectedDividerButton) {
+    const collapsed = rightPanelSectionState.selectedCollapsed;
+    const label = collapsed ? "展开组题编辑区" : "收起组题编辑区";
+    selectedDividerButton.setAttribute("aria-label", label);
+    selectedDividerButton.title = label;
+    selectedDividerButton.innerHTML = `<i class="${collapsed ? "ri-arrow-right-s-line" : "ri-arrow-left-s-line"}" aria-hidden="true"></i>`;
+  }
+  if (browseDividerButton) {
+    const collapsed = rightPanelSectionState.browseCollapsed;
+    const label = collapsed ? "展开题目浏览区" : "收起题目浏览区";
+    browseDividerButton.setAttribute("aria-label", label);
+    browseDividerButton.title = label;
+    browseDividerButton.innerHTML = `<i class="${collapsed ? "ri-arrow-left-s-line" : "ri-arrow-right-s-line"}" aria-hidden="true"></i>`;
+  }
   if (rightPanelSectionState.selectedCollapsed && selectedPanelEnlarged) {
     selectedPanelEnlarged = false;
     selectedShowAnswers = false;
@@ -3910,6 +3923,8 @@ function bindSelectedPanelControls() {
   const topbarExpandBtn = document.querySelector("#topbarExpandSelected");
   const browseCollapseBtn = document.querySelector("#collapseBrowsePanel");
   const browseRail = document.querySelector("#browsePanelRail");
+  const selectedDividerButton = document.querySelector("#dividerToggleSelected");
+  const browseDividerButton = document.querySelector("#dividerToggleBrowse");
 
   // 首次进入默认收起；用户手动展开或收起后记住其选择
   rightPanelSectionState.selectedCollapsed = shouldCanvasStartCollapsed();
@@ -3985,6 +4000,36 @@ function bindSelectedPanelControls() {
     applySelectedPanelState();
     const activeTab = getActiveTab();
     if (activeTab) renderMeta(activeTab);
+    saveWorkspace();
+  });
+
+  selectedDividerButton?.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (rightPanelSectionState.selectedCollapsed) {
+      expandSelectedPanel({ focus: false });
+    } else {
+      collapseSelectedPanel({ manual: true });
+    }
+    renderSelectedContext();
+  });
+
+  browseDividerButton?.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (rightPanelSectionState.browseCollapsed) {
+      rightPanelSectionState.browseCollapsed = false;
+      if (selectedPanelEnlarged) setSelectedPanelEnlarged(false);
+      applySelectedPanelState();
+      const activeTab = getActiveTab();
+      if (activeTab) renderMeta(activeTab);
+      saveWorkspace();
+      return;
+    }
+    rightPanelSectionState.browseCollapsed = true;
+    rightPanelSectionState.selectedCollapsed = false;
+    setCanvasManuallyCollapsed(false);
+    setSelectedPanelEnlarged(true);
     saveWorkspace();
   });
 

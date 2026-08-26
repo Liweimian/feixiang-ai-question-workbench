@@ -862,6 +862,19 @@ function escapeHomepageTitle(value) {
     .replaceAll(">", "&gt;");
 }
 
+function homepagePaperDetailTitle(topic) {
+  let title = normalizeCurrentResourceCopy(topic?.title || "", /中考/.test(topic?.title || ""))
+    .replaceAll("七年级（上）", "七年级上册")
+    .replaceAll("七年级(上)", "七年级上册")
+    .replaceAll("七年级上学期", "七年级上册")
+    .replace(/数学(?:试卷|试题)$/, "：数学")
+    .replace(/(期中|期末)(?=：数学$)/, "$1考试");
+  if (!title.endsWith("：数学") && /数学$/.test(title)) {
+    title = title.replace(/数学$/, "：数学");
+  }
+  return title;
+}
+
 function homepagePaperCard(item, options = {}) {
   const topic = byId[item.id];
   if (!topic) return "";
@@ -889,8 +902,9 @@ function homepagePaperCard(item, options = {}) {
   const displayTitle = unifyTags && /卷$/.test(baseDisplayTitle) && !/汇编$/.test(baseDisplayTitle)
     ? `${baseDisplayTitle} · 2026-2027学年`
     : baseDisplayTitle;
+  const detailTitle = homepagePaperDetailTitle(topic);
   return `
-    <button class="home-paper-card${rank ? " is-ranked" : ""}" type="button" data-topic="${topic.id}" data-context="paper" data-featured-paper-card data-paper-filters="${filters.join(" ")}" data-paper-types="${typeIds.join(" ")}">
+    <button class="home-paper-card${rank ? " is-ranked" : ""}" type="button" data-topic="${topic.id}" data-context="paper" data-detail-title="${escapeHomepageTitle(detailTitle)}" data-featured-paper-card data-paper-filters="${filters.join(" ")}" data-paper-types="${typeIds.join(" ")}">
       ${rank ? `<span class="home-paper-rank${rank <= 3 ? " is-top" : ""}">${String(rank).padStart(2, "0")}</span>` : ""}
       <span class="home-paper-copy">
         <span class="home-featured-resource-title"><b title="${escapeHomepageTitle(displayTitle)}">${displayTitle}</b></span>
@@ -2311,9 +2325,10 @@ function bindContentEvents(root = document) {
       const cardTitle = element.dataset.lessonTitle
         || element.querySelector("b, h3")?.textContent?.trim()
         || "";
+      const detailTitle = element.dataset.detailTitle || cardTitle;
       const shortTitle = element.dataset.shortTitle || cardTitle;
       openTopic(element.dataset.topic, {
-        title: cardTitle || undefined,
+        title: detailTitle || undefined,
         shortTitle: shortTitle || undefined,
         lessonKey: element.dataset.lessonKey || cardTitle || undefined,
         context: element.dataset.context || undefined
