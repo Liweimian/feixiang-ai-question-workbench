@@ -125,7 +125,6 @@ const rightPanelSectionState = {
   browseCollapsed: false
 };
 
-const MAX_OPEN_TABS = 6;
 const HOME_FRAME_SRC = "./index.html?embed=1&v=20260825workspacetabs62";
 const SCHOOL_FRAME_SRC = "./school.html?embed=1&v=20260825workspacetabs61";
 const QUESTION_DRAG_MIME = "application/x-aiq-questions";
@@ -1335,6 +1334,9 @@ function buildGlobalSelectedEntry(tab, q) {
     selectionKey: getQuestionSelectionKey(topicId, q.id),
     topicId,
     sourceTitle: getTabBaseTitle(tab),
+    sourceShortTitle: tab.shortTitle || getTabBaseTitle(tab),
+    sourceContext: tab.context || "paper",
+    sourceLessonKey: tab.lessonKey || "",
     question: { ...resolved }
   };
 }
@@ -2273,7 +2275,6 @@ function ensureRecordTab() {
   };
   workspace.tabs.push(tab);
   workspace.activeTabId = tab.id;
-  pruneOverflowTabs();
   saveWorkspace();
   return tab;
 }
@@ -2328,7 +2329,6 @@ function ensureComposeTab() {
   };
   workspace.tabs.push(tab);
   workspace.activeTabId = tab.id;
-  pruneOverflowTabs();
   saveWorkspace();
   return tab;
 }
@@ -2954,11 +2954,32 @@ function toggleSelectedQuestionAnalysis(selectionKey) {
 }
 
 function selectedPreviewCompactHtml(item, index) {
+  const q = item.question || {};
+  const meta = questionDefaults(q);
+  const optionList = q.options || [];
+  const singleColumn = optionList.some(option => String(option).length > 20);
+  const options = optionList.length
+    ? `<div class="ai-canvas-options ${singleColumn ? "is-single" : ""}">${optionList.map(option => `<span>${escapeHtml(option)}</span>`).join("")}</div>`
+    : "";
+  const knowledge = q.knowledge || "暂未标注";
+  const type = q.type || "题目";
+  const sourceTitle = item.sourceTitle || "来源试卷";
   return `
     <article class="ai-canvas-item" draggable="true" data-selection-key="${item.selectionKey}" data-topic-id="${escapeHtml(item.topicId)}" data-q="${escapeHtml(item.question.id)}" tabindex="0">
       <i class="ri-draggable ai-canvas-drag" aria-hidden="true" title="拖动排序"></i>
       <span class="ai-canvas-index">${index + 1}</span>
-      <p class="ai-canvas-stem" data-canvas-stem>${escapeHtml(item.question.stem)}</p>
+      <div class="ai-canvas-content">
+        <p class="ai-canvas-stem" data-canvas-stem>${escapeHtml(q.stem)}</p>
+        ${options}
+        <div class="ai-canvas-hover-meta" aria-label="题目信息">
+          <span title="题型"><i class="ri-file-list-3-line"></i>${escapeHtml(type)}</span>
+          <span title="知识点"><i class="ri-book-open-line"></i>${escapeHtml(knowledge)}</span>
+          <span title="作答时长"><i class="ri-time-line"></i>${meta.minutes} 分钟</span>
+          <button type="button" class="ai-canvas-source" data-selected-action="locate-source" data-selection-key="${item.selectionKey}" title="在右侧定位：${escapeHtml(sourceTitle)}">
+            <i class="ri-links-line"></i><span>来源：${escapeHtml(sourceTitle)}</span>
+          </button>
+        </div>
+      </div>
       <button type="button" class="ai-canvas-minus" data-selected-action="remove" data-selection-key="${item.selectionKey}" aria-label="移出" title="移出">
         <i class="ri-subtract-line"></i>
       </button>
@@ -3080,21 +3101,33 @@ function locateCanvasQuestion(item, options = {}) {
   const { switchTabIfNeeded = false } = options;
   if (!item) return;
   const active = getActiveTab();
-  const samePaper = active && getBaseTopicId(active.topicId) === getBaseTopicId(item.topicId) && !active.isQuestionList;
+  const samePaper = !workspace.homeActive
+    && !workspace.activeBrowseFilter
+    && active
+    && getBaseTopicId(active.topicId) === getBaseTopicId(item.topicId)
+    && !active.isQuestionList;
   if (!samePaper) {
     if (!switchTabIfNeeded) return;
     workspace.homeActive = false;
     workspace.activeBrowseFilter = null;
     const existing = findTabForTopic(item.topicId);
     if (existing) workspace.activeTabId = existing.id;
-    else openTab(item.topicId);
+    else openTab(item.topicId, {
+      context: item.sourceContext || "paper",
+      title: item.sourceTitle || undefined,
+      shortTitle: item.sourceShortTitle || item.sourceTitle || undefined,
+      lessonKey: item.sourceLessonKey || item.sourceTitle || undefined
+    });
     saveWorkspace();
     renderAll();
   }
-  const node = document.querySelector(`#questionCardBoard .question-item[data-q="${item.question.id}"]`);
-  if (!node) return;
-  node.scrollIntoView({ behavior: "smooth", block: "center" });
-  flashQuestionNode(node);
+  const reveal = () => {
+    const node = document.querySelector(`#questionCardBoard .question-item[data-q="${item.question.id}"]`);
+    if (!node) return;
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
+    flashQuestionNode(node);
+  };
+  window.requestAnimationFrame(() => window.requestAnimationFrame(reveal));
 }
 
 function reorderCanvasItem(fromKey, targetKey, place = "before") {
@@ -3266,6 +3299,10 @@ function bindSelectedPreviewEvents() {
       }
       if (action === "analysis" && selectionKey) {
         toggleSelectedQuestionAnalysis(selectionKey);
+        return;
+      }
+      if (action === "locate-source" && item) {
+        locateCanvasQuestion(item, { switchTabIfNeeded: true });
         return;
       }
       if (action === "favorite" && topicId && qId) {
@@ -3745,6 +3782,34 @@ function isDefaultQuestionDraftSaved() {
     && workspace.canvasSavedSignature === defaultQuestionDraftSignature();
 }
 
+function ensureQuestionDraftCloseModal() {
+  let modal = document.querySelector("#questionDraftCloseModal");
+  if (modal) return modal;
+  document.body.insertAdjacentHTML("beforeend", `
+    <div id="questionDraftCloseModal" class="ai-create-modal" hidden>
+      <div class="ai-create-mask" data-question-draft-close-modal></div>
+      <section class="ai-create-panel ai-confirm-panel" role="dialog" aria-modal="true" aria-labelledby="questionDraftCloseTitle">
+        <header class="ai-create-head">
+          <strong id="questionDraftCloseTitle"><i class="ri-error-warning-line"></i>关闭未保存的题单？</strong>
+          <button type="button" class="ai-create-close" data-question-draft-close-modal aria-label="关闭弹窗"><i class="ri-close-line"></i></button>
+        </header>
+        <div class="ai-create-body">
+          <p class="ai-confirm-copy">题单“<strong id="questionDraftCloseName">未命名题单</strong>”尚未保存，关闭后本次编辑内容将不保留。</p>
+        </div>
+        <footer class="ai-create-foot">
+          <button type="button" class="ai-create-cancel" data-question-draft-close-modal>继续编辑</button>
+          <button type="button" class="ai-confirm-danger" id="confirmQuestionDraftClose">确认关闭</button>
+        </footer>
+      </section>
+    </div>`);
+  modal = document.querySelector("#questionDraftCloseModal");
+  modal?.querySelectorAll("[data-question-draft-close-modal]").forEach(node => {
+    node.addEventListener("click", closeQuestionDraftCloseModal);
+  });
+  modal?.querySelector("#confirmQuestionDraftClose")?.addEventListener("click", confirmQuestionDraftClose);
+  return modal;
+}
+
 function resetDefaultQuestionDraft(options = {}) {
   workspace.globalSelectedQuestions = [];
   workspace.canvasTitle = "";
@@ -3759,8 +3824,8 @@ function resetDefaultQuestionDraft(options = {}) {
 
 function openQuestionDraftCloseModal(tabId, title) {
   pendingQuestionDraftCloseId = tabId;
-  const modal = document.querySelector("#questionDraftCloseModal");
-  const name = document.querySelector("#questionDraftCloseName");
+  const modal = ensureQuestionDraftCloseModal();
+  const name = modal?.querySelector("#questionDraftCloseName");
   if (name) name.textContent = title || "未命名题单";
   if (modal) modal.hidden = false;
   window.setTimeout(() => document.querySelector("#confirmQuestionDraftClose")?.focus(), 0);
@@ -3874,6 +3939,7 @@ function renderQuestionDraftTabs() {
         <button type="button" class="question-draft-option-close" data-close-question-draft="${escapeHtml(entry.value)}" aria-label="关闭${escapeHtml(entry.label)}" title="关闭题单"><i class="ri-close-line" aria-hidden="true"></i></button>
       </div>`).join("");
     mountQuestionDraftToolbarActions(bar);
+    bindQuestionDraftCloseButtons(bar);
     return;
   }
   bar.innerHTML = `
@@ -3899,6 +3965,18 @@ function renderQuestionDraftTabs() {
       </div>
     </details>`;
   mountQuestionDraftToolbarActions(bar);
+  bindQuestionDraftCloseButtons(bar);
+}
+
+function bindQuestionDraftCloseButtons(bar) {
+  bar?.querySelectorAll("[data-close-question-draft]").forEach(button => {
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      button.closest("details")?.removeAttribute("open");
+      closeQuestionDraft(button.dataset.closeQuestionDraft);
+    });
+  });
 }
 
 function mountQuestionDraftToolbarActions(bar) {
@@ -4779,7 +4857,6 @@ function generateAiQuestionList() {
   registerMyQuestionList(newTab);
   workspace.tabs.push(newTab);
   workspace.activeTabId = newTab.id;
-  pruneOverflowTabs();
   saveWorkspace();
   closeAiCreateModal();
   if (isMobileLayout()) setMobileDrawer("selected", false);
@@ -6281,7 +6358,6 @@ function openTab(topicId, options = {}) {
   // The active question draft remains selected in the left workspace, but its
   // full-screen editor must not cover the newly opened resource.
   selectedPanelEnlarged = false;
-  pruneOverflowTabs();
   saveWorkspace();
   if (isComposeMode || isRecordMode) openDetailPage(tabPageUrl(tab));
   else {
@@ -6290,21 +6366,6 @@ function openTab(topicId, options = {}) {
   }
   showToast(`已打开「${tab.shortTitle || tab.title}」`);
   return tab;
-}
-
-// 标签页无限增长会让标题被挤成一串省略号，超出上限时回收最早打开且未激活的一个
-function pruneOverflowTabs() {
-  while (workspace.tabs.length > MAX_OPEN_TABS) {
-    const index = workspace.tabs.findIndex(tab =>
-      tab.id !== workspace.activeTabId
-      && tab.kind !== "editor"
-      && !tab.isQuestionList
-      && !tab.fromQuestionId
-      && !workspace.tabs.some(child => child.fromTabId === tab.id)
-    );
-    if (index < 0) return;
-    workspace.tabs.splice(index, 1);
-  }
 }
 
 function openPaperPicker() {

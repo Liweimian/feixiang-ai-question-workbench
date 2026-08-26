@@ -2650,6 +2650,12 @@ renderBankStats();
 if (isEmbedded) {
   document.body.classList.add("is-embedded");
   document.addEventListener("click", event => {
+    const brandHomeLink = event.target.closest(".site-header .brand-mark");
+    if (brandHomeLink) {
+      // 品牌入口始终退出工作台，由链接的 target="_top" 返回独立题库首页。
+      return;
+    }
+
     const workspaceNavLink = event.target.closest(".site-header a[href]");
     if (workspaceNavLink) {
       const url = new URL(workspaceNavLink.getAttribute("href"), location.href);
