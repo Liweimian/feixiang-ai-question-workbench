@@ -54,7 +54,10 @@
           <div id="aiSelectedContext" class="ai-selected-context">
             <p class="ai-selected-summary" id="aiSelectedSummary" hidden></p>
             <div id="aiSelectedPreview" class="ai-selected-preview"></div>
-            <div class="ai-selected-empty" id="aiSelectedEmpty"><strong>当前题单还没有题目</strong><span>请从右侧题目浏览区开始选题，选中的题目会自动加入这里</span></div>
+            <div class="ai-selected-empty" id="aiSelectedEmpty">
+              <span>这里还没有题目</span>
+              <strong>到右边点「选用」，或用「更多题源」补充</strong>
+            </div>
           </div>
           <div class="ai-canvas-studio" id="aiCanvasStudio" hidden>
             <p class="ai-canvas-save-hint" id="canvasEditorSaveHint" hidden><i class="ri-information-line"></i>完成后保存至我的资源，并清空本次组题</p>
@@ -100,9 +103,6 @@
           <footer class="ai-selected-footer" id="aiSelectedFooter">
             <div class="ai-selected-footer-actions">
               <p class="ai-canvas-stats" id="aiCanvasStats" hidden>还没有选题</p>
-              <button type="button" class="ai-selected-preview-btn" id="clearSelectedQuestions" disabled>
-                <i class="ri-delete-bin-line"></i><span>删除</span>
-              </button>
               <button type="button" class="ai-selected-preview-btn ai-canvas-wide-btn" id="scoreQuestionList" disabled hidden>
                 <i class="ri-medal-line"></i><span>赋分</span>
               </button>
