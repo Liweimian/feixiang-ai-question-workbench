@@ -1537,8 +1537,8 @@ function resolveTopicMeta(topicId, tabContext = contextName, overrides = {}) {
 }
 
 function favoriteResourceLabel(saved = false) {
-  if (saved) return `<i class="ri-star-fill"></i><span id="favoritePaperLabel">已收藏整卷</span>`;
-  return `<i class="ri-star-line"></i><span id="favoritePaperLabel">收藏整卷</span>`;
+  if (saved) return `<i class="ri-star-fill"></i><span id="favoritePaperLabel">已收藏</span>`;
+  return `<i class="ri-star-line"></i><span id="favoritePaperLabel">收藏</span>`;
 }
 
 function createTab(topicId, tabContext = contextName, overrides = {}) {
@@ -2206,7 +2206,7 @@ function applyPageMode() {
     document.querySelector("#breadcrumbContext") && (document.querySelector("#breadcrumbContext").textContent = isWorkbook ? "练习册" : "试卷");
     document.querySelector("#breadcrumbLeaf") && (document.querySelector("#breadcrumbLeaf").textContent = isWorkbook ? "章节练习" : "试卷详情");
   }
-  if (favoriteLabel) favoriteLabel.textContent = "收藏整卷";
+  if (favoriteLabel) favoriteLabel.textContent = "收藏";
   if (docTabs) docTabs.setAttribute("aria-label", "已打开的题单");
 }
 
@@ -2747,8 +2747,8 @@ function renderPaperActionButtons(tab) {
   if (batchButton) {
     batchButton.disabled = selectable.length === 0 || missingCount === 0;
     batchButton.innerHTML = missingCount === 0
-      ? `<i class="ri-checkbox-circle-fill"></i><span>已整套加入当前题单</span>`
-      : `<i class="ri-layout-left-line"></i><span>整套加入当前题单</span>`;
+      ? `<i class="ri-checkbox-circle-fill"></i><span>已加入题单</span>`
+      : `<i class="ri-layout-left-line"></i><span>加入题单</span>`;
     batchButton.title = missingCount === 0
       ? `当前整卷已加入「${destinationTitle}」`
       : `将当前整卷加入「${destinationTitle}」，自动去重`;
@@ -2762,7 +2762,7 @@ function renderPaperActionButtons(tab) {
     if (icon) icon.className = isEditableQuestionList ? "ri-save-3-line" : "ri-file-copy-2-line";
   }
   if (saveLabel) {
-    saveLabel.textContent = isEditableQuestionList ? "保存当前题单" : "复制为新题单并编辑";
+    saveLabel.textContent = isEditableQuestionList ? "保存题单" : "复制编辑";
   }
   if (copyNote) {
     copyNote.textContent = isEditableQuestionList
@@ -6313,7 +6313,7 @@ function switchTab(tabId) {
 function syncPageChromeForTab(tab) {
   const favoriteLabel = document.querySelector("#favoritePaperLabel");
   if (!tab || !favoriteLabel) return;
-  favoriteLabel.textContent = "收藏整卷";
+  favoriteLabel.textContent = "收藏";
 }
 
 function closeTab(tabId) {
