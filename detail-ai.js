@@ -2762,7 +2762,7 @@ function renderPaperActionButtons(tab) {
     if (icon) icon.className = isEditableQuestionList ? "ri-save-3-line" : "ri-file-copy-2-line";
   }
   if (saveLabel) {
-    saveLabel.textContent = isEditableQuestionList ? "保存题单" : "复制编辑";
+    saveLabel.textContent = isEditableQuestionList ? "保存题单" : "编辑";
   }
   if (copyNote) {
     copyNote.textContent = isEditableQuestionList

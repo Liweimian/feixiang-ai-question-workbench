@@ -2306,6 +2306,7 @@
 }
 
 .paper-meta-inline-actions .paper-action-menu button {
+  position: relative;
   width: 100%;
   min-height: 32px;
   justify-content: flex-start;
@@ -2313,6 +2314,35 @@
   color: #4f665a;
   border: 0;
   background: transparent;
+}
+
+.paper-meta-inline-actions .paper-action-menu button[data-help]::after {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 8px);
+  z-index: 30;
+  width: 220px;
+  padding: 8px 10px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  pointer-events: none;
+  content: attr(data-help);
+  border-radius: 6px;
+  background: rgba(35, 54, 45, .94);
+  box-shadow: 0 6px 18px rgba(31, 65, 50, .18);
+  opacity: 0;
+  transform: translate(4px, -50%);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.paper-meta-inline-actions .paper-action-menu button[data-help]:hover::after,
+.paper-meta-inline-actions .paper-action-menu button[data-help]:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%);
 }
 
 .paper-meta-inline-actions .paper-action-menu button:hover {
