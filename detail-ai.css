@@ -2282,14 +2282,18 @@
 
 .paper-action-more {
   position: relative;
+  display: inline-flex;
 }
 
 .paper-action-menu {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
+  left: 0;
   z-index: 20;
-  min-width: 238px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 5px;
   border: 1px solid #d8e5de;
   border-radius: 8px;
@@ -2305,6 +2309,7 @@
   width: 100%;
   min-height: 32px;
   justify-content: flex-start;
+  white-space: nowrap;
   color: #4f665a;
   border: 0;
   background: transparent;
