@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
     <link rel="stylesheet" href="./detail.css" />
-    <link rel="stylesheet" href="./detail-ai.css?v=20260826workspacetabs78" />
+  <link rel="stylesheet" href="./detail-ai.css?v=20260826workspacetabs102" />
     <link rel="stylesheet" href="./theme-workspace-v50.css?v=20260821workspace4" />
     <style id="ai-panel-legacy-toggle-hide">
       #aiPanelExpand.legacy-hidden,
@@ -35,7 +35,7 @@
           <i class="ri-layout-masonry-line"></i><span>展开正在组题</span>
         </button>
         <nav class="breadcrumb" aria-label="当前位置">
-          <span>题目浏览区：<a href="./index.html">首页</a></span>
+          <span>题目浏览区：<a href="./index.html">题库首页</a></span>
           <i class="ri-arrow-right-s-line"></i>
           <span id="breadcrumbContext">试卷</span>
           <i class="ri-arrow-right-s-line"></i>
@@ -44,11 +44,7 @@
         <button type="button" class="panel-action-btn panel-action-btn-compact" id="topbarCollapseCanvas" hidden aria-label="收起" title="收起">
           <i class="ri-arrow-left-double-line"></i><span>收起</span>
         </button>
-        <button type="button" class="doc-tab-ai" id="docTabAiAssistant" title="从 AI、我的内容及其他题库入口补充题目" aria-label="更多题源" aria-expanded="false">
-          <i class="ri-add-circle-line" aria-hidden="true"></i>
-          <span>更多题源</span>
-        </button>
-        <button type="button" class="panel-action-btn panel-action-btn-compact browse-panel-collapse" id="collapseBrowsePanel" aria-label="收起题目浏览区" title="收起题目浏览区">
+        <button type="button" class="panel-action-btn panel-action-btn-compact browse-panel-collapse" id="collapseBrowsePanel" hidden aria-label="收起题目浏览区" title="收起题目浏览区">
           <span>收起</span><i class="ri-arrow-right-double-line"></i>
         </button>
         <button id="mobileDirectory" class="mobile-directory" type="button" hidden><i class="ri-list-unordered"></i>目录</button>
@@ -72,6 +68,7 @@
             </div>
             <div class="ai-section-head-actions">
               <button type="button" id="toggleSelectedAnswers" hidden>显示答案</button>
+              <button type="button" class="panel-action-btn panel-action-btn-compact panel-action-new-draft" data-new-question-draft aria-label="新建题单" title="新建题单"><i class="ri-add-line"></i></button>
               <button type="button" class="panel-action-btn panel-action-btn-compact" id="enlargeSelectedPanel" aria-pressed="false">展开编辑</button>
               <button type="button" class="panel-action-btn panel-action-btn-compact" id="collapseSelectedPanel" aria-label="收起组题编辑区" title="收起组题编辑区">
                 <i class="ri-arrow-left-double-line"></i><span>收起</span>
@@ -82,7 +79,10 @@
           <div id="aiSelectedContext" class="ai-selected-context">
             <p class="ai-selected-summary" id="aiSelectedSummary" hidden></p>
             <div id="aiSelectedPreview" class="ai-selected-preview"></div>
-            <div class="ai-selected-empty" id="aiSelectedEmpty"><strong>开始组题</strong><span>从右侧选择题目，直接组成一份练习，无需试题篮</span><button type="button" data-open-add-questions><i class="ri-add-line"></i>添加题目</button></div>
+            <div class="ai-selected-empty" id="aiSelectedEmpty">
+              <span>这里还没有题目</span>
+              <strong>到右边点「选用」，或用「更多题源」补充</strong>
+            </div>
           </div>
           <div class="ai-canvas-studio" id="aiCanvasStudio" hidden>
             <div class="ai-canvas-studio-toolbar">
@@ -133,14 +133,11 @@
               <button type="button" class="ai-selected-preview-btn ai-canvas-wide-btn" id="scoreQuestionList" disabled hidden>
                 <i class="ri-medal-line"></i><span>赋分</span>
               </button>
-              <button type="button" class="ai-selected-preview-btn ai-canvas-wide-btn ai-canvas-footer-add" data-open-add-questions disabled hidden>
-                <i class="ri-add-line"></i><span>添加题目</span>
-              </button>
               <button type="button" class="ai-selected-preview-btn" id="previewQuestionList" disabled hidden>
                 <i class="ri-printer-line"></i><span id="previewQuestionListLabel">预览</span>
               </button>
               <button type="button" class="ai-selected-create" id="createQuestionList" disabled>
-                <i class="ri-checkbox-circle-line"></i><span id="createQuestionListLabel">完成组题</span>
+                <i class="ri-save-3-line"></i><span id="createQuestionListLabel">保存</span>
               </button>
               <button type="button" class="ai-selected-preview-btn ai-canvas-wide-btn" data-canvas-action="assign" disabled hidden>
                 <i class="ri-send-plane-line"></i><span>布置</span>
@@ -155,15 +152,6 @@
           </footer>
         </div>
       </aside>
-
-      <div class="workspace-divider-controls" id="workspaceDividerControls" aria-label="左右工作区折叠控制">
-        <button type="button" id="dividerToggleSelected" aria-label="收起组题编辑区" title="收起组题编辑区">
-          <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
-        </button>
-        <button type="button" id="dividerToggleBrowse" aria-label="收起题目浏览区" title="收起题目浏览区">
-          <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
-        </button>
-      </div>
 
       <aside class="browse-panel-rail" id="browsePanelRail" aria-label="展开题目浏览区" hidden>
         <button type="button" aria-label="展开题目浏览区" title="展开题目浏览区">
@@ -206,7 +194,7 @@
 
           <section class="doc-workspace" aria-label="试卷预览">
             <div class="home-view" id="homeView" hidden>
-              <iframe id="homeFrame" class="home-view-frame" title="题库首页" src="about:blank"></iframe>
+              <iframe id="homeFrame" class="home-view-frame" title="首页" src="about:blank"></iframe>
             </div>
             <section class="ai-assistant-panel ai-assistant-workspace-view course-center" id="aiAssistantPanel" aria-label="更多题源" hidden>
               <div class="course-center-scroll">
@@ -348,6 +336,28 @@
     <div id="directoryMask" class="directory-mask" hidden></div>
     <div id="panelMask" class="panel-mask" hidden></div>
 
+    <div id="composeSpecModal" class="compose-spec-modal" hidden>
+      <div class="compose-spec-mask" data-compose-spec-close></div>
+      <section class="compose-spec-panel" role="dialog" aria-modal="true" aria-labelledby="composeSpecTitle">
+        <header>
+          <div><span class="compose-spec-pdf-icon"><i class="ri-file-pdf-2-fill"></i></span><div><strong id="composeSpecTitle">命题说明书.pdf</strong><small>AI 命题依据与质量验收报告</small></div></div>
+          <div><button type="button" class="paper-action-ghost" id="composeSpecDownload"><i class="ri-download-2-line"></i>下载 PDF</button><button type="button" class="compose-spec-close" data-compose-spec-close aria-label="关闭"><i class="ri-close-line"></i></button></div>
+        </header>
+        <div class="compose-spec-scroll">
+          <article class="compose-spec-page">
+            <p class="compose-spec-kicker">飞象 AI 题库 · 命题质量报告</p>
+            <h1>七年级上学期数学期末试卷<br />命题说明书</h1>
+            <p class="compose-spec-meta">2026-2027 学年 · 北京市朝阳区 · 数学</p>
+            <section><h2>一、命题目标</h2><p>依据课程标准与学情要求，覆盖正负数、数轴及实际应用等核心内容，兼顾基础理解、迁移应用与综合表达。</p></section>
+            <section><h2>二、试卷结构</h2><div class="compose-spec-summary"><span><b>7</b>道题</span><span><b>45</b>分钟</span><span><b>中等</b>难度</span><span><b>3</b>类题型</span></div></section>
+            <section><h2>三、双向细目表</h2><table><thead><tr><th>题型</th><th>数量</th><th>重点知识</th><th>能力层级</th></tr></thead><tbody><tr><td>选择题</td><td>4</td><td>正负数、相反意义的量</td><td>理解 / 应用</td></tr><tr><td>填空题</td><td>2</td><td>数轴、水位变化</td><td>应用</td></tr><tr><td>解答题</td><td>1</td><td>质量偏差</td><td>综合</td></tr></tbody></table></section>
+            <section><h2>四、质量验收结论</h2><p>题目表述清晰，答案一致性校验通过；题型、难度和知识覆盖分布合理，未发现明显重复或超纲内容。</p></section>
+            <footer>本报告由飞象 AI 题库生成，请教师审核后使用</footer>
+          </article>
+        </div>
+      </section>
+    </div>
+
     <div id="aiCreateModal" class="ai-create-modal" hidden>
       <div class="ai-create-mask" data-ai-create-close></div>
       <div class="ai-create-panel" role="dialog" aria-modal="true" aria-labelledby="aiCreateTitle">
@@ -442,6 +452,6 @@
     </aside>
 
     <div id="toast" class="toast" role="status"></div>
-    <script src="./detail-ai.js?v=20260826workspacetabs87"></script>
+  <script src="./detail-ai.js?v=20260826workspacetabs109"></script>
   </body>
 </html>

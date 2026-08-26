@@ -171,6 +171,8 @@ let selectedPreviewTypeFilter = null;
 let selectedPanelEnlarged = false;
 let selectedShowAnswers = false;
 let aiAssistantOpen = false;
+// 题目浏览区在「更多题源」中收起时，记住应恢复的右侧视图。
+let collapsedAssistantView = false;
 let aiAssistantTabOpen = false;
 let aiAssistantMessages = [];
 let aiAssistantAttachment = null;
@@ -936,7 +938,7 @@ function courseCenterEmptyHtml(view) {
       ? { icon: "ri-download-cloud-2-line", title: "还没有下载记录", note: "下载过的题单和试卷会显示在这里。" }
       : view === "recordings"
         ? { icon: "ri-scan-2-line", title: "还没有录题记录", note: "上传图片、PDF 或 Word，开始第一次 AI 录题。" }
-        : { icon: "ri-folder-open-line", title: "还没有我的创建", note: "完成组题或保存编辑副本后，会显示在这里。" };
+        : { icon: "ri-folder-open-line", title: "还没有我的创建", note: "保存题单或编辑副本后，会显示在这里。" };
   return `<div class="course-center-empty"><i class="${copy.icon}"></i><strong>${copy.title}</strong><span>${copy.note}</span></div>`;
 }
 
@@ -2017,7 +2019,7 @@ function renderDetailBreadcrumb(tab, displayTitle) {
   }
   if (tab.myResourceId || tab.isQuestionList) {
     trail.innerHTML = `
-      <span>题目浏览区：<a href="./index.html">首页</a></span>
+      <span>题目浏览区：<a href="./index.html">题库首页</a></span>
       <i class="ri-arrow-right-s-line"></i>
       <button type="button" class="breadcrumb-resource-link" data-open-my-resources>我的</button>
       <i class="ri-arrow-right-s-line"></i>
@@ -2029,7 +2031,7 @@ function renderDetailBreadcrumb(tab, displayTitle) {
     ? "练习详情"
     : tabIsSpecial(tab) ? "专题详情" : tab.fromQuestionId ? "题目详情" : "试卷详情";
   trail.innerHTML = `
-    <span>题目浏览区：<a href="./index.html">首页</a></span>
+    <span>题目浏览区：<a href="./index.html">题库首页</a></span>
     <i class="ri-arrow-right-s-line"></i>
     <span id="breadcrumbContext">${escapeHtml(contextLabel)}</span>
     <i class="ri-arrow-right-s-line"></i>
@@ -2280,6 +2282,9 @@ function ensureComposeTab() {
   const title = composePaperTitle(composePrompt);
   const existing = workspace.tabs.find(tab => tab.composeSession && tab.meta?.aiPrompt === composePrompt);
   if (existing) {
+    existing.title = "AI组题";
+    existing.shortTitle = "AI组题";
+    existing.meta = { ...(existing.meta || {}), title: "AI组题", shortTitle: "AI组题", paperTitle: title };
     workspace.activeTabId = existing.id;
     saveWorkspace();
     return existing;
@@ -2300,11 +2305,12 @@ function ensureComposeTab() {
     id: `tab-${tabCounter}`,
     topicId: `compose-${Date.now()}`,
     context: "paper",
-    title,
-    shortTitle: title.length > 12 ? `${title.slice(0, 12)}…` : title,
+    title: "AI组题",
+    shortTitle: "AI组题",
     meta: {
-      title,
-      shortTitle: title,
+      title: "AI组题",
+      shortTitle: "AI组题",
+      paperTitle: title,
       source: "AI 组卷",
       difficulty: "中等",
       questionCount: questions.length,
@@ -2341,12 +2347,44 @@ function applyComposeMode() {
   const title = composePaperTitle(composePrompt);
   const trail = document.querySelector(".ai-detail-topbar .breadcrumb");
   if (trail) {
-    trail.innerHTML = `<span>题目浏览区：<a href="./index.html">首页</a></span><i class="ri-arrow-right-s-line"></i><span>更多题源</span><i class="ri-arrow-right-s-line"></i><strong>AI组题</strong>`;
+    trail.innerHTML = `<span>题目浏览区：<a href="./index.html">题库首页</a></span><i class="ri-arrow-right-s-line"></i><span>更多题源</span><i class="ri-arrow-right-s-line"></i><strong>AI组题</strong>`;
   }
   document.title = `${title} · AI组题`;
   renderComposeThread();
+  startComposeFlow();
   aiAssistantOpen = false;
   syncAiAssistantChrome();
+}
+
+function ensureComposeDraft() {
+  if (!isComposeMode) return null;
+  const sourceTab = getActiveTab();
+  if (!sourceTab?.composeSession) return null;
+  const existing = workspace.tabs.find(tab => tab.kind === "editor"
+    && tab.editorSource === "ai-compose"
+    && tab.sourceTabId === sourceTab.id);
+  if (existing) {
+    workspace.activeQuestionDraftTabId = existing.id;
+    workspace.addQuestionTargetTabId = existing.id;
+    return existing;
+  }
+  const items = (sourceTab.questions || []).map(question => buildGlobalSelectedEntry(sourceTab, question));
+  const draft = createEditorTab({
+    editorSource: "ai-compose",
+    sourceTab,
+    title: composePaperTitle(composePrompt),
+    items,
+    expand: false,
+    preserveRight: true
+  });
+  if (draft?.editorDraft) {
+    draft.editorDraft.aiPrompt = composePrompt;
+    draft.editorDraft.commandSpecReady = true;
+    draft.meta = { ...(draft.meta || {}), source: "AI组题", aiPrompt: composePrompt };
+    syncEditorTabTitle(draft);
+    saveWorkspace();
+  }
+  return draft;
 }
 
 function recordSourceHtml() {
@@ -2399,7 +2437,7 @@ function applyRecordMode() {
   if (resultHead) resultHead.hidden = false;
   const trail = document.querySelector(".ai-detail-topbar .breadcrumb");
   if (trail) {
-    trail.innerHTML = `<span>题目浏览区：<a href="./index.html">首页</a></span><i class="ri-arrow-right-s-line"></i><span>更多题源</span><i class="ri-arrow-right-s-line"></i><strong>AI录题</strong>`;
+    trail.innerHTML = `<span>题目浏览区：<a href="./index.html">题库首页</a></span><i class="ri-arrow-right-s-line"></i><span>更多题源</span><i class="ri-arrow-right-s-line"></i><strong>AI录题</strong>`;
   }
   document.title = `${recordFileName} · AI录题`;
   aiAssistantOpen = false;
@@ -2416,36 +2454,94 @@ function showRecordResults() {
   window.setTimeout(() => preview?.classList.remove("is-record-revealed"), 520);
 }
 
+let composeFlowStage = 0;
+let composeFlowTimer = null;
+
+function composeStageClass(index) {
+  if (index < composeFlowStage) return "is-complete is-open";
+  if (index === composeFlowStage) return "is-running is-open";
+  return "is-pending";
+}
+
+function composeStageIcon(index) {
+  if (index < composeFlowStage) return "ri-checkbox-circle-fill";
+  if (index === composeFlowStage) return "ri-loader-4-line";
+  return "ri-checkbox-blank-circle-line";
+}
+
+function composeDetailTableHtml() {
+  const rows = [
+    ["1", "选择题", "正负数的意义", "较易", "Ⅱ级（理解）"], ["2", "选择题", "相反意义的量", "较易", "Ⅱ级（理解）"],
+    ["3", "选择题", "负数的识别", "中等", "Ⅲ级（应用）"], ["4", "选择题", "温差的计算", "较易", "Ⅲ级（应用）"],
+    ["5", "填空题", "数轴与点的距离", "中等", "Ⅲ级（应用）"], ["6", "填空题", "水位变化与正负数", "中等", "Ⅲ级（应用）"],
+    ["7", "解答题", "标准质量与偏差", "较难", "Ⅳ级（综合）"]
+  ];
+  return `<div class="ai-compose-table-wrap"><table class="ai-compose-table"><thead><tr><th>题号</th><th>题型</th><th>知识点</th><th>难度</th><th>能力层级</th></tr></thead><tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+
+function composeValidationTableHtml() {
+  const reasons = ["通过生活方向情境考查正负数意义，兼顾概念理解与表达规范。", "以相反意义的量为核心，检验学生对抽象数学语言的迁移能力。", "通过数的分类辨析夯实基础，为后续数轴与运算学习建立支点。", "将温差计算置于真实情境中，考查运算能力和应用意识。", "结合数轴距离与水位变化，形成从直观到建模的能力梯度。", "综合题聚焦质量偏差，检验信息提取、计算与规范表达。"];
+  return `<div class="ai-compose-table-wrap"><table class="ai-compose-table is-reason"><thead><tr><th>题号</th><th>选题原因</th></tr></thead><tbody>${reasons.map((reason, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(reason)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+function composeOutputFilesHtml() {
+  return `<div class="ai-compose-output-files"><button type="button" data-compose-output="paper"><span class="is-word"><i class="ri-file-list-3-line"></i></span><span><strong>试卷</strong><small>已生成到组题编辑区</small></span><i class="ri-arrow-left-line"></i></button><button type="button" data-compose-output="spec"><span class="is-pdf"><i class="ri-file-pdf-2-fill"></i></span><span><strong>命题说明书</strong><small>PDF · 命题依据与质量验收</small></span><i class="ri-eye-line"></i></button></div>`;
+}
+
+function openComposeGeneratedPaper(showFeedback = true) {
+  const draft = ensureComposeDraft();
+  if (!draft) return;
+  const root = document.querySelector("#aiWorkspace");
+  root?.classList.remove("compose-draft-open");
+  root?.classList.add("compose-paper-open");
+  activateEditorTab(draft, { expand: true });
+  if (showFeedback) showToast("已定位到左侧生成的试卷");
+}
+
+function revealComposeDraftPanel() {
+  const draft = ensureComposeDraft();
+  if (!draft) return;
+  const root = document.querySelector("#aiWorkspace");
+  root?.classList.remove("compose-paper-open");
+  root?.classList.add("compose-draft-open");
+  rightPanelSectionState.browseCollapsed = false;
+  activateEditorTab(draft, { expand: false, preserveRight: true });
+}
+
+function composeStepSection(index, title, body) {
+  const statusText = index < composeFlowStage ? "已完成" : (index === composeFlowStage ? "生成中" : "等待中");
+  return `<section class="ai-compose-step ${composeStageClass(index)}"><button type="button" data-compose-step><i class="${composeStageIcon(index)}"></i><span>${escapeHtml(title)}</span><em>${statusText}</em><i class="ri-arrow-${index <= composeFlowStage ? "down" : "right"}-s-line"></i></button><div class="ai-compose-step-body"${index <= composeFlowStage ? "" : " hidden"}>${body}</div></section>`;
+}
+
 function composeStepHtml() {
   const title = composePaperTitle(composePrompt);
+  const sections = [
+    ["命题参数定义与模型构建", `<div class="ai-compose-facts"><p><b>场景</b>2026-2027学年北京市朝阳区七年级上学期期末考试 · 数学</p><p><b>题目结构</b>选择题 4 题 · 填空题 2 题 · 解答题 1 题</p><p><b>目标</b>45 分钟 · 中等难度 · 覆盖理解、应用与综合能力</p></div>`],
+    ["题库检索与初筛", `<p>已从区级试卷、校考卷与同步教辅中完成语义检索、去重和初筛。</p><div class="ai-compose-source-list"><a class="ai-compose-source-link" href="./detail-ai.html?topic=t2&context=paper"><i class="ri-link"></i>${escapeHtml(title)}</a><a class="ai-compose-source-link" href="./detail-ai.html?topic=t59&context=paper"><i class="ri-link"></i>朝阳区七年级上学期月考试卷</a><a class="ai-compose-source-link" href="./detail-ai.html?topic=t71&context=paper"><i class="ri-link"></i>北京四中七年级上学期期中试卷</a></div>`],
+    ["命题双向细目表", composeDetailTableHtml()], ["试题多维校验", composeValidationTableHtml()],
+    ["试题结构平衡性复核", `<div class="ai-compose-review-grid"><article><span>难度分布</span><strong>较易 43% · 中等 43% · 较难 14%</strong></article><article><span>题型分布</span><strong>选择 4 · 填空 2 · 解答 1</strong></article><article><span>知识覆盖</span><strong>正负数 · 数轴 · 实际应用</strong></article><article><span>预计用时</span><strong>45 分钟</strong></article></div>`],
+    ["AI 试题模拟与质量验收", `<p>已完成逐题作答模拟、答案一致性检查、表述歧义检测与重复度检查。</p><div class="ai-compose-quality"><span><i class="ri-shield-check-line"></i><b>答案一致性</b><strong>100%</strong></span><span><i class="ri-scales-3-line"></i><b>结构合理性</b><strong>通过</strong></span><span><i class="ri-focus-2-line"></i><b>重复度</b><strong>低</strong></span></div>`],
+    ["标准化文档输出", `<p>题单已写入左侧组题编辑区，并同步生成可下载文档与命题说明书。</p>${composeOutputFilesHtml()}`]
+  ];
   return `
     <div class="ai-compose-job">
-      <div class="ai-compose-job-head"><i class="ri-sparkling-2-line"></i>AI作业星</div>
-      <section class="ai-compose-step is-open">
-        <button type="button" data-compose-step>
-          <i class="ri-checkbox-circle-fill"></i>
-          <span>命题参数定义与模型构建</span>
-          <i class="ri-arrow-down-s-line"></i>
-        </button>
-        <div class="ai-compose-step-body">
-          <p>场景：2026-2027学年北京市朝阳区七年级上学期期末检测，数学，闭卷 90 分钟。</p>
-          <p>结构：选择题 4 题、填空题 2 题、解答题 1 题，覆盖正负数、数轴与实际应用。</p>
-          <p>来源风格：区级试题 + 全品学练考 / 多维导学案同步题。</p>
-        </div>
-      </section>
-      <section class="ai-compose-step is-open">
-        <button type="button" data-compose-step>
-          <i class="ri-checkbox-circle-fill"></i>
-          <span>题库检索与初筛</span>
-          <i class="ri-arrow-down-s-line"></i>
-        </button>
-        <div class="ai-compose-step-body">
-          <p>已从朝阳区期末卷和同步教辅中初筛匹配题目，并完成去重。</p>
-          <a class="ai-compose-source-link" href="./detail-ai.html?topic=t2&context=paper">${escapeHtml(title)}</a>
-          <a class="ai-compose-source-link" href="./detail-ai.html?topic=t59&context=paper">2026-2027学年北京市朝阳区七年级（上）10月月考数学试卷</a>
-        </div>
-      </section>
+      <div class="ai-compose-job-head"><span><i class="ri-sparkling-2-line"></i></span><div><strong>AI 命题流程</strong><small>生成过程与命题依据</small></div><em>${Math.min(composeFlowStage, sections.length)}/${sections.length}</em></div>
+      <div class="ai-compose-timeline">${sections.map((section, index) => composeStepSection(index, section[0], section[1])).join("")}</div>
     </div>`;
+}
+
+function startComposeFlow() {
+  if (!isComposeMode || composeFlowTimer || composeFlowStage >= 7) return;
+  composeFlowTimer = window.setInterval(() => {
+    composeFlowStage += 1;
+    renderComposeThread(composeFollowups);
+    if (composeFlowStage >= 7) {
+      window.clearInterval(composeFlowTimer);
+      composeFlowTimer = null;
+      revealComposeDraftPanel();
+      showToast("AI 组题完成，已打开左侧题单");
+    }
+  }, 520);
 }
 
 function renderComposeThread(extraMessages = []) {
@@ -2473,6 +2569,13 @@ function bindComposeControls() {
     }
   });
   document.querySelector("#aiComposeThread")?.addEventListener("click", event => {
+    const output = event.target.closest("[data-compose-output]");
+    if (output) {
+      const type = output.dataset.composeOutput;
+      if (type === "spec") openComposeSpecModal();
+      else if (type === "paper") openComposeGeneratedPaper();
+      return;
+    }
     const toggle = event.target.closest("[data-compose-step]");
     if (!toggle) return;
     const step = toggle.closest(".ai-compose-step");
@@ -2483,6 +2586,8 @@ function bindComposeControls() {
     body.hidden = !open;
     if (arrow) arrow.className = open ? "ri-arrow-down-s-line" : "ri-arrow-right-s-line";
   });
+  document.querySelectorAll("[data-compose-spec-close]").forEach(node => node.addEventListener("click", closeComposeSpecModal));
+  document.querySelector("#composeSpecDownload")?.addEventListener("click", () => showToast("正在下载命题说明书 PDF"));
   document.querySelector("#aiComposeEdit")?.addEventListener("click", () => {
     showToast("已进入编辑，可从试卷中继续选用题目");
   });
@@ -2509,6 +2614,16 @@ function bindComposeControls() {
       }
     });
   });
+}
+
+function openComposeSpecModal() {
+  const modal = document.querySelector("#composeSpecModal");
+  if (modal) modal.hidden = false;
+}
+
+function closeComposeSpecModal() {
+  const modal = document.querySelector("#composeSpecModal");
+  if (modal) modal.hidden = true;
 }
 
 function bindRecordControls() {
@@ -2632,12 +2747,12 @@ function renderPaperActionButtons(tab) {
   if (saveButton) {
     saveButton.disabled = selectable.length === 0;
     saveButton.classList.remove("is-saved");
-    saveButton.title = isEditableQuestionList ? "完成当前题单的组题" : "复制整卷到左侧新题单并展开编辑，原卷不变";
+    saveButton.title = isEditableQuestionList ? "保存当前题单" : "复制整卷到左侧新题单并展开编辑，原卷不变";
     const icon = saveButton.querySelector("i");
-    if (icon) icon.className = isEditableQuestionList ? "ri-checkbox-circle-line" : "ri-file-copy-2-line";
+    if (icon) icon.className = isEditableQuestionList ? "ri-save-3-line" : "ri-file-copy-2-line";
   }
   if (saveLabel) {
-    saveLabel.textContent = isEditableQuestionList ? "完成组题" : "复制并编辑";
+    saveLabel.textContent = isEditableQuestionList ? "保存" : "复制并编辑";
   }
   if (copyNote) {
     copyNote.textContent = isEditableQuestionList
@@ -2702,11 +2817,11 @@ function renderSelectedFooter(count) {
     button.disabled = count === 0 || paperEditSaved;
     button.classList.toggle("is-saved", paperEditSaved);
   }
-  if (label) label.textContent = "完成组题";
+  if (label) label.textContent = "保存";
   if (button) {
-    button.title = activeDraft ? "保存到我的资源" : "完成组题并存入我的-我的创建";
+    button.title = activeDraft ? "保存到我的创建" : "保存到我的-我的创建";
     const icon = button.querySelector("i");
-    if (icon) icon.className = "ri-checkbox-circle-line";
+    if (icon) icon.className = "ri-save-3-line";
   }
   applyCanvasTitleToUi();
   bindCanvasTitleEditor(document.querySelector("#canvasHeadTitle"));
@@ -2783,18 +2898,10 @@ function syncSelectedPanelChrome() {
   const footer = document.querySelector("#aiSelectedFooter");
   const collapseBtn = document.querySelector("#collapseSelectedPanel");
   const panelBody = document.querySelector(".ai-selected-body");
-  const headActions = document.querySelector("#selectedSectionHead .ai-section-head-actions");
-  const footerActions = footer?.querySelector(".ai-selected-footer-actions");
   if (footer && panelBody) {
-    if (selectedPanelEnlarged && headActions && collapseBtn) {
-      headActions.insertBefore(footer, collapseBtn);
-    } else {
-      panelBody.appendChild(footer);
-    }
+    panelBody.appendChild(footer);
   }
-  if (!selectedPanelEnlarged && enlargeBtn && footerActions) {
-    footerActions.insertBefore(enlargeBtn, footerActions.firstElementChild);
-  }
+  mountQuestionDraftToolbarActions(document.querySelector("#questionDraftTabs"));
 }
 
 function setSelectedPanelEnlarged(next) {
@@ -2814,6 +2921,11 @@ function setSelectedPanelEnlarged(next) {
 }
 
 function restoreSplitWorkspaceView() {
+  const root = document.querySelector("#aiWorkspace");
+  if (isComposeMode) {
+    root?.classList.remove("compose-paper-open");
+    root?.classList.add("compose-draft-open");
+  }
   rightPanelSectionState.selectedCollapsed = false;
   rightPanelSectionState.browseCollapsed = false;
   setCanvasManuallyCollapsed(false);
@@ -3231,8 +3343,7 @@ function renderCanvasInfo(item) {
   if (!wrap) return;
   if (!item) {
     wrap.innerHTML = isWholePaperEditActive()
-      ? `<p class="ai-canvas-info-empty">当前草稿还没有题目。</p>
-         <button type="button" class="ai-canvas-info-primary" data-editor-add-question><i class="ri-add-line"></i> 添加一道题</button>`
+      ? `<p class="ai-canvas-info-empty">当前草稿还没有题目。</p>`
       : `<p class="ai-canvas-info-empty">选用题目后，这里会显示答案、解析和知识点。</p>`;
     return;
   }
@@ -3445,7 +3556,10 @@ function renderCanvasStudio() {
   if (paper) {
     paper.innerHTML = items.length
       ? items.map((item, index) => canvasPaperItemHtml(item, index)).join("")
-      : `<p class="ai-canvas-info-empty">画布还是空的，先在右侧选用题目。</p>`;
+      : `<div class="ai-canvas-info-empty ai-canvas-paper-empty">
+          <span>画布还是空的，现在去右侧选题</span>
+          <button type="button" data-open-add-questions><i class="ri-add-line" aria-hidden="true"></i>添加题目</button>
+        </div>`;
   }
   renderCanvasInfo(items.find(item => item.selectionKey === canvasFocusKey) || null);
   bindCanvasStudioEvents();
@@ -3586,12 +3700,15 @@ function renderSelectedContext() {
   const empty = document.querySelector("#aiSelectedEmpty");
   if (!wrap || !preview) return;
   const selected = getGlobalSelectedQuestions();
+  const fixedAdd = document.querySelector(".ai-selected-fixed-add");
+  if (fixedAdd) fixedAdd.hidden = selected.length === 0;
   renderQuestionDraftTabs();
   const visible = selectedPreviewTypeFilter
     ? selected.filter(item => matchesSelectedType(item.question.type, selectedPreviewTypeFilter))
     : selected;
   wrap.classList.toggle("has-selection", selected.length > 0);
   document.querySelector("#aiSelectedPanel")?.classList.toggle("has-selection", selected.length > 0);
+  if (selected.length === 0) wrap.scrollTop = 0;
   renderSelectedFooter(selected.length);
   syncSelectedPanelChrome();
   if (summary) {
@@ -3680,7 +3797,12 @@ function closeQuestionDraft(tabId, options = {}) {
       workspace.canvasDraftClosed = false;
     }
     saveWorkspace();
-    renderAll();
+    if (hasQuestions) renderAll();
+    else {
+      renderSelectedContext();
+      renderQuestionCards();
+      renderCourseCenter();
+    }
     applySelectedPanelState();
     return;
   }
@@ -3707,7 +3829,12 @@ function closeQuestionDraft(tabId, options = {}) {
     workspace.addQuestionTargetTabId = null;
   }
   saveWorkspace();
-  renderAll();
+  if (hasQuestions) renderAll();
+  else {
+    renderSelectedContext();
+    renderQuestionCards();
+    renderCourseCenter();
+  }
   applySelectedPanelState();
 }
 
@@ -3717,52 +3844,75 @@ function renderQuestionDraftTabs() {
   const drafts = (workspace.tabs || []).filter(tab => tab.kind === "editor" && tab.editorDraft);
   if (!drafts.length && workspace.canvasDraftClosed) workspace.canvasDraftClosed = false;
   const showDefault = !workspace.canvasDraftClosed;
-  const defaultActive = showDefault && !workspace.activeQuestionDraftTabId;
-  const defaultSaved = isDefaultQuestionDraftSaved();
+  const entries = [
+    ...(showDefault ? [{
+      value: "default",
+      label: questionDraftTabLabel(),
+      count: workspace.globalSelectedQuestions?.length || 0,
+      saved: isDefaultQuestionDraftSaved()
+    }] : []),
+    ...drafts.map(tab => ({
+      value: tab.id,
+      label: questionDraftTabLabel(tab),
+      count: tab.editorDraft.questions?.length || 0,
+      saved: !tab.editorDraft.dirty
+    }))
+  ];
+  const activeValue = workspace.activeQuestionDraftTabId || "default";
+  const activeEntry = entries.find(entry => entry.value === activeValue) || entries[0];
+  bar.hidden = false;
+  bar.classList.toggle("is-flat", selectedPanelEnlarged);
+  if (selectedPanelEnlarged) {
+    bar.innerHTML = entries.map(entry => `
+      <div class="question-draft-flat-tab ${entry.value === activeValue ? "active" : ""}">
+        <button type="button" class="question-draft-flat-main" ${entry.value === "default" ? "data-question-draft-default" : `data-question-draft-id="${escapeHtml(entry.value)}"`} title="${escapeHtml(entry.label)}">
+          <i class="ri-file-edit-line" aria-hidden="true"></i>
+          <span>${escapeHtml(entry.label)}</span>
+          ${!entry.saved ? `<em aria-label="未保存" title="未保存"></em>` : ""}
+          <b>${entry.count}</b>
+        </button>
+        <button type="button" class="question-draft-option-close" data-close-question-draft="${escapeHtml(entry.value)}" aria-label="关闭${escapeHtml(entry.label)}" title="关闭题单"><i class="ri-close-line" aria-hidden="true"></i></button>
+      </div>`).join("");
+    mountQuestionDraftToolbarActions(bar);
+    return;
+  }
   bar.innerHTML = `
-    <div class="question-draft-tabs-scroll">
-      ${showDefault ? `<button type="button" class="question-draft-tab ${defaultActive ? "active" : ""}" data-question-draft-default title="${escapeHtml(questionDraftTabLabel())}">
-        <i class="ri-file-edit-line"></i><span>${escapeHtml(questionDraftTabLabel())}</span>
-        ${defaultSaved ? `<i class="ri-check-line question-draft-saved" aria-label="已保存"></i>` : `<em aria-label="未保存"></em>`}
-        ${workspace.globalSelectedQuestions?.length ? `<b>${workspace.globalSelectedQuestions.length}</b>` : ""}
-        <i class="ri-close-line question-draft-close" data-close-question-draft="default" aria-label="关闭题单"></i>
-      </button>` : ""}
-      ${drafts.map(tab => `
-        <button type="button" class="question-draft-tab ${workspace.activeQuestionDraftTabId === tab.id ? "active" : ""}" data-question-draft-id="${tab.id}" title="${escapeHtml(questionDraftTabLabel(tab))}">
-          <i class="ri-file-edit-line"></i><span>${escapeHtml(questionDraftTabLabel(tab))}</span>
-          ${tab.editorDraft.dirty ? `<em aria-label="未保存"></em>` : `<i class="ri-check-line question-draft-saved" aria-label="已保存"></i>`}
-          <b>${tab.editorDraft.questions?.length || 0}</b>
-          <i class="ri-close-line question-draft-close" data-close-question-draft="${tab.id}" aria-label="关闭题单"></i>
-        </button>`).join("")}
-    </div>
-    <button type="button" class="question-draft-add" data-new-question-draft title="新建空白题单" aria-label="新建空白题单"><i class="ri-add-line"></i></button>`;
-  bar.onclick = event => {
-    const closeDraft = event.target.closest("[data-close-question-draft]");
-    if (closeDraft) {
-      event.preventDefault();
-      event.stopPropagation();
-      closeQuestionDraft(closeDraft.dataset.closeQuestionDraft);
-      return;
-    }
-    if (event.target.closest("[data-new-question-draft]")) {
-      event.preventDefault();
-      event.stopPropagation();
-      createBlankQuestionDraft();
-      return;
-    }
-    if (event.target.closest("[data-question-draft-default]")) {
-      event.preventDefault();
-      event.stopPropagation();
-      activateDefaultQuestionDraft({ expand: selectedPanelEnlarged });
-      return;
-    }
-    const draftButton = event.target.closest("[data-question-draft-id]");
-    if (!draftButton) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const draft = workspace.tabs.find(item => item.id === draftButton.dataset.questionDraftId && item.kind === "editor");
-    if (draft) activateEditorTab(draft, { expand: selectedPanelEnlarged });
-  };
+    <span class="question-draft-switcher-label">当前编辑</span>
+    <details class="question-draft-switcher">
+      <summary aria-label="切换当前题单">
+        <i class="ri-file-edit-line" aria-hidden="true"></i>
+        <span title="${escapeHtml(activeEntry?.label || "未命名题单")}">${escapeHtml(activeEntry?.label || "未命名题单")}</span>
+        ${activeEntry && !activeEntry.saved ? `<em aria-label="未保存" title="未保存"></em>` : ""}
+        <b>${activeEntry?.count || 0}</b>
+        <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+      </summary>
+      <div class="question-draft-menu" role="listbox" aria-label="题单列表">
+        ${entries.map(entry => `
+          <div class="question-draft-option ${entry.value === activeValue ? "active" : ""}" role="option" aria-selected="${entry.value === activeValue}">
+            <button type="button" class="question-draft-option-main" ${entry.value === "default" ? "data-question-draft-default" : `data-question-draft-id="${escapeHtml(entry.value)}"`} title="${escapeHtml(entry.label)}">
+              <span>${escapeHtml(entry.label)}</span>
+              ${!entry.saved ? `<em aria-label="未保存" title="未保存"></em>` : ""}
+              <b>${entry.count}</b>
+            </button>
+            <button type="button" class="question-draft-option-close" data-close-question-draft="${escapeHtml(entry.value)}" aria-label="关闭${escapeHtml(entry.label)}" title="关闭题单"><i class="ri-close-line" aria-hidden="true"></i></button>
+          </div>`).join("")}
+      </div>
+    </details>`;
+  mountQuestionDraftToolbarActions(bar);
+}
+
+function mountQuestionDraftToolbarActions(bar) {
+  if (!bar) return;
+  bar.querySelector(".question-draft-toolbar-actions")?.remove();
+  const actions = document.createElement("div");
+  actions.className = "question-draft-toolbar-actions";
+  const expandLabel = selectedPanelEnlarged ? "恢复双栏" : "展开编辑";
+  const expandIcon = selectedPanelEnlarged ? "ri-fullscreen-exit-line" : "ri-expand-diagonal-line";
+  actions.innerHTML = `
+    <button type="button" class="panel-action-btn panel-action-btn-compact panel-action-new-draft question-draft-new-action" data-question-draft-toolbar-action="new" aria-label="新建题单" title="新建题单"><i class="ri-add-line" aria-hidden="true"></i></button>
+    <button type="button" class="panel-action-btn panel-action-btn-compact question-draft-expand-action" data-question-draft-toolbar-action="expand" aria-label="${expandLabel}" title="${expandLabel}"><i class="${expandIcon}" aria-hidden="true"></i></button>
+    <button type="button" class="panel-action-btn panel-action-btn-compact question-draft-collapse-action" data-question-draft-toolbar-action="collapse" aria-label="收起组题编辑区" title="收起组题编辑区"><i class="ri-arrow-left-double-line" aria-hidden="true"></i></button>`;
+  bar.appendChild(actions);
 }
 
 function getFilteredSidebarPapers() {
@@ -3890,23 +4040,8 @@ function applySelectedPanelState() {
   const browseRail = document.querySelector("#browsePanelRail");
   if (browseRail) browseRail.hidden = !rightPanelSectionState.browseCollapsed;
   const browseCollapse = document.querySelector("#collapseBrowsePanel");
-  if (browseCollapse) browseCollapse.hidden = rightPanelSectionState.browseCollapsed || selectedPanelEnlarged;
-  const selectedDividerButton = document.querySelector("#dividerToggleSelected");
-  const browseDividerButton = document.querySelector("#dividerToggleBrowse");
-  if (selectedDividerButton) {
-    const collapsed = rightPanelSectionState.selectedCollapsed;
-    const label = collapsed ? "展开组题编辑区" : "收起组题编辑区";
-    selectedDividerButton.setAttribute("aria-label", label);
-    selectedDividerButton.title = label;
-    selectedDividerButton.innerHTML = `<i class="${collapsed ? "ri-arrow-right-s-line" : "ri-arrow-left-s-line"}" aria-hidden="true"></i>`;
-  }
-  if (browseDividerButton) {
-    const collapsed = rightPanelSectionState.browseCollapsed;
-    const label = collapsed ? "展开题目浏览区" : "收起题目浏览区";
-    browseDividerButton.setAttribute("aria-label", label);
-    browseDividerButton.title = label;
-    browseDividerButton.innerHTML = `<i class="${collapsed ? "ri-arrow-left-s-line" : "ri-arrow-right-s-line"}" aria-hidden="true"></i>`;
-  }
+  // 浏览区收起入口固定在页签栏；保留此按钮仅作为统一的程序化控制器。
+  if (browseCollapse) browseCollapse.hidden = true;
   if (rightPanelSectionState.selectedCollapsed && selectedPanelEnlarged) {
     selectedPanelEnlarged = false;
     selectedShowAnswers = false;
@@ -3916,6 +4051,28 @@ function applySelectedPanelState() {
   applyResponsiveChrome();
 }
 
+function collapseBrowsePanelToEditor() {
+  collapsedAssistantView = isAiAssistantViewActive();
+  if (collapsedAssistantView) aiAssistantOpen = false;
+  rightPanelSectionState.browseCollapsed = true;
+  rightPanelSectionState.selectedCollapsed = false;
+  setCanvasManuallyCollapsed(false);
+  setSelectedPanelEnlarged(true);
+  applySelectedPanelState();
+  renderAll();
+  saveWorkspace();
+}
+
+function restoreCollapsedBrowsePanel() {
+  rightPanelSectionState.browseCollapsed = false;
+  if (selectedPanelEnlarged) setSelectedPanelEnlarged(false);
+  if (collapsedAssistantView && aiAssistantTabOpen) aiAssistantOpen = true;
+  collapsedAssistantView = false;
+  applySelectedPanelState();
+  renderAll();
+  saveWorkspace();
+}
+
 function bindSelectedPanelControls() {
   const panel = document.querySelector("#aiSelectedPanel");
   const collapseBtn = document.querySelector("#collapseSelectedPanel");
@@ -3923,8 +4080,6 @@ function bindSelectedPanelControls() {
   const topbarExpandBtn = document.querySelector("#topbarExpandSelected");
   const browseCollapseBtn = document.querySelector("#collapseBrowsePanel");
   const browseRail = document.querySelector("#browsePanelRail");
-  const selectedDividerButton = document.querySelector("#dividerToggleSelected");
-  const browseDividerButton = document.querySelector("#dividerToggleBrowse");
 
   // 首次进入默认收起；用户手动展开或收起后记住其选择
   rightPanelSectionState.selectedCollapsed = shouldCanvasStartCollapsed();
@@ -3983,54 +4138,13 @@ function bindSelectedPanelControls() {
   browseCollapseBtn?.addEventListener("click", event => {
     event.preventDefault();
     event.stopPropagation();
-    rightPanelSectionState.browseCollapsed = true;
-    rightPanelSectionState.selectedCollapsed = false;
-    setCanvasManuallyCollapsed(false);
-    setSelectedPanelEnlarged(true);
-    saveWorkspace();
+    collapseBrowsePanelToEditor();
   });
 
   browseRail?.addEventListener("click", event => {
     event.preventDefault();
     event.stopPropagation();
-    rightPanelSectionState.browseCollapsed = false;
-    if (selectedPanelEnlarged) {
-      setSelectedPanelEnlarged(false);
-    }
-    applySelectedPanelState();
-    const activeTab = getActiveTab();
-    if (activeTab) renderMeta(activeTab);
-    saveWorkspace();
-  });
-
-  selectedDividerButton?.addEventListener("click", event => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (rightPanelSectionState.selectedCollapsed) {
-      expandSelectedPanel({ focus: false });
-    } else {
-      collapseSelectedPanel({ manual: true });
-    }
-    renderSelectedContext();
-  });
-
-  browseDividerButton?.addEventListener("click", event => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (rightPanelSectionState.browseCollapsed) {
-      rightPanelSectionState.browseCollapsed = false;
-      if (selectedPanelEnlarged) setSelectedPanelEnlarged(false);
-      applySelectedPanelState();
-      const activeTab = getActiveTab();
-      if (activeTab) renderMeta(activeTab);
-      saveWorkspace();
-      return;
-    }
-    rightPanelSectionState.browseCollapsed = true;
-    rightPanelSectionState.selectedCollapsed = false;
-    setCanvasManuallyCollapsed(false);
-    setSelectedPanelEnlarged(true);
-    saveWorkspace();
+    restoreCollapsedBrowsePanel();
   });
 
   applySelectedPanelState();
@@ -4109,7 +4223,8 @@ function createEditorTab(options = {}) {
   };
   syncEditorTabTitle(tab);
   const sourceIndex = sourceTab ? workspace.tabs.findIndex(item => item.id === sourceTab.id) : -1;
-  if (sourceIndex >= 0) workspace.tabs.splice(sourceIndex + 1, 0, tab);
+  if (options.appendEditor) workspace.tabs.push(tab);
+  else if (sourceIndex >= 0) workspace.tabs.splice(sourceIndex + 1, 0, tab);
   else workspace.tabs.push(tab);
   activateEditorTab(tab, {
     expand: options.expand !== false,
@@ -4162,7 +4277,7 @@ function animateWholePaperIntoDraft(onComplete) {
   if (wholePaperCopyAnimating) return;
   wholePaperCopyAnimating = true;
   const source = document.querySelector(".paper-meta-bar") || document.querySelector("#savePaperCopy");
-  const target = document.querySelector("#questionDraftTabs") || document.querySelector("#aiSelectedPanel");
+  const target = document.querySelector("#canvasHeadTitle") || document.querySelector("#aiSelectedPanel");
   if (!source || !target || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     complete();
     return;
@@ -4194,11 +4309,14 @@ function animateWholePaperIntoDraft(onComplete) {
 }
 
 function openCanvasEditorTab() {
-  selectedPanelEnlarged = true;
-  rightPanelSectionState.selectedCollapsed = false;
-  rightPanelSectionState.browseCollapsed = true;
+  const root = document.querySelector("#aiWorkspace");
+  if (isComposeMode) {
+    root?.classList.remove("compose-draft-open");
+    root?.classList.add("compose-paper-open");
+  }
+  setCanvasManuallyCollapsed(false);
+  setSelectedPanelEnlarged(true);
   saveWorkspace();
-  renderAll();
   applySelectedPanelState();
   return getActiveEditorTab();
 }
@@ -4232,7 +4350,7 @@ function nextBlankQuestionDraftTitle() {
   return `未命名组题${index}`;
 }
 
-function createBlankQuestionDraft() {
+function createBlankQuestionDraft(options = {}) {
   return createEditorTab({
     editorSource: "blank",
     sourceTab: getActiveTab(),
@@ -4240,8 +4358,9 @@ function createBlankQuestionDraft() {
     items: [],
     scores: {},
     allowEmpty: true,
-    expand: false,
+    expand: Boolean(options.expand),
     preserveRight: true,
+    appendEditor: Boolean(options.appendEditor),
     forceNew: true
   });
 }
@@ -4720,6 +4839,7 @@ function openAddQuestions() {
   }
   selectedPanelEnlarged = false;
   rightPanelSectionState.selectedCollapsed = false;
+  rightPanelSectionState.browseCollapsed = false;
   setCanvasManuallyCollapsed(false);
   applySelectedPanelState();
   openAiAssistant();
@@ -4856,10 +4976,6 @@ function sendAiAssistantMessage(rawText) {
 }
 
 function bindAiAssistantControls() {
-  document.querySelector("#docTabAiAssistant")?.addEventListener("click", event => {
-    event.stopPropagation();
-    toggleAiAssistant();
-  });
   document.querySelector("#aiAssistantClose")?.addEventListener("click", closeAiAssistant);
   document.querySelector("#aiAssistantSend")?.addEventListener("click", () => sendAiAssistantMessage());
   document.querySelector("#aiAssistantAttach")?.addEventListener("click", () => {
@@ -5647,8 +5763,8 @@ function renderWorkspaceBreadcrumb(contextLabel, leafLabel) {
   const trail = document.querySelector(".ai-detail-topbar .breadcrumb");
   if (!trail) return;
   trail.innerHTML = `
-    <span>题目浏览区：<a href="./index.html">首页</a></span>
-    ${leafLabel && leafLabel !== "首页"
+    <span>题目浏览区：<a href="./index.html">题库首页</a></span>
+    ${leafLabel
       ? `<i class="ri-arrow-right-s-line"></i><strong id="breadcrumbLeaf">${escapeHtml(leafLabel)}</strong>`
       : ""}`;
 }
@@ -5694,7 +5810,7 @@ function applyHomeView() {
   }
   if (shellActive) {
     renderWorkspaceBreadcrumb("题目浏览区", browseMeta?.label || "首页");
-    document.title = `${browseMeta?.label || "题库首页"} · AI 试卷工作台`;
+    document.title = `${browseMeta?.label || "首页"} · AI 试卷工作台`;
   } else if (assistantActive) {
     renderWorkspaceBreadcrumb("题目浏览区", "更多题源");
     document.title = "更多题源 · AI 试卷工作台";
@@ -5895,11 +6011,11 @@ function renderTabs() {
   const assistantActive = isAiAssistantViewActive();
   const activeBrowse = workspace.activeBrowseFilter;
   bar.innerHTML = `
+    <button class="doc-tab doc-tab-home doc-tab-pinned-home ${homeActive ? "active" : ""}" type="button" data-home-tab aria-label="首页">
+      <i class="ri-home-4-line doc-tab-icon" aria-hidden="true"></i>
+      <span class="doc-tab-label">首页</span>
+    </button>
     <div class="doc-tabs-scroll">
-      <button class="doc-tab doc-tab-home ${homeActive ? "active" : ""}" type="button" data-home-tab aria-label="题库首页">
-        <i class="ri-home-4-line doc-tab-icon" aria-hidden="true"></i>
-        <span class="doc-tab-label">首页</span>
-      </button>
       ${workspace.browseTabs.map(filter => {
         const meta = getBrowseMeta(filter);
         if (!meta) return "";
@@ -5917,13 +6033,14 @@ function renderTabs() {
           ${tab.kind === "editor" && tab.editorDraft?.dirty ? `<span class="doc-tab-dirty" aria-label="有未保存修改" title="有未保存修改"></span>` : ""}
           <span class="doc-tab-close" role="button" tabindex="0" data-close-tab="${tab.id}" aria-label="关闭 ${escapeHtml(tab.shortTitle)}"><i class="ri-close-line"></i></span>
         </button>`).join("")}
-      ${aiAssistantTabOpen ? `
-        <button class="doc-tab doc-tab-assistant ${assistantActive ? "active" : ""}" type="button" data-ai-assistant-tab>
-          <i class="ri-apps-2-line doc-tab-icon" aria-hidden="true"></i>
-          <span class="doc-tab-label">更多题源</span>
-          <span class="doc-tab-close" role="button" tabindex="0" data-close-ai-assistant aria-label="关闭更多题源"><i class="ri-close-line"></i></span>
-        </button>` : ""}
-    </div>`;
+    </div>
+    <button class="doc-tab doc-tab-assistant doc-tab-pinned-more ${assistantActive ? "active" : ""}" id="docTabAiAssistant" type="button" data-ai-assistant-tab aria-label="更多题源" aria-expanded="${assistantActive}">
+      <i class="ri-add-circle-line doc-tab-icon" aria-hidden="true"></i>
+      <span class="doc-tab-label">更多题源</span>
+    </button>
+    <button class="doc-tab doc-tab-pinned-collapse" type="button" data-collapse-browse-tab aria-label="收起题目浏览区" title="收起题目浏览区">
+      <i class="ri-arrow-right-double-line doc-tab-icon" aria-hidden="true"></i>
+    </button>`;
 
   bar.querySelector("[data-home-tab]")?.addEventListener("click", () => {
     setHomeView(true);
@@ -5953,12 +6070,13 @@ function renderTabs() {
     });
   });
   bar.querySelector("[data-ai-assistant-tab]")?.addEventListener("click", event => {
-    if (event.target.closest("[data-close-ai-assistant]")) return;
-    openAiAssistant();
-  });
-  bar.querySelector("[data-close-ai-assistant]")?.addEventListener("click", event => {
     event.stopPropagation();
-    closeAiAssistant();
+    toggleAiAssistant();
+  });
+  bar.querySelector("[data-collapse-browse-tab]")?.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    collapseBrowsePanelToEditor();
   });
   bar.querySelectorAll("[data-tab-add-destination]").forEach(button => {
     button.addEventListener("click", () => openTabAddDestination(button.dataset.tabAddDestination));
@@ -6309,6 +6427,36 @@ function renderAll() {
 
 function bindEvents() {
   document.addEventListener("click", event => {
+    const toolbarAction = event.target.closest("[data-question-draft-toolbar-action]");
+    if (toolbarAction) {
+      event.preventDefault();
+      event.stopPropagation();
+      const action = toolbarAction.dataset.questionDraftToolbarAction;
+      if (action === "new") {
+        createBlankQuestionDraft({
+          appendEditor: selectedPanelEnlarged,
+          expand: selectedPanelEnlarged
+        });
+      } else if (action === "expand") {
+        if (selectedPanelEnlarged) restoreSplitWorkspaceView();
+        else openCanvasEditorTab();
+      } else if (action === "collapse") {
+        if (selectedPanelEnlarged) {
+          restoreSplitWorkspaceView();
+        } else {
+          if (isMobileLayout()) setMobileDrawer("selected", false);
+          collapseSelectedPanel({ manual: true });
+          renderSelectedContext();
+        }
+      }
+      return;
+    }
+    if (event.target.closest("[data-open-add-questions]")) {
+      event.preventDefault();
+      event.stopPropagation();
+      openAddQuestions();
+      return;
+    }
     const closeDraft = event.target.closest("[data-close-question-draft]");
     if (closeDraft) {
       event.preventDefault();
@@ -6335,13 +6483,6 @@ function bindEvents() {
       const tab = workspace.tabs.find(item => item.id === draftButton.dataset.questionDraftId);
       if (tab) activateEditorTab(tab, { expand: selectedPanelEnlarged });
     }
-  });
-  document.querySelectorAll("[data-open-add-questions]").forEach(button => {
-    button.addEventListener("click", event => {
-      event.preventDefault();
-      event.stopPropagation();
-      openAddQuestions();
-    });
   });
   document.querySelector("#createQuestionList")?.addEventListener("click", openSelectedAsQuestionList);
   document.querySelector("#savePaperCopy")?.addEventListener("click", savePaperCopyAsQuestionList);
@@ -6420,6 +6561,7 @@ function bindEvents() {
       setTabAddMenuOpen(false);
       clearDragPicks();
       closeAiCreateModal();
+      closeComposeSpecModal();
       closeQuestionDraftCloseModal();
       closePrintPreview();
       closeScoreSettingsModal();
@@ -6464,6 +6606,7 @@ if (isHomeShell) {
 } else {
   applyPageMode();
   ensureInitialTab();
+  if (isComposeMode) ensureComposeDraft();
   if (!isComposeMode && !isRecordMode) migrateLegacyEditorSession();
   if (isRecordMode) applyRecordMode();
   bindHomeFrameBridge();

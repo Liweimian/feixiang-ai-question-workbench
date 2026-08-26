@@ -143,7 +143,7 @@
       ? { title: "我的收藏", icon: "ri-star-line", empty: "还没有收藏内容", hint: "收藏的试题和资源会显示在这里。" }
       : currentView === "downloads"
         ? { title: "我的下载", icon: "ri-download-cloud-2-line", empty: "还没有下载内容", hint: "下载过的题单和试卷会显示在这里。" }
-        : { title: "题单", icon: "ri-file-list-3-line", empty: "这个文件夹还没有题单", hint: "完成组题后，题单会保存到这里。" };
+        : { title: "题单", icon: "ri-file-list-3-line", empty: "这个文件夹还没有题单", hint: "保存题单后，会在这里显示。" };
     document.querySelector("#questionListTitle").textContent = viewCopy.title;
     document.querySelector(".resources-question-head > div > i").className = viewCopy.icon;
     summary.textContent = resources.length ? `${resources.length} 份题单` : "暂无内容";

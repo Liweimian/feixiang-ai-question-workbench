@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="./school.css" />
     <link rel="stylesheet" href="./theme-workspace-v50.css?v=20260820nav2" />
     <link rel="stylesheet" href="./home-revision-v51.css?v=20260820book2" />
-    <link rel="stylesheet" href="./detail-ai.css?v=20260826workspacetabs78" />
+  <link rel="stylesheet" href="./detail-ai.css?v=20260826workspacetabs102" />
   </head>
   <body class="school-library-page">
     <div class="ai-workspace selected-panel-collapsed" id="aiWorkspace">
@@ -43,6 +43,7 @@
             </div>
             <div class="ai-section-head-actions">
               <button type="button" id="toggleSelectedAnswers" hidden>显示答案</button>
+              <button type="button" class="panel-action-btn panel-action-btn-compact panel-action-new-draft" data-new-question-draft aria-label="新建题单" title="新建题单"><i class="ri-add-line"></i></button>
               <button type="button" class="panel-action-btn panel-action-btn-compact" id="enlargeSelectedPanel" aria-pressed="false">展开编辑</button>
               <button type="button" class="panel-action-btn panel-action-btn-compact" id="collapseSelectedPanel" aria-label="收起组题编辑区" title="收起组题编辑区">
                 <i class="ri-arrow-left-double-line"></i><span>收起</span>
@@ -53,7 +54,7 @@
           <div id="aiSelectedContext" class="ai-selected-context">
             <p class="ai-selected-summary" id="aiSelectedSummary" hidden></p>
             <div id="aiSelectedPreview" class="ai-selected-preview"></div>
-            <div class="ai-selected-empty" id="aiSelectedEmpty"><strong>开始组题</strong><span>从右侧选择题目，直接组成一份练习，无需试题篮</span><button type="button" data-open-add-questions><i class="ri-add-line"></i>添加题目</button></div>
+            <div class="ai-selected-empty" id="aiSelectedEmpty"><strong>当前题单还没有题目</strong><span>请从右侧题目浏览区开始选题，选中的题目会自动加入这里</span></div>
           </div>
           <div class="ai-canvas-studio" id="aiCanvasStudio" hidden>
             <p class="ai-canvas-save-hint" id="canvasEditorSaveHint" hidden><i class="ri-information-line"></i>完成后保存至我的资源，并清空本次组题</p>
@@ -109,7 +110,7 @@
                 <i class="ri-printer-line"></i><span id="previewQuestionListLabel">预览</span>
               </button>
               <button type="button" class="ai-selected-create" id="createQuestionList" disabled>
-                <i class="ri-checkbox-circle-line"></i><span id="createQuestionListLabel">完成组题</span>
+                <i class="ri-save-3-line"></i><span id="createQuestionListLabel">保存</span>
               </button>
               <button type="button" class="ai-selected-preview-btn ai-canvas-wide-btn" data-canvas-action="assign" disabled hidden>
                 <i class="ri-send-plane-line"></i><span>布置</span>
@@ -266,6 +267,6 @@
     <div id="schoolToast" class="school-toast" role="status" aria-live="polite"></div>
     <div id="toast" class="toast" role="status"></div>
     <script src="./school.js?v=20260825workspacetabs61"></script>
-  <script src="./detail-ai.js?v=20260826workspacetabs87"></script>
+  <script src="./detail-ai.js?v=20260826workspacetabs109"></script>
   </body>
 </html>

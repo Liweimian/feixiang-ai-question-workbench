@@ -220,59 +220,6 @@
   margin-left: auto;
 }
 
-.workspace-divider-controls {
-  position: fixed;
-  left: var(--selected-panel-width);
-  top: 46%;
-  z-index: 42;
-  width: 26px;
-  display: grid;
-  grid-template-rows: repeat(2, 30px);
-  overflow: hidden;
-  transform: translate(-50%, -50%);
-  border: 1px solid #d9e0ef;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, .96);
-  box-shadow: 0 4px 14px rgba(39, 55, 113, .14);
-  transition: left .24s ease, right .24s ease, transform .24s ease;
-}
-
-.workspace-divider-controls > button {
-  width: 100%;
-  min-width: 0;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  border: 0;
-  color: #6072cc;
-  background: transparent;
-  cursor: pointer;
-}
-
-.workspace-divider-controls > button + button {
-  border-top: 1px solid #e7eaf3;
-}
-
-.workspace-divider-controls > button:hover {
-  color: #fff;
-  background: #6377e8;
-}
-
-.workspace-divider-controls i {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.ai-workspace.selected-panel-collapsed .workspace-divider-controls {
-  left: 64px;
-}
-
-.ai-workspace.browse-panel-collapsed .workspace-divider-controls {
-  right: 64px;
-  left: auto;
-  transform: translate(50%, -50%);
-}
-
 .ai-workspace.whole-paper-editor.selected-panel-enlarged .ai-detail-topbar .back-home,
 .ai-workspace.whole-paper-editor.selected-panel-enlarged #topbarCollapseCanvas,
 .ai-workspace.whole-paper-editor.selected-panel-enlarged #collapseBrowsePanel {
@@ -935,6 +882,10 @@
   color: #3f55c9;
   background: transparent;
   text-decoration: underline;
+}
+
+.ai-selected-fixed-add[hidden] {
+  display: none !important;
 }
 
 .ai-selected-panel.is-enlarged .ai-selected-fixed-add,
@@ -3103,6 +3054,49 @@ body.is-question-dragging .question-item {
   -ms-overflow-style: none;
 }
 
+.doc-tab-pinned-home,
+.doc-tab-pinned-more {
+  flex: 0 0 auto;
+  z-index: 2;
+  background: #f7f9f8;
+}
+
+.doc-tab-pinned-home {
+  margin-right: 5px;
+}
+
+.doc-tab-pinned-more {
+  margin-left: 5px;
+  color: #5d6fca;
+  border-color: #e0e5f5;
+  background: #f7f8ff;
+}
+
+.doc-tab-pinned-more:hover {
+  color: #4f63c9;
+  background: #f0f2ff;
+}
+
+.doc-tab-pinned-more.active {
+  color: #4f63c9;
+  border-color: #cdd5f3;
+  background: #fff;
+  box-shadow: inset 0 2px 0 #7384e8, 0 1px 0 #fff;
+}
+
+.doc-tab-pinned-more::before,
+.doc-tab-pinned-home::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: #dde5e1;
+}
+
+.doc-tab-pinned-home::after { right: -5px; }
+.doc-tab-pinned-more::before { left: -5px; }
+
 .doc-tabs-scroll::-webkit-scrollbar {
   display: none;
   height: 0;
@@ -4196,10 +4190,6 @@ body.ai-detail-page .doc-tab.doc-tab-editable i.doc-tab-icon {
     display: none !important;
   }
 
-  .workspace-divider-controls {
-    display: none !important;
-  }
-
   .ai-bottom-bar {
     max-height: none;
   }
@@ -4261,91 +4251,206 @@ body.ai-detail-page .doc-tab.doc-tab-editable i.doc-tab-icon {
 /* ---- 正在组题：选用 / 三态 / 分组镜像 ---- */
 .question-draft-tabs {
   display: flex;
-  align-items: flex-end;
-  gap: 6px;
+  align-items: center;
+  gap: 7px;
   min-width: 0;
-  height: 38px;
-  padding: 0 8px;
+  min-height: 38px;
+  padding: 4px 10px;
   border-bottom: 1px solid #e7ebf4;
   background: #f7f9f8;
 }
 
-.question-draft-tabs-scroll {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
+.question-draft-tabs[hidden] {
+  display: none !important;
 }
 
-.question-draft-tabs-scroll::-webkit-scrollbar { display: none; }
-
-.question-draft-tab,
-.question-draft-add {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 34px;
-  border: 1px solid transparent;
-  border-bottom: 0;
-  border-radius: 8px 8px 0 0;
-  background: transparent;
-  color: #66726c;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.question-draft-tab {
-  max-width: 178px;
-  padding: 0 8px;
-}
-
-.question-draft-tab > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.question-draft-switcher-label {
+  flex: none;
+  color: #78827d;
+  font-size: 11px;
+  font-weight: 650;
   white-space: nowrap;
 }
 
-.question-draft-tab > b {
+.question-draft-switcher {
+  position: relative;
+  flex: 0 1 210px;
+  min-width: 118px;
+  max-width: 210px;
+}
+
+.question-draft-switcher summary {
+  height: 28px;
+  padding: 0 7px 0 8px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  list-style: none;
+  color: #4f5d78;
+  border: 1px solid #dce2ef;
+  border-radius: 7px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.question-draft-switcher summary::-webkit-details-marker { display: none; }
+
+.question-draft-switcher summary > i:first-child {
+  flex: none;
+  color: #6578e7;
+  font-size: 13px;
+}
+
+.question-draft-switcher summary > span {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.question-draft-switcher summary > i:last-child {
+  flex: none;
+  color: #7f899f;
+  font-size: 14px;
+  transition: transform .16s ease;
+}
+
+.question-draft-switcher[open] summary > i:last-child { transform: rotate(180deg); }
+
+.question-draft-switcher summary:hover,
+.question-draft-switcher summary:focus-visible {
+  border-color: #aebbf0;
+  outline: none;
+}
+
+.question-draft-switcher em,
+.question-draft-option em {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #55a676;
+}
+
+.question-draft-switcher summary > b,
+.question-draft-option-main > b {
+  flex: none;
   min-width: 17px;
   height: 17px;
   padding: 0 4px;
   border-radius: 9px;
-  background: #eef1f8;
   color: #77829a;
+  background: #eef1f8;
   font-size: 10px;
   line-height: 17px;
   text-align: center;
 }
 
-.question-draft-tab > em {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ee9b3d;
-}
-
-.question-draft-tab.active {
-  border-color: #d9deef;
+.question-draft-menu {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 5px);
+  left: 0;
+  width: min(280px, calc(100vw - 30px));
+  max-height: 232px;
+  padding: 4px;
+  overflow-y: auto;
+  border: 1px solid #dce2ef;
+  border-radius: 9px;
   background: #fff;
-  color: #536de2;
-  box-shadow: inset 0 2px 0 #6c7ff0;
+  box-shadow: 0 10px 28px rgba(36, 50, 91, .16);
 }
 
-.question-draft-saved { color: #59a47b; }
-.question-draft-close { color: #9aa3b5; }
-.question-draft-close:hover { color: #df6670; }
+.question-draft-option {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border-radius: 6px;
+}
+
+.question-draft-option:hover,
+.question-draft-option.active { background: #f2f4ff; }
+
+.question-draft-option-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  padding: 0 6px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4f5d78;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.question-draft-option-main > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.question-draft-option-close {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: #9aa3b5;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.question-draft-option-close:hover { color: #df6670; background: #fff0f1; }
+
+.question-draft-current-close {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: #9aa3b5;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.question-draft-current-close:hover {
+  color: #df6670;
+  background: #fff0f1;
+}
 
 .question-draft-add {
-  width: 34px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  margin-left: auto;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  border-style: dashed;
-  border-bottom: 1px dashed #dfe4f1;
-  border-radius: 8px;
+  border: 1px dashed #cfd7e9;
+  border-radius: 7px;
+  background: #fff;
   color: #6578e7;
+  cursor: pointer;
 }
+
+.question-draft-add:hover { border-color: #9eade8; background: #f3f5ff; }
 
 .ai-selected-panel.is-enlarged .question-draft-tabs {
   order: 0;
@@ -5405,6 +5510,35 @@ body.ai-detail-page .doc-tab.doc-tab-editable i.doc-tab-icon {
   font-size: 12px;
 }
 
+.ai-canvas-paper-empty {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.ai-canvas-paper-empty button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 12px;
+  color: #526bd7;
+  font-size: 12px;
+  font-weight: 750;
+  border: 1px solid #cbd3f6;
+  border-radius: 8px;
+  background: #f7f8ff;
+  cursor: pointer;
+}
+
+.ai-canvas-paper-empty button:hover {
+  border-color: #aebbf0;
+  background: #eef1ff;
+}
+
 .ai-canvas-info-meta {
   margin: 0 0 12px;
   color: #7a9488;
@@ -5582,6 +5716,222 @@ body.ai-detail-page .doc-tab.doc-tab-editable i.doc-tab-icon {
   }
 }
 
+/* AI 命题任务：右侧呈现流式命题过程，生成题单始终落在左侧编辑区。 */
+.ai-workspace.compose-mode .ai-content-shell {
+  grid-template-columns: minmax(0, 1fr);
+  background: #f4f5ff;
+}
+
+.ai-workspace.compose-mode .doc-workspace {
+  display: none;
+}
+
+.ai-workspace.compose-mode .ai-compose-chat {
+  display: flex;
+  border-right: 0;
+  background: #f4f5ff;
+}
+
+.ai-workspace.compose-mode .ai-compose-thread {
+  padding: 26px clamp(18px, 3vw, 44px) 20px;
+}
+
+.ai-workspace.compose-mode .ai-compose-user {
+  width: fit-content;
+  max-width: min(720px, 86%);
+  margin: 0 0 20px auto;
+  padding: 11px 16px;
+  color: #26314f;
+  border: 1px solid #dfe3f5;
+  border-radius: 16px 16px 4px 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(68, 78, 140, .07);
+}
+
+.ai-workspace.compose-mode .ai-compose-job {
+  gap: 0;
+  padding: clamp(20px, 2.4vw, 30px);
+  border: 1px solid #e0e4f4;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 16px 44px rgba(68, 78, 140, .08);
+}
+
+.ai-workspace.compose-mode .ai-compose-job-head {
+  display: flex;
+  margin-bottom: 20px;
+  color: #273250;
+}
+
+.ai-workspace.compose-mode .ai-compose-job-head > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #7285f2, #5c6fe2);
+  box-shadow: 0 10px 22px rgba(92, 111, 226, .22);
+}
+
+.ai-workspace.compose-mode .ai-compose-job-head > span i {
+  width: auto;
+  height: auto;
+  font-size: 20px;
+  background: none;
+}
+
+.ai-workspace.compose-mode .ai-compose-job-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.ai-workspace.compose-mode .ai-compose-job-head strong { font-size: 17px; }
+.ai-workspace.compose-mode .ai-compose-job-head small { color: #929ab4; font-size: 12px; font-weight: 500; }
+.ai-workspace.compose-mode .ai-compose-job-head em { margin-left: auto; color: #6678df; font-size: 12px; font-style: normal; }
+
+.ai-compose-timeline {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding-left: 15px;
+}
+
+.ai-compose-timeline::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 15px;
+  border-left: 1px dashed #cbd1e6;
+}
+
+.ai-workspace.compose-mode .ai-compose-step {
+  position: relative;
+  overflow: visible;
+  margin-left: 18px;
+  border-color: #e2e6f3;
+  border-radius: 14px;
+  background: #fbfbfe;
+  transition: opacity .24s ease, transform .24s ease;
+}
+
+.ai-workspace.compose-mode .ai-compose-step.is-pending { opacity: .52; }
+.ai-workspace.compose-mode .ai-compose-step.is-running { border-color: #b8c3f6; box-shadow: 0 0 0 3px rgba(101, 119, 225, .07); }
+.ai-workspace.compose-mode .ai-compose-step.is-running > button i:first-child { animation: ai-compose-spin 1s linear infinite; }
+@keyframes ai-compose-spin { to { transform: rotate(360deg); } }
+
+.ai-workspace.compose-mode .ai-compose-step > button {
+  padding: 13px 14px;
+  color: #293451;
+}
+
+.ai-workspace.compose-mode .ai-compose-step > button i:first-child {
+  position: absolute;
+  left: -30px;
+  color: #6678df;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.ai-workspace.compose-mode .ai-compose-step > button em {
+  margin-left: auto;
+  color: #98a0b6;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.ai-workspace.compose-mode .ai-compose-step.is-complete > button em { color: #57a177; }
+.ai-workspace.compose-mode .ai-compose-step-body { padding: 0 14px 16px; color: #636c84; font-size: 13px; }
+
+.ai-compose-facts { display: grid; gap: 8px; }
+.ai-compose-facts p { display: grid; grid-template-columns: 76px 1fr; gap: 8px; }
+.ai-compose-facts b { color: #303a56; }
+.ai-compose-source-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.ai-workspace.compose-mode .ai-compose-source-link { display: inline-flex; align-items: center; gap: 5px; margin: 0; padding: 6px 10px; color: #5669d6; border: 1px solid #dce1f4; border-radius: 999px; background: #f7f8ff; text-decoration: none; }
+
+.ai-compose-table-wrap { overflow-x: auto; border: 1px solid #e7e9f2; border-radius: 10px; background: #fff; }
+.ai-compose-table { width: 100%; border-collapse: collapse; min-width: 620px; }
+.ai-compose-table th, .ai-compose-table td { padding: 9px 11px; text-align: left; border-bottom: 1px solid #eceef5; }
+.ai-compose-table th { color: #59627a; font-size: 12px; background: #f7f8fc; }
+.ai-compose-table td { color: #646d82; font-size: 12px; }
+.ai-compose-table tbody tr:last-child td { border-bottom: 0; }
+.ai-compose-table.is-reason th:first-child, .ai-compose-table.is-reason td:first-child { width: 64px; text-align: center; }
+
+.ai-compose-review-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ai-compose-review-grid article { display: grid; gap: 3px; padding: 10px 12px; border-radius: 9px; background: #f2f4ff; }
+.ai-compose-review-grid span { color: #8d95ac; font-size: 11px; }
+.ai-compose-review-grid strong { color: #39435f; font-size: 12px; }
+.ai-compose-quality { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ai-compose-quality span { display: grid; grid-template-columns: 26px 1fr; gap: 1px 7px; align-items: center; padding: 10px; border: 1px solid #dde8e2; border-radius: 10px; background: #f7fbf9; }
+.ai-compose-quality i { grid-row: 1 / 3; color: #55a176; font-size: 20px; }
+.ai-compose-quality b { color: #657068; font-size: 11px; }.ai-compose-quality strong { color: #2f5f47; font-size: 12px; }
+
+.ai-compose-output-files { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.ai-compose-output-files button { min-width: 0; display: grid; grid-template-columns: 38px minmax(0, 1fr) 20px; gap: 10px; align-items: center; padding: 11px; text-align: left; border: 1px solid #e0e4f0; border-radius: 11px; background: #fff; cursor: pointer; }
+.ai-compose-output-files button:hover { border-color: #aebaf1; box-shadow: 0 8px 20px rgba(80, 96, 170, .09); }
+.ai-compose-output-files button > span:first-child { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 9px; font-size: 20px; }
+.ai-compose-output-files .is-word { color: #4267c7; background: #eef2ff; }.ai-compose-output-files .is-pdf { color: #c45b55; background: #fff0ef; }
+.ai-compose-output-files button > span:nth-child(2) { min-width: 0; display: grid; gap: 2px; }
+.ai-compose-output-files strong, .ai-compose-output-files small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-compose-output-files strong { color: #303a56; font-size: 12px; }.ai-compose-output-files small { color: #979eb2; font-size: 10px; }
+.ai-compose-output-files button > i { color: #8790aa; }
+
+.ai-workspace.compose-mode .ai-compose-dock { padding: 12px clamp(18px, 3vw, 44px) 14px; border-top-color: #e2e5f2; background: rgba(244,245,255,.94); }
+.ai-workspace.compose-mode .ai-compose-composer { max-width: 960px; margin: 0 auto; border-color: #d6dcf3; border-radius: 14px; background: #fff; box-shadow: 0 10px 30px rgba(68,78,140,.08); }
+.ai-workspace.compose-mode .ai-compose-send { background: #6578e1; }
+
+/* AI 组题是独占任务页：生成过程占满工作台，结果试卷再回到左侧编辑区。 */
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) > .ai-detail-topbar,
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) > .doc-tabs,
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) > .ai-main-column {
+  grid-column: 1;
+}
+
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) > .ai-selected-panel {
+  display: none;
+}
+
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) .ai-compose-thread {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.ai-workspace.compose-mode.compose-paper-open .ai-compose-chat {
+  display: none !important;
+}
+
+.ai-workspace.compose-mode.compose-paper-open > .ai-selected-panel {
+  display: flex;
+}
+
+.compose-spec-modal[hidden] { display: none; }
+.compose-spec-modal { position: fixed; inset: 0; z-index: 220; display: grid; place-items: center; padding: 24px; }
+.compose-spec-mask { position: absolute; inset: 0; background: rgba(31,36,56,.52); backdrop-filter: blur(5px); }
+.compose-spec-panel { position: relative; width: min(980px, 94vw); height: min(820px, 90vh); display: flex; flex-direction: column; overflow: hidden; border-radius: 18px; background: #f0f1f6; box-shadow: 0 28px 80px rgba(24,29,50,.28); }
+.compose-spec-panel > header { flex: none; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 18px; border-bottom: 1px solid #dde0ea; background: #fff; }
+.compose-spec-panel > header > div { display: flex; align-items: center; gap: 10px; }.compose-spec-panel > header > div:first-child > div { display: grid; }
+.compose-spec-panel header strong { color: #27314c; font-size: 14px; }.compose-spec-panel header small { color: #9299ad; font-size: 11px; }
+.compose-spec-pdf-icon { width: 36px; height: 36px; display: grid; place-items: center; color: #c75852; border-radius: 9px; background: #fff0ef; font-size: 19px; }
+.compose-spec-close { width: 34px; height: 34px; display: grid; place-items: center; border: 0; border-radius: 8px; color: #747d96; background: transparent; cursor: pointer; }
+.compose-spec-scroll { min-height: 0; overflow: auto; padding: 28px; }
+.compose-spec-page { width: min(760px, 100%); min-height: 980px; margin: 0 auto; padding: 60px 64px; color: #394057; background: #fff; box-shadow: 0 8px 30px rgba(36,42,70,.1); }
+.compose-spec-page h1 { margin: 12px 0; color: #202941; font-size: 28px; line-height: 1.45; text-align: center; }.compose-spec-kicker, .compose-spec-meta { color: #7d86a0; text-align: center; }
+.compose-spec-page section { margin-top: 34px; }.compose-spec-page h2 { margin: 0 0 12px; color: #27314c; font-size: 17px; }.compose-spec-page p { line-height: 1.9; }
+.compose-spec-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }.compose-spec-summary span { display: grid; gap: 4px; padding: 14px; color: #8a92aa; text-align: center; border-radius: 10px; background: #f5f6fb; }.compose-spec-summary b { color: #5f72dc; font-size: 18px; }
+.compose-spec-page table { width: 100%; border-collapse: collapse; }.compose-spec-page th, .compose-spec-page td { padding: 10px; text-align: left; border: 1px solid #e3e5ed; }.compose-spec-page th { background: #f5f6fa; }
+.compose-spec-page footer { margin-top: 70px; color: #9da3b4; font-size: 11px; text-align: center; }
+
+@media (max-width: 900px) {
+  .ai-compose-output-files, .ai-compose-quality { grid-template-columns: 1fr; }
+  .ai-compose-review-grid { grid-template-columns: 1fr; }
+  .compose-spec-page { padding: 36px 24px; }
+}
+
 /* 工作台顶层导航只承担返回与定位，视觉高度应低于文档 Tab 栏。 */
 @media (min-width: 761px) {
   .ai-workspace {
@@ -5672,6 +6022,21 @@ body.ai-detail-page .doc-tab.doc-tab-editable i.doc-tab-icon {
   border-radius: 4px;
   background: #fff;
   box-shadow: 0 2px 12px rgba(42, 52, 86, .08);
+}
+
+.ai-selected-panel:not(.is-enlarged):not(.has-selection) .ai-selected-context {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-selected-panel:not(.is-enlarged):not(.has-selection) .ai-selected-preview {
+  display: none;
+}
+
+.ai-selected-panel:not(.is-enlarged):not(.has-selection) .ai-selected-empty {
+  max-width: 280px;
+  padding: 20px;
 }
 
 .ai-live-question-section + .ai-live-question-section {
@@ -7448,20 +7813,20 @@ body.compose-mode .ai-compose-files {
 
 .ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > button {
   width: auto;
-  max-width: 104px;
+  max-width: none;
   min-width: 0;
-  flex: 1 1 0;
-  min-height: 36px;
-  height: 36px;
-  padding: 0 12px;
-  gap: 6px;
-  color: #52627d;
-  font-size: 12px;
-  font-weight: 700;
+  flex: 0 0 auto;
+  min-height: 32px;
+  height: 32px;
+  padding: 0 10px;
+  gap: 5px;
+  color: #5c7466;
+  font-size: 13px;
+  font-weight: 650;
   line-height: 1;
-  border: 1px solid #d6dced;
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
   box-shadow: none;
 }
 
@@ -7471,28 +7836,49 @@ body.compose-mode .ai-compose-files {
 }
 
 .ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > button:hover:not(:disabled) {
-  color: #4f64d6;
-  border-color: #aebaf0;
-  background: #f7f8ff;
+  color: var(--green-900);
+  border-color: transparent;
+  background: #edf5f0;
+}
+
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > #enlargeSelectedPanel,
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > [data-canvas-action="assign"] {
+  color: #66708a;
+  border-color: #dfe5f2;
+  background: #fff;
+}
+
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > [data-canvas-action="assign"],
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > #createQuestionList {
+  width: 68px;
+  flex-basis: 68px;
+}
+
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > #enlargeSelectedPanel:hover:not(:disabled),
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > [data-canvas-action="assign"]:hover:not(:disabled) {
+  color: #526bd7;
+  border-color: #b8c4ed;
+  background: #f5f7ff;
 }
 
 .ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > #createQuestionList {
-  color: #fff;
-  border-color: #6378eb;
-  background: #6378eb;
-  box-shadow: 0 5px 12px rgba(91, 112, 225, .22);
+  color: var(--green-800);
+  border-color: #b8d4c5;
+  background: #fff;
+  box-shadow: none;
 }
 
 .ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > #createQuestionList:hover:not(:disabled) {
-  color: #fff;
-  border-color: #5269dc;
-  background: #5269dc;
+  color: var(--green-900);
+  border-color: #8fbea6;
+  background: #edf5f0;
 }
 
-.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > button:disabled {
-  color: #a8afbd;
-  border-color: #e5e8ef;
-  background: #f5f6f8;
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > button:disabled,
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > #createQuestionList:disabled {
+  color: #9bb0a5;
+  border-color: #e1e9e4;
+  background: #eef2f0;
   box-shadow: none;
 }
 
@@ -7528,4 +7914,285 @@ body.compose-mode .ai-compose-files {
     border-right: 0;
     border-bottom: 1px solid var(--ai-border);
   }
+}
+
+/* Final compose layout guard: legacy compose rules above must not restore the
+   old 360px conversation + preview split. */
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) > .ai-detail-topbar,
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) > .doc-tabs,
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) > .ai-main-column {
+  grid-column: 1 !important;
+}
+
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) > .ai-selected-panel,
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) .doc-workspace {
+  display: none !important;
+}
+
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) .ai-content-shell {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) .ai-compose-chat,
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) .ai-compose-chat[hidden] {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  display: flex !important;
+  border-right: 0;
+}
+
+.ai-workspace.compose-mode:not(.compose-paper-open):not(.compose-draft-open) .ai-compose-thread {
+  width: min(1180px, 100%);
+  margin-inline: auto;
+}
+
+.ai-workspace.compose-mode.compose-draft-open {
+  grid-template-columns: var(--selected-panel-width) minmax(0, 1fr) !important;
+}
+
+.ai-workspace.compose-mode.compose-draft-open > .ai-selected-panel {
+  display: flex !important;
+  grid-column: 1;
+  grid-row: 1 / -1;
+}
+
+.ai-workspace.compose-mode.compose-draft-open > .ai-detail-topbar,
+.ai-workspace.compose-mode.compose-draft-open > .doc-tabs,
+.ai-workspace.compose-mode.compose-draft-open > .ai-main-column {
+  grid-column: 2 !important;
+}
+
+.ai-workspace.compose-mode.compose-draft-open .ai-content-shell {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.ai-workspace.compose-mode.compose-draft-open .doc-workspace {
+  display: none !important;
+}
+
+.ai-workspace.compose-mode.compose-draft-open .ai-compose-chat,
+.ai-workspace.compose-mode.compose-draft-open .ai-compose-chat[hidden] {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  display: flex !important;
+  border-right: 0;
+}
+
+.ai-workspace.compose-mode.compose-paper-open .ai-compose-chat {
+  display: none !important;
+}
+
+.ai-workspace.compose-mode.compose-paper-open > .ai-selected-panel {
+  display: flex !important;
+}
+
+/* 题单切换：小窗保持单个下拉，展开编辑后平铺为编辑任务页签。 */
+.question-draft-tabs.is-flat {
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.question-draft-flat-tab {
+  flex: 0 1 250px;
+  min-width: 150px;
+  max-width: 250px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #dfe4ef;
+  border-radius: 8px 8px 0 0;
+  background: #fff;
+}
+
+.question-draft-flat-tab.active {
+  color: #526bd7;
+  border-color: #aebbf0;
+  background: #f3f5ff;
+  box-shadow: inset 0 2px 0 #687bea;
+}
+
+.question-draft-flat-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.question-draft-flat-main > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.question-draft-flat-main > em {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: #55a676;
+}
+
+.question-draft-flat-main > b {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  flex: none;
+  color: #77829a;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 9px;
+  background: #eef1f8;
+}
+
+.panel-action-new-draft {
+  width: 30px;
+  min-width: 30px;
+  padding-inline: 0 !important;
+  color: #526bd7 !important;
+  border-style: dashed !important;
+}
+
+/* 更多题源之后固定一个同壳的收起入口，不再占用顶栏空间。 */
+#collapseBrowsePanel { display: none !important; }
+
+.doc-tab-pinned-collapse {
+  width: 38px;
+  min-width: 38px;
+  justify-content: center;
+  padding-inline: 0;
+  flex: none;
+  gap: 5px;
+  color: #68748b;
+  border-left: 1px solid #e2e7f0;
+  background: #fbfcfe;
+}
+
+.doc-tab-pinned-collapse:hover {
+  color: #526bd7;
+  background: #f3f5ff;
+}
+
+/* 小窗中的题干完整换行显示，避免一行截断造成内容失真。 */
+.ai-selected-panel:not(.is-enlarged) .ai-live-question-list .ai-canvas-stem {
+  display: block;
+  overflow: visible;
+  white-space: normal;
+  -webkit-line-clamp: unset;
+}
+
+/* 主要动作轻度加重：保存为主动作，整卷加入保持柔和强调。 */
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > #createQuestionList {
+  color: #fff;
+  border-color: #6578df;
+  background: #6578df;
+  box-shadow: 0 3px 10px rgba(82, 107, 215, .14);
+}
+
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > #createQuestionList:hover:not(:disabled) {
+  color: #fff;
+  border-color: #526bd7;
+  background: #526bd7;
+}
+
+.ai-selected-panel:not(.is-enlarged) .ai-selected-footer-actions > #createQuestionList:disabled {
+  color: #9ca8a1;
+  border-color: #dfe7e2;
+  background: #f4f7f5;
+  box-shadow: none;
+}
+
+#batchAddAllQuestions.paper-action-secondary {
+  color: #526bd7;
+  border-color: #aebbf0 !important;
+  background: #f3f5ff;
+  font-weight: 750;
+}
+
+#batchAddAllQuestions.paper-action-secondary:hover:not(:disabled) {
+  color: #4058c5;
+  border-color: #8799e2 !important;
+  background: #e9edff;
+}
+
+/* AI 组题的小窗态与全屏编辑态互斥，防止旧分栏宽度压缩编辑器。 */
+.ai-workspace.compose-mode.compose-paper-open.selected-panel-enlarged {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.ai-workspace.compose-mode.compose-paper-open.selected-panel-enlarged > .ai-selected-panel {
+  grid-column: 1 !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* 工作台不再额外占用一整行显示模块标题和面包屑。 */
+.ai-workspace {
+  grid-template-rows: 0 38px minmax(0, 1fr);
+}
+
+.ai-workspace > .ai-detail-topbar,
+.ai-selected-panel .ai-section-head {
+  display: none !important;
+}
+
+/* 展开编辑后由题单页签承载题单身份，移除重复的“组题编辑区”标题行。 */
+.ai-workspace.selected-panel-enlarged .ai-selected-panel .ai-section-head {
+  display: none !important;
+}
+
+.question-draft-toolbar-actions {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.question-draft-toolbar-actions .panel-action-btn {
+  width: 30px;
+  min-width: 30px;
+  min-height: 28px;
+  padding-inline: 0;
+}
+
+.question-draft-tabs.is-flat .question-draft-toolbar-actions {
+  position: sticky;
+  right: 0;
+  z-index: 6;
+  margin-left: auto;
+  padding: 0 8px 0 16px;
+  background: linear-gradient(90deg, rgba(247, 249, 248, 0), #f7f9f8 18px);
+}
+
+/* 收起更多题源/AI 页面时，左侧题单编辑器覆盖临时视图的隐藏规则。 */
+.ai-workspace.ai-assistant-view.browse-panel-collapsed.selected-panel-enlarged:not(.selected-panel-collapsed) > .ai-selected-panel {
+  display: flex;
+}
+
+/* 普通题单与 AI 题单展开后都必须占满工作台，旧的左右分栏尺寸不能残留。 */
+.ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed) > .ai-selected-panel {
+  grid-column: 1 !important;
+  width: 100% !important;
+  max-width: none !important;
 }
