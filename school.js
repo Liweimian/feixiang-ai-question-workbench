@@ -77,6 +77,10 @@ const questions = [
   { id: "q9", chapter: "ch6", knowledge: "k6", source: "教材同步", sourceDetail: "人教版七年级上册·第六章", citation: 1, type: "填空题", difficulty: "简单", minutes: 1, title: "经过两点有且只有______条直线。", skill: "直线的基本性质", ability: "空间观念", tone: "violet", updated: 9, tags: ["AI批改"] }
 ];
 
+questions.forEach(question => {
+  if (question.source === "真题汇编") question.source = "试题汇编";
+});
+
 let sideView = "chapters";
 let activeNav = "all";
 let sortMode = "recommended";

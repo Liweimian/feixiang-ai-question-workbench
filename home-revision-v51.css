@@ -10,6 +10,85 @@ body.school-library-page .school-header.site-header {
   border-color: #e2e6f3;
 }
 
+/* The library homepage lives in the right-hand finding area when it is embedded
+   in the workbench. Keep navigation and its teaching scope on one compact row. */
+body.index-page.is-embedded.is-home-view .site-header {
+  min-height: 68px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: 68px;
+  gap: 14px;
+  padding: 0 16px;
+  overflow: hidden;
+}
+
+body.index-page.is-embedded.is-home-view .site-header .brand-mark {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+body.index-page.is-embedded.is-home-view .site-header .brand-mark-glyph {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+}
+
+body.index-page.is-embedded.is-home-view .site-header .brand-mark-copy b {
+  font-size: 20px;
+}
+
+body.index-page.is-embedded.is-home-view .site-header .category-tabs {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  width: 100%;
+  align-self: stretch;
+  margin: 0;
+  padding: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+body.index-page.is-embedded.is-home-view .site-header .category-tabs button,
+body.index-page.is-embedded.is-home-view .site-header .category-tabs .category-nav-link {
+  min-height: 54px;
+  padding-inline: 9px !important;
+  font-size: 13px;
+}
+
+body.index-page.is-embedded.is-home-view .site-header .category-tabs button.active::after {
+  right: 9px;
+  bottom: 7px;
+  left: 9px;
+}
+
+body.index-page.is-embedded.is-home-view .site-header .category-nav-divider {
+  height: 24px;
+  margin-inline: 7px;
+}
+
+body.index-page.is-embedded.is-home-view .site-header .header-tools {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex !important;
+  min-width: 0;
+  margin: 0;
+}
+
+body.index-page.is-embedded.is-home-view .site-header .context-identity {
+  display: inline-flex !important;
+  max-width: none;
+  gap: 6px;
+  padding: 7px 9px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+body.index-page.is-embedded.is-home-view .home-mobile-scope {
+  display: none !important;
+}
+
 body.index-page .site-header .category-tabs .category-nav-divider,
 body.school-library-page .school-header .category-tabs .category-nav-divider {
   width: 1px;
@@ -1142,6 +1221,58 @@ body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane-list 
 
 body.index-page.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-facts {
   display: inline-flex;
+}
+
+/* The embedded homepage is narrower than the standalone library. Stack both
+   resource modules and keep every long title on one inspectable line. */
+body.index-page.is-embedded.is-home-view .home-paper-recommend-layout {
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: stretch;
+  gap: 10px;
+}
+
+body.index-page.is-embedded.is-home-view .home-recommend-module,
+body.index-page.is-embedded.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download {
+  height: auto;
+}
+
+body.index-page.is-embedded.is-home-view .home-recommend-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(58px, 1fr));
+  height: 100%;
+}
+
+body.index-page.is-embedded.is-home-view .home-recommend-grid .home-paper-card:nth-child(even) {
+  padding-left: 10px;
+  border-left: 1px solid #f0f2f7;
+}
+
+body.index-page.is-embedded.is-home-view .home-recommend-grid .home-paper-card:nth-child(-n+2) {
+  border-top: 0;
+}
+
+body.index-page.is-embedded.is-home-view .home-recommend-grid .home-paper-card:first-child {
+  border-top: 0;
+}
+
+body.index-page.is-embedded.is-home-view .home-recommend-module .home-paper-copy > .home-featured-resource-title > b,
+body.index-page.is-embedded.is-home-view .home-paper-recommend-layout .home-paper-lane.is-download .home-paper-copy > .home-featured-resource-title > b {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: unset;
+}
+
+body.index-page.is-embedded.is-home-view .home-paper-recommend-layout .home-paper-lane-list {
+  grid-template-rows: repeat(4, minmax(58px, auto));
+  height: 100%;
+}
+
+@media (max-width: 760px) {
+  body.index-page.is-embedded.is-home-view .home-paper-recommend-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 1100px) {

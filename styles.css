@@ -25,8 +25,12 @@
 html { scroll-behavior: smooth; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--canvas); -webkit-font-smoothing: antialiased; }
 
-/* 组题画布常驻首页 / 自主组题左侧：默认折叠条，加入题目后再展开 */
-body.index-page,
+/* 正在组题常驻首页 / 自主组题左侧：默认折叠条，选用题目后再展开 */
+body.index-page {
+  /* 与试卷详情工作台保持同一组题编辑区宽度，避免返回首页后侧栏跳窄。 */
+  --selected-panel-width: clamp(420px, 32vw, 480px);
+}
+
 body.school-library-page {
   --selected-panel-width: 340px;
 }
@@ -6888,7 +6892,7 @@ body.index-page.is-embedded.is-home-view.has-ai-dock .ai-dock-shell {
   display: none !important;
 }
 
-/* 工作台内嵌首页只承载内容，左侧组题画布由外层工作台统一提供。 */
+/* 工作台内嵌首页只承载内容，左侧正在组题区域由外层工作台统一提供。 */
 body.index-page.is-embedded > .ai-workspace,
 body.index-page.is-embedded > .ai-workspace.selected-panel-collapsed,
 body.school-library-page.is-embedded > .ai-workspace,
